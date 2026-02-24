@@ -1,0 +1,7 @@
+srpm:
+	cd sources/kde-ludora && \
+	rpmbuild -bs \
+		--define "_sourcedir $(CURDIR)/sources/kde-ludora" \
+		--define "_srcrpmdir $(outdir)" \
+		--define "_builddir $(CURDIR)/sources/kde-ludora" \
+		kde-ludora.spec
