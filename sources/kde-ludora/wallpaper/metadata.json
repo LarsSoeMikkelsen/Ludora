@@ -1,0 +1,12 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Ludora"
+            }
+        ],
+        "Id": "Ludora",
+        "License": "GPLv2+",
+        "Name": "Ludora"
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Ludora Team"
+            }
+        ],
+        "Category": "",
+        "Description": "Ludora theme based on Breeze Dark",
+        "Id": "org.ludora.desktop",
+        "License": "GPLv2+",
+        "Name": "Ludora",
+        "Website": ""
+    }
+}
