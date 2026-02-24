@@ -4,8 +4,8 @@ Release:        1%{?dist}
 Summary:        Ludora KDE Plasma Global Theme
 
 License:        GPLv2+
-URL:            https://github.com/yourusername/kde-ludora
-Source0:        https://github.com/yourusername/kde-ludora/archive/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
+URL:            https://github.com/LarsSoeMikkelsen/Ludora/tree/main/sources/kde-ludora
+Source0:        https://github.com/LarsSoeMikkelsen/Ludora/tree/main/sources/kde-ludora/archive/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
 BuildArch:      noarch
 
