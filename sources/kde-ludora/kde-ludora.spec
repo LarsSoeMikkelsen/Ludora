@@ -4,7 +4,7 @@ Release:        1%{?dist}
 Summary:        Ludora KDE Plasma Global Theme
 
 License:        GPLv2+
-URL:            https://github.com/LarsSoeMikkelsen/Ludora
+URL:            https://github.com/LarsSoeMikkelsen/Ludora/tree/main/sources/kde-ludora
 
 BuildArch:      noarch
 
@@ -24,11 +24,11 @@ featuring custom wallpapers and branding for the Ludora distribution.
 %install
 # Install look-and-feel theme
 mkdir -p %{buildroot}%{_datadir}/plasma/look-and-feel/org.ludora.desktop
-cp -a look-and-feel/* %{buildroot}%{_datadir}/plasma/look-and-feel/org.ludora.desktop/
+cp -ar %{_builddir}/kde-ludora/look-and-feel/* %{buildroot}%{_datadir}/plasma/look-and-feel/org.ludora.desktop/
 
 # Install wallpaper
 mkdir -p %{buildroot}%{_datadir}/wallpapers/Ludora
-cp -a wallpaper/* %{buildroot}%{_datadir}/wallpapers/Ludora/
+cp -ar %{_builddir}/kde-ludora/wallpaper/* %{buildroot}%{_datadir}/wallpapers/Ludora/
 
 # Install icons
 mkdir -p %{buildroot}%{_datadir}/icons/hicolor/scalable/apps
@@ -36,10 +36,10 @@ mkdir -p %{buildroot}%{_datadir}/icons/hicolor/64x64/apps
 mkdir -p %{buildroot}%{_datadir}/icons/hicolor/128x128/apps
 mkdir -p %{buildroot}%{_datadir}/icons/hicolor/256x256/apps
 
-cp icons/scalable/ludora-start-here.svg %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/
-cp icons/64x64/ludora-start-here.png %{buildroot}%{_datadir}/icons/hicolor/64x64/apps/
-cp icons/128x128/ludora-start-here.svg %{buildroot}%{_datadir}/icons/hicolor/128x128/apps/
-cp icons/256x256/ludora-start-here.svg %{buildroot}%{_datadir}/icons/hicolor/256x256/apps/
+cp %{_builddir}/kde-ludora/icons/scalable/ludora-start-here.svg %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/
+cp %{_builddir}/kde-ludora/icons/64x64/ludora-start-here.png %{buildroot}%{_datadir}/icons/hicolor/64x64/apps/
+cp %{_builddir}/kde-ludora/icons/128x128/ludora-start-here.svg %{buildroot}%{_datadir}/icons/hicolor/128x128/apps/
+cp %{_builddir}/kde-ludora/icons/256x256/ludora-start-here.svg %{buildroot}%{_datadir}/icons/hicolor/256x256/apps/
 
 %files
 %{_datadir}/plasma/look-and-feel/org.ludora.desktop/
