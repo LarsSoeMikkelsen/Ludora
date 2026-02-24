@@ -16,7 +16,12 @@ Ludora is a KDE Plasma global theme based on Breeze Dark with Papirus icons,
 featuring custom wallpapers and branding for the Ludora distribution.
 
 %prep
-# No prep needed - files are in the repo
+# Copy source files from current directory to build directory
+mkdir -p %{_builddir}/%{name}-%{version}
+cp -a %{_sourcedir}/look-and-feel %{_builddir}/%{name}-%{version}/
+cp -a %{_sourcedir}/wallpaper %{_builddir}/%{name}-%{version}/
+cp -a %{_sourcedir}/icons %{_builddir}/%{name}-%{version}/
+cd %{_builddir}/%{name}-%{version}
 
 %build
 # Nothing to build
