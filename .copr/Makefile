@@ -1,11 +1,11 @@
 # COPR Makefile for building packages from the Ludora monorepo
-# COPR runs this from the repository root, but the working directory
-# when make is invoked is already in the subdirectory specified in COPR settings
 srpm:
+	cd $(CURDIR) && \
+	tar czf /tmp/kde-ludora-1.0.tar.gz \
+		--transform 's|^|kde-ludora-1.0/|' \
+		look-and-feel wallpaper icons && \
 	rpmbuild -bs \
-		--define "_sourcedir $(CURDIR)" \
+		--define "_sourcedir /tmp" \
 		--define "_srcrpmdir $(outdir)" \
 		--define "_builddir $(CURDIR)" \
 		$(spec)
-# Future packages can be added here with additional targets or conditionals
-# based on the $(spec) variable that COPR passes in
