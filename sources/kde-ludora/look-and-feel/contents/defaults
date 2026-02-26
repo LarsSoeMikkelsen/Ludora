@@ -1,24 +1,24 @@
-[kdeglobals][KDE]
-widgetStyle=Breeze
+[kcminputrc][Mouse]
+cursorTheme=breeze_cursors
 
 [kdeglobals][General]
-ColorScheme=BreezeDark
+ColorScheme=Ludora
 
 [kdeglobals][Icons]
 Theme=Papirus-Dark
 
-[plasmarc][Theme]
-name=default
+[kdeglobals][KDE]
+widgetStyle=Breeze
 
-[Wallpaper]
-Image=Ludora
+[kwinrc][DesktopSwitcher]
+LayoutName=org.kde.breeze.desktop
 
-[kcminputrc][Mouse]
-cursorTheme=breeze_cursors
+[kwinrc][WindowSwitcher]
+LayoutName=org.kde.breeze.desktop
 
 [kwinrc][org.kde.kdecoration2]
 library=org.kde.breeze
 theme=Breeze
 
-[KSplash]
-Theme=org.kde.Breeze
+[plasmarc][Theme]
+name=default
