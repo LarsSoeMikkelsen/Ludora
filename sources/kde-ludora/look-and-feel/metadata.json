@@ -6,11 +6,13 @@
                 "Name": "Ludora Team"
             }
         ],
-        "Category": "",
-        "Description": "Ludora theme based on Breeze Dark",
+        "Description": "Ludora — a gaming-focused KDE Plasma theme based on Breeze Dark",
         "Id": "org.ludora.desktop",
         "License": "GPLv2+",
         "Name": "Ludora",
-        "Website": ""
-    }
+        "Website": "https://ludora.org"
+    },
+    "Keywords": "Desktop;Workspace;Appearance;Look and Feel;Gaming;",
+    "X-Plasma-APIVersion": "2",
+    "X-Plasma-MainScript": "default"
 }
