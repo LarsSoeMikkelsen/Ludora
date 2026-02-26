@@ -30,9 +30,6 @@ BuildRequires:  pkgconfig(libsoup-3.0)
 # Need for TLS support
 Requires:       glib-networking
 
-Obsoletes:  	protonup-qt
-Obsoletes:	protonplus-next
-
 %description
 ProtonPlus is a simple and powerful manager for:
  - Wine
