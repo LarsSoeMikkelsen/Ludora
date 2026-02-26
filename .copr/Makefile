@@ -1,8 +1,8 @@
 srpm:
 	@if echo "$(spec)" | grep -q "kde-ludora"; then \
 		cd $(CURDIR) && \
-		tar czf /tmp/kde-ludora-1.1.tar.gz \
-			--transform 's|^|kde-ludora-1.1/|' \
+		tar czf /tmp/kde-ludora-1.2.tar.gz \
+			--transform 's|^|kde-ludora-1.2/|' \
 			look-and-feel color-schemes icons && \
 		rpmbuild -bs \
 			--define "_sourcedir /tmp" \
