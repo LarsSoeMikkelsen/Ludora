@@ -19,4 +19,11 @@ srpm:
 			--define "_srcrpmdir $(outdir)" \
 			--define "_builddir $(CURDIR)" \
 			$(spec); \
+	elif echo "$(spec)" | grep -q "plymouth-ludora"; then \
+		cp $(CURDIR)/watermark.png /tmp/watermark.png && \
+		rpmbuild -bs \
+			--define "_sourcedir /tmp" \
+			--define "_srcrpmdir $(outdir)" \
+			--define "_builddir $(CURDIR)" \
+			$(spec); \
 	fi
