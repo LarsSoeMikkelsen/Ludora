@@ -205,7 +205,7 @@ developing custom modules for Calamares.
 
 
 %prep
-%autosetup -N -n %{name}
+%autosetup -N -n calamares
 # fuck RPM's patch requirements
 # workaround 'File src/modules/plasmalnf/view-preview.png: git binary diffs are not supported.'
 mv %{SOURCE1001} src/modules/
