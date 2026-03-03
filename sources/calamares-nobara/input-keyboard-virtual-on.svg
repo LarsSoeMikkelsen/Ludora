@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="32"
+   height="32"
+   version="1.1"
+   id="svg10"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs14" />
+  <namedview
+     id="namedview12"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     showgrid="false" />
+  <style
+     type="text/css"
+     id="current-color-scheme">.ColorScheme-Accent { color: #3daee9; } .ColorScheme-Background { color: #2a2e32; } .ColorScheme-ButtonText { color: #31363b; } .ColorScheme-Text { color: #fcfcfc; } </style>
+  <rect
+     width="32"
+     height="32"
+     fill="none"
+     id="rect3"
+     x="0"
+     y="0"
+     style="stroke-width:1.45455" />
+  <path
+     class="ColorScheme-Text"
+     d="m 3.000001,11.000005 v 17 h 26 v -17 z m 1,1 h 24 v 2 h -24 z m 0,3 h 24 v 12 h -24 z m 1,2 v 2 h 1 v -2 z m 2,0 v 2 h 2 v -2 z m 3,0 v 2 h 2 v -2 z m 3,0 v 2 h 2 v -2 z m 3,0 v 2 h 2 v -2 z m 3,0 v 2 h 2 v -2 z m 3,0 v 2 h 2 v -2 z m 3,0 v 2 h 2 v -2 z m -20,3 v 2 h 3 v -2 z m 4,0 v 2 h 2 v -2 z m 3,0 v 2 h 2 v -2 z m 3,0 v 2 h 2 v -2 z m 3,0 v 2 h 2 v -2 z m 3,0 v 2 h 2 v -2 z m 3,0 v 2 h 3 v -2 z m -19,3 v 2 h 2 v -2 z m 3,0 v 2 h 2 v -2 z m 3,0 v 2 h 10 v -2 z m 11,0 v 2 h 2 v -2 z m 3,0 v 2 h 2 v -2 z"
+     fill="currentColor"
+     id="path5"
+     style="fill:#030303" />
+  <path
+     d="M 5.5,4.000002 A 2.4999996,2.4999855 0 0 0 2.9999999,6.5000019 2.4999996,2.4999855 0 0 0 5.5,9.000002 2.4999996,2.4999855 0 0 0 8.0000001,6.5000019 2.4999996,2.4999855 0 0 0 5.5,4.000002 Z"
+     fill="#11d116"
+     id="path7"
+     style="stroke-width:1.45455" />
+</svg>
