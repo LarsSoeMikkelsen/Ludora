@@ -37,6 +37,9 @@
 # x86_64_v3
 %define _x86_64_lvl 3
 
+# https://fedoraproject.org/wiki/Changes/EncourageI686LeafRemoval
+ExcludeArch:    %{ix86}
+
 # Define variables for directory paths
 # to be used during packaging
 %define _kernel_dir /lib/modules/%{_kver}
@@ -80,30 +83,32 @@ BuildRequires:  python3-devel
 BuildRequires:  python3-pyyaml
 BuildRequires:  python-srpm-macros
 
-# Indexes 0-9 are reserved for the kernel.
+# Sources
 Source0:        https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-%{_tarkver}.tar.xz
 Source1:        https://raw.githubusercontent.com/CachyOS/linux-cachyos/master/linux-cachyos/config
 
 # CachyOS patches:
 Patch0:         %{_cachyos_patch_src}/all/0001-cachyos-base-all.patch
 Patch1:         %{_cachyos_patch_src}/sched/0001-bore-cachy.patch
+Patch2:         %{_cachyos_patch_src}/misc/0001-handheld.patch
 
 # Nobara patches_
-Patch2:         %{_nobara_patch_src}/linux-surface.patch
+Patch3:         %{_nobara_patch_src}/linux-surface.patch
 
 %description
     The meta package for %{name}.
 
 %prep
     %setup -q %{?SOURCE10:-b 10} -n linux-%{_tarkver}
-    %autopatch -p1 -v -M 9
+    # %autopatch -p1 -v -M 9
     
     # Apply CachyOS patches:
-    # patch -p1 -i %{PATCH0}
-    # patch -p1 -i %{PATCH1}
+    patch -p1 -i %{PATCH0}
+    patch -p1 -i %{PATCH1}
+    patch -p1 -i %{PATCH2}
     
     # Apply Nobara patches:
-    # patch -p1 -i %{PATCH2}
+    patch -p1 -i %{PATCH3}
 
     cp %{SOURCE1} .config
 
