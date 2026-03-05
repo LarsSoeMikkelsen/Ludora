@@ -16,7 +16,7 @@
 %define _kver %{_rpmver}.%{_arch}
 
 # Kernel Release Version
-%define _releasekver 100
+%define _releasekver 200
 
 %if %{_stablekver} == 0
     %define _tarkver %{_basekver}
