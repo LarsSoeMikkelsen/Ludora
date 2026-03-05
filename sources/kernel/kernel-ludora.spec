@@ -11,7 +11,7 @@
 
 # Linux Kernel Versions
 %define _basekver 6.19
-%define _stablekver 6
+%define _stablekver 5
 %define _rpmver %{version}-%{release}
 %define _kver %{_rpmver}.%{_arch}
 
@@ -57,9 +57,9 @@ URL:            https://github.com/LarsSoeMikkelsen/Ludora
 Requires:       kernel-core-uname-r = %{_kver}
 Requires:       kernel-modules-uname-r = %{_kver}
 Requires:       kernel-modules-core-uname-r = %{_kver}
-Provides:       kernel-hjelmos > 6.12.9-cb1.0%{?dist}
+Provides:       kernel-ludora > 6.12.9-cb1.0%{?dist}
 Provides:       installonlypkg(kernel)
-Obsoletes:      kernel-hjelmos <= 6.12.9-cb1.0.lto%{?dist}
+Obsoletes:      kernel-ludora <= 6.12.9-cb1.0.lto%{?dist}
 
 BuildRequires:  bc
 BuildRequires:  bison
@@ -89,7 +89,7 @@ Patch0:         %{_cachyos_patch_src}/all/0001-cachyos-base-all.patch
 Patch1:         %{_cachyos_patch_src}/sched/0001-bore-cachy.patch
 
 # Nobara patches_
-# Patch2:         %{_nobara_patch_src}/linux-surface.patch
+Patch2:         %{_nobara_patch_src}/linux-surface.patch
 
 %description
     The meta package for %{name}.
