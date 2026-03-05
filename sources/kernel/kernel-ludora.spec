@@ -100,15 +100,15 @@ Patch3:         %{_nobara_patch_src}/linux-surface.patch
 
 %prep
     %setup -q %{?SOURCE10:-b 10} -n linux-%{_tarkver}
-    # %autopatch -p1 -v -M 9
+    %autopatch -p1 -v -M 9
     
     # Apply CachyOS patches:
-    patch -p1 -i %{PATCH0}
-    patch -p1 -i %{PATCH1}
-    patch -p1 -i %{PATCH2}
+    # patch -p1 -i %{PATCH0}
+    # patch -p1 -i %{PATCH1}
+    # patch -p1 -i %{PATCH2}
     
     # Apply Nobara patches:
-    patch -p1 -i %{PATCH3}
+    # patch -p1 -i %{PATCH3}
 
     cp %{SOURCE1} .config
 
