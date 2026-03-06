@@ -96,7 +96,7 @@ var layout = {
                     "lastScreen": "0"
                 }
             },
-            "height": 3.6666666666666665,
+            "height": 2.5,
             "hiding": "normal",
             "location": "bottom",
             "maximumLength": 191.11111111111111,
