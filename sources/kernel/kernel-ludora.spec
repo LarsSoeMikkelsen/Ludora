@@ -11,12 +11,12 @@
 
 # Linux Kernel Versions
 %define _basekver 6.19
-%define _stablekver 5
+%define _stablekver 6
 %define _rpmver %{version}-%{release}
 %define _kver %{_rpmver}.%{_arch}
 
 # Kernel Release Version
-%define _releasekver 200
+%define _releasekver 100
 
 %if %{_stablekver} == 0
     %define _tarkver %{_basekver}
