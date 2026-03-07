@@ -54,7 +54,7 @@ var layout = {
                         "/General": {
                             "groupedTaskVisualization": "2",
                             "iconSpacing": "0",
-                            "launchers": "applications:org.kde.konsole.desktop,preferred://filemanager,preferred://browser,applications:steam.desktop"
+                            "launchers": "applications:org.kde.konsole.desktop,preferred://filemanager,preferred://browser,applications:discord.desktop,lutris.desktop,steam.desktop"
                         }
                     },
                     "plugin": "org.kde.plasma.icontasks"
