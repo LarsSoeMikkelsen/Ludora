@@ -5,44 +5,43 @@ Summary:        Ludora configuration for libdnf5-plugin-snapper
 License:        MIT
 URL:            https://github.com/predze/ludora
 BuildArch:      noarch
-
-# Main plugin must be installed
 Requires:       libdnf5-plugin-snapper >= 1.0
 %description
 Ludora-specific configuration for libdnf5-plugin-snapper.
-Configures the plugin to snapshot ALL DNF transactions instead
-of filtering to important packages only.
+Configures the plugin to snapshot ALL DNF transactions.
 %prep
-# No source to prep
+# No source
 %build
 # Nothing to build
 %install
-mkdir -p %{buildroot}%{_sysconfdir}/dnf/libdnf5-plugins
-cat > %{buildroot}%{_sysconfdir}/dnf/libdnf5-plugins/snapper.conf << 'EOF'
+# No files to install - config is handled in %post
+%post
+# Modify the existing snapper.conf to use Ludora settings
+# Only run on initial install, not upgrades
+if [ $1 -eq 1 ]; then
+    cat > /etc/dnf/libdnf5-plugins/snapper.conf << 'EOF'
 # Ludora Configuration for DNF5 Snapper Plugin
 # Snapshots ALL package transactions (not filtered)
 [main]
-# Enable the plugin
 enabled = true
-# Dry-run mode: show what would be done without creating snapshots
 dryrun = false
-# Snapper configuration to use
 snapper_config = root
-# Cleanup algorithm for snapshots
 cleanup_algorithm = number
 [filters]
 # Snapshot ALL package transactions
-# Setting to * means every dnf install/update/remove creates snapshots
 include_packages = *
-# No package exclusions - snapshot everything
-# exclude_packages = 
-# All packages treated as important for retention purposes
-# This ensures snapshots are kept according to cleanup_algorithm
+# All packages treated as important for retention
 important_packages = *
 EOF
+fi
+%postun
+# Restore default config on uninstall
+if [ $1 -eq 0 ]; then
+    # Reinstall the upstream package to restore default config
+    dnf reinstall -y libdnf5-plugin-snapper 2>/dev/null || true
+fi
 %files
-%config(noreplace) %{_sysconfdir}/dnf/libdnf5-plugins/snapper.conf
+# No files owned by this package
 %changelog
 * Mon Mar 09 2026 Predze <predze@ludora> - 1.0-1
 - Initial Ludora configuration package
-- Configures plugin to snapshot all DNF transactions
