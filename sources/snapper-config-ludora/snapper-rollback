@@ -1,0 +1,6 @@
+#!/bin/bash
+# snapper rollback requires --ambit classic on Fedora because the btrfs
+# default subvolume is @ (not a snapshot), so snapper cannot auto-detect
+# the ambit. This wrapper inserts --ambit classic transparently.
+# Usage: sudo snapper-rollback [number]
+exec snapper --ambit classic rollback "$@"

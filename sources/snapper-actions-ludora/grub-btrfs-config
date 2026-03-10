@@ -1,0 +1,6 @@
+GRUB_BTRFS_IGNORE_SPECIFIC_PATH=("@")
+GRUB_BTRFS_IGNORE_PREFIX_PATH=("var/lib/docker" "@var/lib/docker" "@/var/lib/docker")
+GRUB_BTRFS_GRUB_DIRNAME="/boot/grub2"
+GRUB_BTRFS_MKCONFIG=/usr/bin/grub2-mkconfig
+GRUB_BTRFS_SCRIPT_CHECK=grub2-script-check
+GRUB_BTRFS_MKCONFIG_LIB=/usr/share/grub/grub-mkconfig_lib
