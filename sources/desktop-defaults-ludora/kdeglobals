@@ -1,0 +1,9 @@
+[General]
+ColorScheme=Ludora
+
+[KDE]
+LookAndFeelPackage=Ludora
+widgetStyle=breeze
+
+[Icons]
+Theme=breeze-dark

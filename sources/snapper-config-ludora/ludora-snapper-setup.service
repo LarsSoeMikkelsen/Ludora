@@ -1,0 +1,12 @@
+[Unit]
+Description=Ludora first-boot snapper and grub-btrfs setup
+After=local-fs.target
+ConditionPathExists=/etc/systemd/system/ludora-snapper-setup.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=no
+ExecStart=/usr/local/bin/ludora-snapper-setup.sh
+
+[Install]
+WantedBy=multi-user.target

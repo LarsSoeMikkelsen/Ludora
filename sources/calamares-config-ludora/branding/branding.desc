@@ -1,0 +1,47 @@
+---
+componentName: ludora
+
+# Slideshow settings
+slideshow: "show.qml"
+slideshowAPI: 2
+
+# Custom stylesheet
+stylesheet: "stylesheet.qss"
+
+# Branding strings
+strings:
+    productName:         "Ludora"
+    shortProductName:    "Ludora"
+    version:             "Gaming Edition"
+    shortVersion:        "Gaming Edition"
+    versionedName:       "Ludora Gaming Edition"
+    shortVersionedName:  "Ludora Gaming"
+    bootloaderEntryName: "Ludora"
+    productUrl:          "https://github.com/LarsSoeMikkelsen/Ludora"
+    supportUrl:          "https://github.com/LarsSoeMikkelsen/Ludora/issues"
+    knownIssuesUrl:      "https://github.com/LarsSoeMikkelsen/Ludora/issues"
+    releaseNotesUrl:     "https://github.com/LarsSoeMikkelsen/Ludora"
+
+# Images and styling
+images:
+    productLogo:         "logo.png"
+    productIcon:         "logo.png"
+    productWelcome:      "welcome.png"
+
+# Style settings for the installer (Ludora amber/orange theme)
+style:
+    # Sidebar colors
+    SidebarBackground:        "#2b2b2b"
+    SidebarText:              "#b8b8b8"
+    SidebarTextCurrent:       "#ff9800"
+    SidebarTextSelect:        "#ff9800"
+    SidebarTextHighlight:     "#ffb74d"
+    SidebarBackgroundCurrent: "#3d3d3d"
+
+    # Also try lowercase versions (different Calamares versions use different case)
+    sidebarBackground:        "#2b2b2b"
+    sidebarText:              "#b8b8b8"
+    sidebarTextCurrent:       "#ff9800"
+    sidebarTextSelect:        "#ff9800"
+    sidebarTextHighlight:     "#ffb74d"
+    sidebarBackgroundCurrent: "#3d3d3d"
