@@ -26,4 +26,53 @@ srpm:
 			--define "_srcrpmdir $(outdir)" \
 			--define "_builddir $(CURDIR)" \
 			$(spec); \
+	elif echo "$(spec)" | grep -q "calamares-config-ludora"; then \
+		cd $(CURDIR) && \
+		tar czf /tmp/calamares-config-ludora-1.0.tar.gz \
+			--transform 's|^|calamares-config-ludora-1.0/|' \
+			settings.conf modules branding && \
+		rpmbuild -bs \
+			--define "_sourcedir /tmp" \
+			--define "_srcrpmdir $(outdir)" \
+			--define "_builddir $(CURDIR)" \
+			$(spec); \
+	elif echo "$(spec)" | grep -q "snapper-config-ludora"; then \
+		cd $(CURDIR) && \
+		tar czf /tmp/snapper-config-ludora-1.0.tar.gz \
+			--transform 's|^|snapper-config-ludora-1.0/|' \
+			ludora-snapper-setup.service \
+			ludora-snapper-setup.sh \
+			snapper-rollback && \
+		rpmbuild -bs \
+			--define "_sourcedir /tmp" \
+			--define "_srcrpmdir $(outdir)" \
+			--define "_builddir $(CURDIR)" \
+			$(spec); \
+	elif echo "$(spec)" | grep -q "snapper-actions-ludora"; then \
+		cd $(CURDIR) && \
+		tar czf /tmp/snapper-actions-ludora-1.0.tar.gz \
+			--transform 's|^|snapper-actions-ludora-1.0/|' \
+			actions.conf \
+			snapper.actions \
+			grub-btrfs-config && \
+		rpmbuild -bs \
+			--define "_sourcedir /tmp" \
+			--define "_srcrpmdir $(outdir)" \
+			--define "_builddir $(CURDIR)" \
+			$(spec); \
+	elif echo "$(spec)" | grep -q "desktop-defaults-ludora"; then \
+		cd $(CURDIR) && \
+		tar czf /tmp/desktop-defaults-ludora-1.0.tar.gz \
+			--transform 's|^|desktop-defaults-ludora-1.0/|' \
+			kdeglobals \
+			plasmashellrc \
+			49-nopasswd-wheel.rules \
+			ludora-fastfetch.sh \
+			ludora-apply-theme.sh \
+			apply-ludora-theme-to-users.sh && \
+		rpmbuild -bs \
+			--define "_sourcedir /tmp" \
+			--define "_srcrpmdir $(outdir)" \
+			--define "_builddir $(CURDIR)" \
+			$(spec); \
 	fi
