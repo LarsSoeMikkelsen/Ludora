@@ -33,7 +33,7 @@ subvolume rather than a snapshot subvolume.
 %install
 # First-boot service
 install -Dm644 ludora-snapper-setup.service \
-    %{buildroot}%{_unitdir}/ludora-snapper-setup.service
+    %{buildroot}/usr/lib/systemd/system/ludora-snapper-setup.service
 
 # First-boot setup script
 install -Dm755 ludora-snapper-setup.sh \
