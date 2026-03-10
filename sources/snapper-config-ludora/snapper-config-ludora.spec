@@ -54,7 +54,7 @@ systemctl enable ludora-snapper-setup.service &>/dev/null || :
 %systemd_postun ludora-snapper-setup.service
 
 %files
-%{_unitdir}/ludora-snapper-setup.service
+/usr/lib/systemd/system/ludora-snapper-setup.service
 /usr/local/bin/ludora-snapper-setup.sh
 /usr/local/bin/snapper-rollback
 
