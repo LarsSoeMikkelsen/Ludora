@@ -1,5 +1,5 @@
 Name:           snapper-config-ludora
-Version:        1.0
+Version:        1.1
 Release:        1%{?dist}
 Summary:        Snapper first-boot setup and rollback wrapper for Ludora Gaming Edition
 License:        GPLv3+
@@ -39,10 +39,6 @@ install -Dm644 ludora-snapper-setup.service \
 install -Dm755 ludora-snapper-setup.sh \
     %{buildroot}/usr/local/bin/ludora-snapper-setup.sh
 
-# Rollback wrapper
-install -Dm755 snapper-rollback \
-    %{buildroot}/usr/local/bin/snapper-rollback
-
 %post
 %systemd_post ludora-snapper-setup.service
 systemctl enable ludora-snapper-setup.service &>/dev/null || :
@@ -56,7 +52,6 @@ systemctl enable ludora-snapper-setup.service &>/dev/null || :
 %files
 /usr/lib/systemd/system/ludora-snapper-setup.service
 /usr/local/bin/ludora-snapper-setup.sh
-/usr/local/bin/snapper-rollback
 
 %changelog
 * Tue Mar 10 2026 Ludora Team <team@ludora.org> - 1.0-1
