@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Ludora Snapshot Notification
+Comment=Notify user when booted into a Btrfs snapshot
+Exec=/usr/local/bin/ludora-snapshot-notify.sh
+Icon=system-upgrade
+Terminal=false
+StartupNotify=false
+X-KDE-autostart-condition=true
+Categories=System;

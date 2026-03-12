@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Commit Current Snapshot
+Comment=Make the currently booted snapshot permanent
+Icon=system-upgrade
+Exec=konsole --hold -e pkexec /usr/local/bin/snapper-commit
+Terminal=false
+Categories=System;
+Keywords=snapshot;btrfs;rollback;restore;
