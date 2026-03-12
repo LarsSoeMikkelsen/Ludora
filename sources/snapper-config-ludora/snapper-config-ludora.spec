@@ -37,7 +37,7 @@ Also includes:
 %install
 # First-boot service
 install -Dm644 ludora-snapper-setup.service \
-    %{buildroot}%{_unitdir}/ludora-snapper-setup.service
+    %{buildroot}/usr/lib/systemd/system/ludora-snapper-setup.service
 
 # First-boot setup script
 install -Dm755 ludora-snapper-setup.sh \
@@ -70,7 +70,7 @@ systemctl enable ludora-snapper-setup.service &>/dev/null || :
 %systemd_postun ludora-snapper-setup.service
 
 %files
-%{_unitdir}/ludora-snapper-setup.service
+/usr/lib/systemd/system/ludora-snapper-setup.service
 /usr/local/bin/ludora-snapper-setup.sh
 /usr/local/bin/snapper-commit
 /usr/local/bin/ludora-snapshot-notify.sh
