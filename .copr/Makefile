@@ -28,8 +28,8 @@ srpm:
 			$(spec); \
 	elif echo "$(spec)" | grep -q "calamares-config-ludora"; then \
 		cd $(CURDIR) && \
-		tar czf /tmp/calamares-config-ludora-1.0.tar.gz \
-			--transform 's|^|calamares-config-ludora-1.0/|' \
+		tar czf /tmp/calamares-config-ludora-1.1.tar.gz \
+			--transform 's|^|calamares-config-ludora-1.1/|' \
 			settings.conf modules branding && \
 		rpmbuild -bs \
 			--define "_sourcedir /tmp" \
