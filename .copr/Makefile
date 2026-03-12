@@ -38,8 +38,8 @@ srpm:
 			$(spec); \
 	elif echo "$(spec)" | grep -q "snapper-config-ludora"; then \
 		cd $(CURDIR) && \
-		tar czf /tmp/snapper-config-ludora-1.2.tar.gz \
-			--transform 's|^|snapper-config-ludora-1.2/|' \
+		tar czf /tmp/snapper-config-ludora-1.3.tar.gz \
+			--transform 's|^|snapper-config-ludora-1.3/|' \
 			ludora-snapper-setup.service \
 			ludora-snapper-setup.sh \
 			snapper-rollback && \
