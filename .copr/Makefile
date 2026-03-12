@@ -38,11 +38,14 @@ srpm:
 			$(spec); \
 	elif echo "$(spec)" | grep -q "snapper-config-ludora"; then \
 		cd $(CURDIR) && \
-		tar czf /tmp/snapper-config-ludora-1.4.tar.gz \
-			--transform 's|^|snapper-config-ludora-1.4/|' \
+		tar czf /tmp/snapper-config-ludora-1.3.tar.gz \
+			--transform 's|^|snapper-config-ludora-1.3/|' \
 			ludora-snapper-setup.service \
 			ludora-snapper-setup.sh \
-			snapper-rollback && \
+			snapper-commit \
+			ludora-snapshot-notify.sh \
+			ludora-snapshot-notify.desktop \
+			ludora-snapshot-commit.desktop && \
 		rpmbuild -bs \
 			--define "_sourcedir /tmp" \
 			--define "_srcrpmdir $(outdir)" \
