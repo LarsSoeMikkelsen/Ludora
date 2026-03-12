@@ -13,7 +13,6 @@
 # - Creates a new read-write snapshot from current state
 # - Replaces /@ with the new snapshot
 # - Updates fstab and regenerates initramfs/grub
-
 set -e
 
 # Must run as root
@@ -25,7 +24,6 @@ fi
 # Detect current subvolume
 CURRENT_SUBVOL=$(findmnt -no SOURCE / | sed 's/.*\[//' | sed 's/\]//')
 BTRFS_ROOT_DEV=$(findmnt -no SOURCE / | sed 's/\[.*//')
-
 echo "Current root subvolume: $CURRENT_SUBVOL"
 echo "Btrfs device: $BTRFS_ROOT_DEV"
 
@@ -48,13 +46,11 @@ trap "umount '$BTRFS_MNT' 2>/dev/null; rmdir '$BTRFS_MNT' 2>/dev/null" EXIT
 
 # Mount btrfs root
 mount -o subvol=/ "$BTRFS_ROOT_DEV" "$BTRFS_MNT"
-
-# Verify snapshot exists
-if [[ ! -d "$BTRFS_MNT/.snapshots/$SNAPSHOT_NUM/snapshot" ]]; then
+# Verify snapshot exists (snapshots are inside @ subvolume)
+if [[ ! -d "$BTRFS_MNT/@/.snapshots/$SNAPSHOT_NUM/snapshot" ]]; then
     echo "Error: Snapshot #$SNAPSHOT_NUM not found in filesystem" >&2
     exit 1
 fi
-
 echo ""
 echo "This will:"
 echo "  1. Create a read-write snapshot from snapshot #$SNAPSHOT_NUM"
@@ -72,7 +68,7 @@ fi
 # Create read-write snapshot from current snapshot
 echo "Creating read-write snapshot..."
 TEMP_SNAPSHOT="$BTRFS_MNT/@_new_$(date +%s)"
-btrfs subvolume snapshot "$BTRFS_MNT/.snapshots/$SNAPSHOT_NUM/snapshot" "$TEMP_SNAPSHOT"
+btrfs subvolume snapshot "$BTRFS_MNT/@/.snapshots/$SNAPSHOT_NUM/snapshot" "$TEMP_SNAPSHOT"
 
 # Make it writable if it's not already
 btrfs property set -ts "$TEMP_SNAPSHOT" ro false 2>/dev/null || true
@@ -88,13 +84,10 @@ mv "$TEMP_SNAPSHOT" "$BTRFS_MNT/@"
 # Remount root to pick up the new subvolume
 echo "Remounting root filesystem..."
 mount -o remount /
-
 echo "Regenerating initramfs..."
 dracut --force --regenerate-all
-
 echo "Updating GRUB configuration..."
 grub2-mkconfig -o /boot/grub2/grub.cfg
-
 echo ""
 echo "✓ Snapshot #$SNAPSHOT_NUM is now your permanent root."
 echo "✓ Safe to reboot - you'll boot into the new /@ subvolume."
