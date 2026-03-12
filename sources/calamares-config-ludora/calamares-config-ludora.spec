@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -12,8 +12,10 @@ Requires:       calamares-libs
 %description
 Calamares installer configuration for Ludora Gaming Edition.
 Provides module configs (bootloader, dracut, fstab, mount, partition,
-removeuser) and Ludora branding for the Calamares installer.
+removeuser, netinstall) and Ludora branding for the Calamares installer.
 The mount module config sets up the Btrfs subvolume layout used by Ludora.
+The netinstall module provides modular package selection with customizable
+tiers for gaming, codecs, kernel, and desktop branding.
 
 %define debug_package %{nil}
 
@@ -34,6 +36,7 @@ install -Dm644 modules/fstab.conf        %{buildroot}%{_sysconfdir}/calamares/mo
 install -Dm644 modules/mount.conf        %{buildroot}%{_sysconfdir}/calamares/modules/mount.conf
 install -Dm644 modules/partition.conf    %{buildroot}%{_sysconfdir}/calamares/modules/partition.conf
 install -Dm644 modules/removeuser.conf   %{buildroot}%{_sysconfdir}/calamares/modules/removeuser.conf
+install -Dm644 modules/netinstall.conf   %{buildroot}%{_sysconfdir}/calamares/modules/netinstall.conf
 
 # Branding
 install -Dm644 branding/branding.desc    %{buildroot}%{_sysconfdir}/calamares/branding/ludora/branding.desc
@@ -49,11 +52,17 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/modules/mount.conf
 %{_sysconfdir}/calamares/modules/partition.conf
 %{_sysconfdir}/calamares/modules/removeuser.conf
+%{_sysconfdir}/calamares/modules/netinstall.conf
 %{_sysconfdir}/calamares/branding/ludora/branding.desc
 %{_sysconfdir}/calamares/branding/ludora/show.qml
 %{_sysconfdir}/calamares/branding/ludora/logo.png
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Thu Mar 12 2026 Ludora Team <team@ludora.org> - 1.0-2
+- Add netinstall module for modular package selection
+- Update settings.conf to include netinstall step in installation sequence
+- Enable tier-based installation: Base, Codecs, Custom Kernel, Gaming, Theme
+
 * Tue Mar 10 2026 Ludora Team <team@ludora.org> - 1.0-1
 - Initial release
