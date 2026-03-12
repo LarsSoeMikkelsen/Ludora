@@ -1,7 +1,7 @@
 [Unit]
 Description=Ludora first-boot snapper and grub-btrfs setup
 After=local-fs.target
-ConditionPathExists=/etc/systemd/system/ludora-snapper-setup.service
+ConditionPathExists=!/etc/snapper/configs/root
 
 [Service]
 Type=oneshot
