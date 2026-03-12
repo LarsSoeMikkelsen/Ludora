@@ -72,7 +72,6 @@ systemctl enable ludora-snapper-setup.service &>/dev/null || :
 %files
 %{_unitdir}/ludora-snapper-setup.service
 /usr/local/bin/ludora-snapper-setup.sh
-/usr/local/bin/snapper-rollback
 /usr/local/bin/snapper-commit
 /usr/local/bin/ludora-snapshot-notify.sh
 /etc/xdg/autostart/ludora-snapshot-notify.desktop
