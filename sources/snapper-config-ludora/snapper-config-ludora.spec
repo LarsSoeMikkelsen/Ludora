@@ -43,10 +43,6 @@ install -Dm644 ludora-snapper-setup.service \
 install -Dm755 ludora-snapper-setup.sh \
     %{buildroot}/usr/local/bin/ludora-snapper-setup.sh
 
-# Rollback wrapper
-install -Dm755 snapper-rollback \
-    %{buildroot}/usr/local/bin/snapper-rollback
-
 # Snapshot commit script
 install -Dm755 snapper-commit \
     %{buildroot}/usr/local/bin/snapper-commit
