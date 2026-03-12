@@ -1,0 +1,102 @@
+#!/bin/bash
+# snapper-commit - Make the currently booted snapshot the new default root
+#
+# Usage: sudo snapper-commit
+#
+# This script is designed for the workflow:
+# 1. Boot into a snapshot from grub-btrfs menu (read-only test)
+# 2. Verify everything works
+# 3. Run 'sudo snapper-commit' to make it permanent
+#
+# What it does:
+# - Detects if you're booted into a snapshot
+# - Creates a new read-write snapshot from current state
+# - Replaces /@ with the new snapshot
+# - Updates fstab and regenerates initramfs/grub
+
+set -e
+
+# Must run as root
+if [[ $EUID -ne 0 ]]; then
+    echo "Error: This script must be run as root (use sudo)" >&2
+    exit 1
+fi
+
+# Detect current subvolume
+CURRENT_SUBVOL=$(findmnt -no SOURCE / | sed 's/.*\[//' | sed 's/\]//')
+BTRFS_ROOT_DEV=$(findmnt -no SOURCE / | sed 's/\[.*//')
+
+echo "Current root subvolume: $CURRENT_SUBVOL"
+echo "Btrfs device: $BTRFS_ROOT_DEV"
+
+# Check if we're in a snapshot
+if [[ ! "$CURRENT_SUBVOL" =~ \.snapshots/[0-9]+/snapshot ]]; then
+    echo "Error: You are not currently booted into a snapshot." >&2
+    echo "Current subvolume: $CURRENT_SUBVOL" >&2
+    echo "" >&2
+    echo "This command should only be run when booted into a snapshot from GRUB." >&2
+    exit 1
+fi
+
+# Extract snapshot number
+SNAPSHOT_NUM=$(echo "$CURRENT_SUBVOL" | sed 's/.*\.snapshots\/\([0-9]*\).*/\1/')
+echo "You are booted into snapshot #$SNAPSHOT_NUM"
+
+# Create temporary mount point for btrfs root
+BTRFS_MNT=$(mktemp -d)
+trap "umount '$BTRFS_MNT' 2>/dev/null; rmdir '$BTRFS_MNT' 2>/dev/null" EXIT
+
+# Mount btrfs root
+mount -o subvol=/ "$BTRFS_ROOT_DEV" "$BTRFS_MNT"
+
+# Verify snapshot exists
+if [[ ! -d "$BTRFS_MNT/.snapshots/$SNAPSHOT_NUM/snapshot" ]]; then
+    echo "Error: Snapshot #$SNAPSHOT_NUM not found in filesystem" >&2
+    exit 1
+fi
+
+echo ""
+echo "This will:"
+echo "  1. Create a read-write snapshot from snapshot #$SNAPSHOT_NUM"
+echo "  2. Delete the current /@  subvolume"
+echo "  3. Replace it with the new read-write snapshot"
+echo "  4. Regenerate initramfs and GRUB"
+echo ""
+read -p "Continue? [y/N] " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Aborted."
+    exit 0
+fi
+
+# Create read-write snapshot from current snapshot
+echo "Creating read-write snapshot..."
+TEMP_SNAPSHOT="$BTRFS_MNT/@_new_$(date +%s)"
+btrfs subvolume snapshot "$BTRFS_MNT/.snapshots/$SNAPSHOT_NUM/snapshot" "$TEMP_SNAPSHOT"
+
+# Make it writable if it's not already
+btrfs property set -ts "$TEMP_SNAPSHOT" ro false 2>/dev/null || true
+
+# Delete old /@
+echo "Removing old /@ subvolume..."
+btrfs subvolume delete "$BTRFS_MNT/@"
+
+# Rename new snapshot to /@
+echo "Installing new /@ subvolume..."
+mv "$TEMP_SNAPSHOT" "$BTRFS_MNT/@"
+
+# Remount root to pick up the new subvolume
+echo "Remounting root filesystem..."
+mount -o remount /
+
+echo "Regenerating initramfs..."
+dracut --force --regenerate-all
+
+echo "Updating GRUB configuration..."
+grub2-mkconfig -o /boot/grub2/grub.cfg
+
+echo ""
+echo "✓ Snapshot #$SNAPSHOT_NUM is now your permanent root."
+echo "✓ Safe to reboot - you'll boot into the new /@ subvolume."
+echo ""
+echo "Note: The original snapshot #$SNAPSHOT_NUM is still in /.snapshots/$SNAPSHOT_NUM/"
