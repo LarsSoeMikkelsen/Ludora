@@ -48,11 +48,9 @@ fi
 echo ""
 echo "This will:"
 echo "  1. Create a read-write snapshot from snapshot #$SNAPSHOT_NUM"
-echo "  2. Change default subvolume to @home (so we can delete @)"
-echo "  3. Delete the current /@ subvolume"
-echo "  4. Replace it with the new read-write snapshot"
-echo "  5. Set new /@ as default subvolume"
-echo "  6. Regenerate initramfs and GRUB"
+echo "  2. Set new snapshot as default subvolume"
+echo "  3. Delete the old /@ subvolume"
+echo "  4. Regenerate initramfs and GRUB"
 echo ""
 read -p "Continue? [y/N] " -n 1 -r
 echo
@@ -60,34 +58,39 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     echo "Aborted."
     exit 0
 fi
-# Get current default subvolume ID
-CURRENT_DEFAULT_ID=$(btrfs subvolume get-default "$BTRFS_MNT" | awk '{print $2}')
-echo "Current default subvolume ID: $CURRENT_DEFAULT_ID"
-# Check if @home exists, if not create it as temporary default
-if [[ -d "$BTRFS_MNT/@home" ]]; then
-    echo "Setting @home as temporary default subvolume..."
-    btrfs subvolume set-default "$BTRFS_MNT/@home" "$BTRFS_MNT"
-else
-    # Create a temporary subvolume to set as default
-    echo "Creating temporary default subvolume..."
-    btrfs subvolume create "$BTRFS_MNT/@_temp_default"
-    btrfs subvolume set-default "$BTRFS_MNT/@_temp_default" "$BTRFS_MNT"
+# Get the subvolume ID of the snapshot we want to set as default
+NEW_SNAPSHOT_PATH="$BTRFS_MNT/@/.snapshots/$SNAPSHOT_NUM/snapshot"
+NEW_SNAPSHOT_ID=$(btrfs subvolume list -o "$NEW_SNAPSHOT_PATH" 2>/dev/null | head -1 | awk '{print $2}')
+if [[ -z "$NEW_SNAPSHOT_ID" ]]; then
+    # Alternative way to get ID
+    NEW_SNAPSHOT_ID=$(btrfs subvolume show "$NEW_SNAPSHOT_PATH" | grep "Object ID:" | awk '{print $3}')
 fi
-# Now we can safely delete @ since it's no longer the default
-echo "Removing old /@ subvolume..."
-btrfs subvolume delete "$BTRFS_MNT/@"
+if [[ -z "$NEW_SNAPSHOT_ID" ]]; then
+    echo "Error: Could not determine snapshot ID" >&2
+    exit 1
+fi
+echo "New snapshot ID: $NEW_SNAPSHOT_ID"
 # Create read-write snapshot from current snapshot
 echo "Creating read-write snapshot..."
 TEMP_SNAPSHOT="$BTRFS_MNT/@_new_$(date +%s)"
 btrfs subvolume snapshot "$BTRFS_MNT/@/.snapshots/$SNAPSHOT_NUM/snapshot" "$TEMP_SNAPSHOT"
 # Make it writable if it's not already
 btrfs property set -ts "$TEMP_SNAPSHOT" ro false 2>/dev/null || true
+# Get the new snapshot's ID before we delete the old @
+NEW_DEFAULT_ID=$(btrfs subvolume show "$TEMP_SNAPSHOT" | grep "Object ID:" | awk '{print $3}')
+echo "New default subvolume ID: $NEW_DEFAULT_ID"
+# Get current default subvolume ID (for reference)
+OLD_DEFAULT_ID=$(btrfs subvolume get-default "$BTRFS_MNT" | awk '{print $2}')
+echo "Current default subvolume ID: $OLD_DEFAULT_ID"
+# Set the new snapshot as default (using numeric ID)
+echo "Setting new snapshot as default subvolume..."
+btrfs subvolume set-default "$NEW_DEFAULT_ID" "$BTRFS_MNT"
+# Now delete old /@ (it's no longer the default)
+echo "Removing old /@ subvolume..."
+btrfs subvolume delete "$BTRFS_MNT/@"
 # Rename new snapshot to /@
 echo "Installing new /@ subvolume..."
 mv "$TEMP_SNAPSHOT" "$BTRFS_MNT/@"
-# Set new /@ as default subvolume
-echo "Setting new /@ as default subvolume..."
-btrfs subvolume set-default "$BTRFS_MNT/@" "$BTRFS_MNT"
 # Remount root to pick up the new subvolume
 echo "Remounting root filesystem..."
 mount -o remount /
