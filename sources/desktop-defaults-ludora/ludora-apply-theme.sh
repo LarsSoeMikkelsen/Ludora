@@ -24,7 +24,7 @@ if [ $RESULT -eq 0 ]; then
 
     echo "Configuring panel favorites..."
     # Configure panel favorites: Konsole, Files, Firefox, Discord, Lutris, Steam
-    kwriteconfig5 --file ~/.config/kickoffrc --group Favorites --key FavoriteApps "preferred://browser,org.kde.konsole.desktop,org.kde.dolphin.desktop,firefox.desktop,discord.desktop,lutris.desktop,steam.desktop"
+    kwriteconfig5 --file ~/.config/kickoffrc --group Favorites --key FavoriteApps "preferred://browser,org.kde.konsole.desktop,org.kde.dolphin.desktop,firefox.desktop,steam.desktop"
 
     echo "Removing autostart file..."
     rm -f ~/.config/autostart/ludora-theme-apply.desktop
