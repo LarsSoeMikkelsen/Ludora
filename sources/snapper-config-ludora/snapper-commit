@@ -1,29 +1,38 @@
-#!/bin/bash
-# snapper-commit - Make the currently booted snapshot the new default root
+#!/usr/bin/bash
+# snapper-commit v7 - Make the currently booted snapshot the new default root
+#
+# Part of Ludora Linux - https://github.com/LarsSoeMikkelsen/Ludora
 #
 # Usage: sudo snapper-commit
 #
-# This script is designed for the workflow:
-# 1. Boot into a snapshot from grub-btrfs menu (read-only test)
+# Workflow:
+# 1. Boot into a snapshot from grub-btrfs menu (snapshot is read-only)
 # 2. Verify everything works
 # 3. Run 'sudo snapper-commit' to make it permanent
 #
-# What it does:
+# This script:
 # - Detects if you're booted into a snapshot
 # - Creates a new read-write snapshot from current state
 # - Replaces /@ with the new snapshot
-# - Updates fstab and regenerates initramfs/grub
+# - Properly handles .snapshots subvolume nesting
+# - Updates GRUB config AND BLS entries to boot from @ instead of snapshot path
+# - Regenerates initramfs
+
 set -e
+
 # Must run as root
 if [[ $EUID -ne 0 ]]; then
     echo "Error: This script must be run as root (use sudo)" >&2
     exit 1
 fi
-# detect current subvolume
+
+# Detect current subvolume
 CURRENT_SUBVOL=$(findmnt -no SOURCE / | sed 's/.*\[//' | sed 's/\]//')
 BTRFS_ROOT_DEV=$(findmnt -no SOURCE / | sed 's/\[.*//')
+
 echo "Current root subvolume: $CURRENT_SUBVOL"
 echo "Btrfs device: $BTRFS_ROOT_DEV"
+
 # Check if we're in a snapshot
 if [[ ! "$CURRENT_SUBVOL" =~ \.snapshots/[0-9]+/snapshot ]]; then
     echo "Error: You are not currently booted into a snapshot." >&2
@@ -32,25 +41,36 @@ if [[ ! "$CURRENT_SUBVOL" =~ \.snapshots/[0-9]+/snapshot ]]; then
     echo "This command should only be run when booted into a snapshot from GRUB." >&2
     exit 1
 fi
+
 # Extract snapshot number
 SNAPSHOT_NUM=$(echo "$CURRENT_SUBVOL" | sed 's/.*\.snapshots\/\([0-9]*\).*/\1/')
 echo "You are booted into snapshot #$SNAPSHOT_NUM"
+
 # Create temporary mount point for btrfs root
 BTRFS_MNT=$(mktemp -d)
 trap "umount '$BTRFS_MNT' 2>/dev/null; rmdir '$BTRFS_MNT' 2>/dev/null" EXIT
+
 # Mount btrfs root
 mount -o subvol=/ "$BTRFS_ROOT_DEV" "$BTRFS_MNT"
-# Verify snapshot exists (snapshots are inside @ subvolume)
+
+# Verify snapshot exists
 if [[ ! -d "$BTRFS_MNT/@/.snapshots/$SNAPSHOT_NUM/snapshot" ]]; then
     echo "Error: Snapshot #$SNAPSHOT_NUM not found in filesystem" >&2
     exit 1
 fi
+
 echo ""
-echo "This will:"
-echo "  1. Create a read-write snapshot from snapshot #$SNAPSHOT_NUM"
-echo "  2. Set new snapshot as default subvolume"
-echo "  3. Delete the old /@ subvolume"
-echo "  4. Regenerate initramfs and GRUB"
+echo "This will make snapshot #$SNAPSHOT_NUM your permanent root by:"
+echo "  1. Creating a read-write copy of snapshot #$SNAPSHOT_NUM"
+echo "  2. Moving .snapshots subvolume to temporary location"
+echo "  3. Deleting the old /@ subvolume"
+echo "  4. Renaming the new snapshot to /@"
+echo "  5. Moving .snapshots back under new /@"
+echo "  6. Setting @ as default subvolume"
+echo "  7. Regenerating initramfs and fixing GRUB config + BLS entries"
+echo ""
+echo "WARNING: This will delete the current @ subvolume."
+echo "         Make sure snapshot #$SNAPSHOT_NUM contains everything you need!"
 echo ""
 read -p "Continue? [y/N] " -n 1 -r
 echo
@@ -58,48 +78,122 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     echo "Aborted."
     exit 0
 fi
-# Get the subvolume ID of the snapshot we want to set as default
-NEW_SNAPSHOT_PATH="$BTRFS_MNT/@/.snapshots/$SNAPSHOT_NUM/snapshot"
-NEW_SNAPSHOT_ID=$(btrfs subvolume list -o "$NEW_SNAPSHOT_PATH" 2>/dev/null | head -1 | awk '{print $2}')
-if [[ -z "$NEW_SNAPSHOT_ID" ]]; then
-    # Alternative way to get ID
-    NEW_SNAPSHOT_ID=$(btrfs subvolume show "$NEW_SNAPSHOT_PATH" | grep "Object ID:" | awk '{print $3}')
-fi
-if [[ -z "$NEW_SNAPSHOT_ID" ]]; then
-    echo "Error: Could not determine snapshot ID" >&2
-    exit 1
-fi
-echo "New snapshot ID: $NEW_SNAPSHOT_ID"
+
 # Create read-write snapshot from current snapshot
-echo "Creating read-write snapshot..."
+echo ""
+echo "[1/7] Creating read-write snapshot..."
 TEMP_SNAPSHOT="$BTRFS_MNT/@_new_$(date +%s)"
 btrfs subvolume snapshot "$BTRFS_MNT/@/.snapshots/$SNAPSHOT_NUM/snapshot" "$TEMP_SNAPSHOT"
-# Make it writable if it's not already
+
+# Make it writable
 btrfs property set -ts "$TEMP_SNAPSHOT" ro false 2>/dev/null || true
-# Get the new snapshot's ID before we delete the old @
-NEW_DEFAULT_ID=$(btrfs subvolume show "$TEMP_SNAPSHOT" | grep "Object ID:" | awk '{print $3}')
-echo "New default subvolume ID: $NEW_DEFAULT_ID"
-# Get current default subvolume ID (for reference)
-OLD_DEFAULT_ID=$(btrfs subvolume get-default "$BTRFS_MNT" | awk '{print $2}')
-echo "Current default subvolume ID: $OLD_DEFAULT_ID"
-# Set the new snapshot as default (using numeric ID)
-echo "Setting new snapshot as default subvolume..."
-btrfs subvolume set-default "$NEW_DEFAULT_ID" "$BTRFS_MNT"
-# Now delete old /@ (it's no longer the default)
-echo "Removing old /@ subvolume..."
-btrfs subvolume delete "$BTRFS_MNT/@"
+
+# Remove the copied .snapshots directory from the new snapshot
+# (it's just a copy of the mount point directory, not the actual subvolume)
+echo "[2/7] Cleaning up copied .snapshots directory from new snapshot..."
+rm -rf "$TEMP_SNAPSHOT/.snapshots"
+# DO NOT create the directory yet - we'll move the subvolume here
+
+# Get the new snapshot's ID
+NEW_DEFAULT_ID=$(btrfs subvolume show "$TEMP_SNAPSHOT" | grep "Subvolume ID:" | awk '{print $3}')
+echo "      New default subvolume ID: $NEW_DEFAULT_ID"
+
+# CRITICAL: Move .snapshots subvolume out from under @ before deleting @
+# This breaks the parent-child relationship in btrfs
+echo "[3/7] Moving .snapshots subvolume to temporary location..."
+mv "$BTRFS_MNT/@/.snapshots" "$BTRFS_MNT/.snapshots_temp"
+
+# Now we can safely rename/delete the old @
+echo "[4/7] Renaming old /@ to /@_old..."
+mv "$BTRFS_MNT/@" "$BTRFS_MNT/@_old"
+
 # Rename new snapshot to /@
-echo "Installing new /@ subvolume..."
+echo "[5/7] Installing new /@ subvolume..."
 mv "$TEMP_SNAPSHOT" "$BTRFS_MNT/@"
-# Remount root to pick up the new subvolume
+
+# Move .snapshots subvolume to its final location under new @
+# Since we didn't create a directory, the subvolume itself becomes @/.snapshots
+echo "[6/7] Moving .snapshots subvolume under new /@..."
+mv "$BTRFS_MNT/.snapshots_temp" "$BTRFS_MNT/@/.snapshots"
+
+# Set the new snapshot as default
+echo "[7/7] Setting new snapshot as default subvolume..."
+btrfs subvolume set-default "$NEW_DEFAULT_ID" "$BTRFS_MNT"
+
+# Now delete old /@ subvolume (should be empty now)
+echo "      Removing old /@_old subvolume..."
+btrfs subvolume delete "$BTRFS_MNT/@_old"
+
+# Remount root to pick up changes
+echo ""
 echo "Remounting root filesystem..."
 mount -o remount /
+
 echo "Regenerating initramfs..."
 dracut --force --regenerate-all
+
 echo "Updating GRUB configuration..."
 grub2-mkconfig -o /boot/grub2/grub.cfg
+
+# FIX 1: Fix grub.cfg
+# grub2-mkconfig detects we're booted from snapshot and uses that path
+# We need to fix the config to use @ instead
+echo "Fixing GRUB config to boot from @ instead of snapshot path..."
+GRUB_CFG="/boot/grub2/grub.cfg"
+
+if [ -f "$GRUB_CFG" ]; then
+    # Backup GRUB config
+    cp "$GRUB_CFG" "$GRUB_CFG.backup.$(date +%s)"
+    
+    # Replace snapshot subvol path with @
+    # Pattern: subvol=@/.snapshots/[number]/snapshot -> subvol=@
+    sed -i "s|subvol=@/\\.snapshots/[0-9]*/snapshot|subvol=@|g" "$GRUB_CFG"
+    
+    if grep -q "subvol=@/.snapshots" "$GRUB_CFG"; then
+        echo "WARNING: GRUB config still contains snapshot paths!"
+    else
+        echo "✓ GRUB config updated to use subvol=@"
+    fi
+else
+    echo "Note: /boot/grub2/grub.cfg not found (system may use different boot method)"
+fi
+
+# FIX 2: Fix BLS (Boot Loader Specification) entries
+# Fedora uses BLS entries which have the rootflags directly in the .conf files
+echo "Fixing BLS entries to boot from @ instead of snapshot path..."
+
+if [ -d /boot/loader/entries ]; then
+    # Backup BLS entries
+    for entry in /boot/loader/entries/*.conf; do
+        if [ -f "$entry" ]; then
+            cp "$entry" "$entry.backup.$(date +%s)"
+        fi
+    done
+    
+    # Fix all BLS entries
+    sed -i "s|rootflags=subvol=@/\\.snapshots/[0-9]*/snapshot|rootflags=subvol=@|g" /boot/loader/entries/*.conf
+    
+    # Verify
+    if grep -q "subvol=@/.snapshots" /boot/loader/entries/*.conf 2>/dev/null; then
+        echo "WARNING: BLS entries still contain snapshot paths!"
+    else
+        echo "✓ BLS entries updated to use subvol=@"
+    fi
+else
+    echo "Note: /boot/loader/entries not found (system may not use BLS)"
+fi
+
 echo ""
+echo "========================================="
 echo "✓ Snapshot #$SNAPSHOT_NUM is now your permanent root."
-echo "✓ Safe to reboot - you'll boot into the new /@ subvolume."
+echo "========================================="
 echo ""
-echo "Note: The original snapshot #$SNAPSHOT_NUM is still in /.snapshots/$SNAPSHOT_NUM/"
+echo "Verification:"
+btrfs subvolume get-default "$BTRFS_MNT"
+echo ""
+btrfs subvolume list "$BTRFS_MNT" | grep "@/.snapshots" | head -4
+
+echo ""
+echo "✓ The .snapshots subvolume has been preserved under new /@"
+echo "✓ GRUB config and BLS entries fixed to boot into @ instead of snapshot"
+echo "✓ Safe to reboot - you'll boot into the new /@ subvolume."
