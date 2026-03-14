@@ -1,5 +1,5 @@
 Name:           snapper-config-ludora
-Version:        1.7
+Version:        1.8
 Release:        1%{?dist}
 Summary:        Snapper first-boot setup and rollback wrapper for Ludora Gaming Edition
 License:        GPLv3+
