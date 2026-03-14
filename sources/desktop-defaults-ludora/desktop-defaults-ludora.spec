@@ -1,6 +1,6 @@
 Name:           desktop-defaults-ludora
 Version:        1.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        KDE desktop defaults and system configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
