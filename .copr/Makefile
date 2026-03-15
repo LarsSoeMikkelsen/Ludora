@@ -51,25 +51,10 @@ srpm:
 			--define "_srcrpmdir $(outdir)" \
 			--define "_builddir $(CURDIR)" \
 			$(spec); \
-	elif echo "$(spec)" | grep -q "snapper-actions-ludora"; then \
+		elif echo "$(spec)" | grep -q "desktop-defaults-ludora"; then \
 		cd $(CURDIR) && \
-		tar czf /tmp/snapper-actions-ludora-1.0.tar.gz \
-			--transform 's|^|snapper-actions-ludora-1.0/|' \
-			actions.conf \
-			snapper.actions \
-			grub-btrfs-config && \
-		rpmbuild -bs \
-			--define "_sourcedir /tmp" \
-			--define "_srcrpmdir $(outdir)" \
-			--define "_builddir $(CURDIR)" \
-			$(spec); \
-	elif echo "$(spec)" | grep -q "desktop-defaults-ludora"; then \
-		cd $(CURDIR) && \
-		tar czf /tmp/desktop-defaults-ludora-1.0.tar.gz \
-			--transform 's|^|desktop-defaults-ludora-1.0/|' \
-			kdeglobals \
-			plasmashellrc \
-			49-nopasswd-wheel.rules \
+		tar czf /tmp/desktop-defaults-ludora-1.1.tar.gz \
+			--transform 's|^|desktop-defaults-ludora-1.1/|' \
 			ludora-fastfetch.sh \
 			ludora-apply-theme.sh \
 			apply-ludora-theme-to-users.sh && \
