@@ -1,5 +1,5 @@
 Name:           calamares-config-ludora
-Version:        1.2
+Version:        1.3
 Release:        1%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
@@ -10,7 +10,7 @@ Requires:       calamares
 Requires:       calamares-libs
 
 %description
-Calamares installer configuration for Ludora Gaming Edition.
+Calamares installer configuration for Ludora.
 Provides module configs (bootloader, dracut, fstab, mount, partition,
 removeuser) and Ludora branding for the Calamares installer.
 The mount module config sets up the Btrfs subvolume layout used by Ludora.

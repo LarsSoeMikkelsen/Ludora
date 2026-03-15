@@ -12,7 +12,7 @@ Presentation {
 
         Text {
             anchors.centerIn: parent
-            text: "Welcome to Ludora Gaming Edition\n\nYour installation is in progress..."
+            text: "Welcome to Ludora\n\nYour installation is in progress..."
             font.pixelSize: 24
             color: "#cdd6f4"
             horizontalAlignment: Text.AlignHCenter
