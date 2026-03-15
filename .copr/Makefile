@@ -1,8 +1,8 @@
 srpm:
 	@if echo "$(spec)" | grep -q "kde-ludora"; then \
 		cd $(CURDIR) && \
-		tar czf /tmp/kde-ludora-1.5.tar.gz \
-			--transform 's|^|kde-ludora-1.5/|' \
+		tar czf /tmp/kde-ludora-1.6.tar.gz \
+			--transform 's|^|kde-ludora-1.6/|' \
 			look-and-feel color-schemes icons && \
 		rpmbuild -bs \
 			--define "_sourcedir /tmp" \
@@ -28,8 +28,8 @@ srpm:
 			$(spec); \
 	elif echo "$(spec)" | grep -q "calamares-config-ludora"; then \
 		cd $(CURDIR) && \
-		tar czf /tmp/calamares-config-ludora-1.3.tar.gz \
-			--transform 's|^|calamares-config-ludora-1.3/|' \
+		tar czf /tmp/calamares-config-ludora-1.4.tar.gz \
+			--transform 's|^|calamares-config-ludora-1.4/|' \
 			settings.conf modules branding && \
 		rpmbuild -bs \
 			--define "_sourcedir /tmp" \
