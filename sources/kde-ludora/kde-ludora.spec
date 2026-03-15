@@ -1,5 +1,5 @@
 Name:           kde-ludora
-Version:        1.4
+Version:        1.5
 Release:        1%{?dist}
 Summary:        Ludora KDE Plasma Global Theme
 License:        GPLv2+
