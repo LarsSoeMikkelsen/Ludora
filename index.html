@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ludora — A Gaming Linux Distro</title>
+  <title>Ludora — A Gaming Linux Distribution</title>
+  <meta name="description" content="Fedora-based gaming Linux with custom kernel, automatic snapshots, and zero setup required." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -97,15 +98,15 @@
       font-weight: 600;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: var(--muted2);
+      color: var(--amber);
     }
 
     .nav-status-dot {
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: #3b7a3b;
-      box-shadow: 0 0 8px #3b7a3b;
+      background: var(--amber);
+      box-shadow: 0 0 8px var(--amber);
       animation: pulse 2.4s ease-in-out infinite;
     }
 
@@ -127,7 +128,6 @@
       overflow: hidden;
     }
 
-    /* big radial glow behind content */
     .hero-glow {
       position: absolute;
       top: 50%;
@@ -139,7 +139,6 @@
       pointer-events: none;
     }
 
-    /* subtle horizontal scanlines */
     .hero-scanlines {
       position: absolute;
       inset: 0;
@@ -190,7 +189,7 @@
       font-size: 1.05rem;
       font-weight: 400;
       color: var(--muted);
-      max-width: 440px;
+      max-width: 540px;
       line-height: 1.7;
       margin-bottom: 44px;
     }
@@ -339,33 +338,33 @@
       margin-bottom: 52px;
     }
 
-    /* ── PACKAGES ── */
-    #packages {
+    /* ── FEATURES ── */
+    #features {
       background: var(--bg2);
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
     }
 
-    .pkg-grid {
+    .feature-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 1px;
       background: var(--border);
       border: 1px solid var(--border);
     }
 
-    .pkg-card {
+    .feature-card {
       background: var(--bg2);
-      padding: 28px 24px;
+      padding: 32px 28px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 12px;
       transition: background 0.2s;
       position: relative;
       overflow: hidden;
     }
 
-    .pkg-card::before {
+    .feature-card::before {
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0;
@@ -375,59 +374,75 @@
       transition: opacity 0.2s;
     }
 
-    .pkg-card:hover { background: var(--bg3); }
-    .pkg-card:hover::before { opacity: 1; }
+    .feature-card:hover { background: var(--bg3); }
+    .feature-card:hover::before { opacity: 1; }
 
-    .pkg-header {
+    .feature-icon {
+      width: 36px;
+      height: 36px;
       display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 4px;
+      align-items: center;
+      justify-content: center;
+      color: var(--amber);
+      opacity: 0.7;
     }
 
-    .pkg-name {
-      font-size: 0.9rem;
+    .feature-title {
+      font-size: 1rem;
       font-weight: 600;
       letter-spacing: 0.01em;
+      margin-top: 4px;
     }
 
-    .pkg-ver {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.65rem;
-      color: var(--amber);
-      opacity: 0.65;
-      flex-shrink: 0;
-      padding-top: 2px;
-    }
-
-    .pkg-desc {
-      font-size: 0.8rem;
+    .feature-desc {
+      font-size: 0.85rem;
       color: var(--muted);
-      line-height: 1.65;
+      line-height: 1.7;
     }
 
-    .pkg-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      margin-top: 10px;
-      font-size: 0.62rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #3a7a3a;
+    /* ── SCREENSHOT SECTION ── */
+    #screenshots {
+      border-top: 1px solid var(--border);
     }
 
-    .pkg-tag-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: #3a7a3a;
+    .screenshot-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .screenshot-item {
+      border: 1px solid var(--border);
+      overflow: hidden;
+      border-radius: 2px;
+    }
+
+    .screenshot-item img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .screenshot-caption {
+      padding: 16px 20px;
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .screenshot-caption strong {
+      color: var(--white);
+      font-weight: 600;
     }
 
     /* ── ABOUT ── */
-    #about { border-top: 1px solid var(--border); }
+    #about {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
 
     .about-grid {
       display: grid;
@@ -438,7 +453,7 @@
     }
 
     .about-cell {
-      background: var(--bg);
+      background: var(--bg2);
       padding: 36px 36px;
     }
 
@@ -474,80 +489,6 @@
       text-decoration-color: var(--amber);
     }
 
-    /* ── ROADMAP ── */
-    #roadmap {
-      background: var(--bg2);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .roadmap-list {
-      list-style: none;
-      border: 1px solid var(--border);
-    }
-
-    .roadmap-item {
-      display: grid;
-      grid-template-columns: 72px 1fr auto;
-      align-items: start;
-      gap: 24px;
-      padding: 24px 28px;
-      border-bottom: 1px solid var(--border);
-      transition: background 0.15s;
-    }
-
-    .roadmap-item:last-child { border-bottom: none; }
-    .roadmap-item:hover { background: rgba(255,255,255,0.015); }
-
-    .roadmap-state {
-      font-size: 0.6rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 4px 8px;
-      border-radius: 2px;
-      text-align: center;
-      margin-top: 3px;
-    }
-
-    .state-done {
-      background: rgba(242,193,46,0.1);
-      color: var(--amber);
-      border: 1px solid var(--border-amber);
-    }
-
-    .state-wip {
-      background: rgba(255,255,255,0.04);
-      color: var(--muted2);
-      border: 1px solid var(--border);
-    }
-
-    .state-later {
-      background: transparent;
-      color: #333;
-      border: 1px solid #1a1a1a;
-    }
-
-    .roadmap-text strong {
-      display: block;
-      font-size: 0.88rem;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .roadmap-text span {
-      font-size: 0.8rem;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    .roadmap-num {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.65rem;
-      color: var(--border);
-      padding-top: 4px;
-    }
-
     /* ── CTA BAND ── */
     #cta {
       border-top: 1px solid var(--border);
@@ -576,30 +517,11 @@
       text-align: center;
     }
 
-    .cta-link-box {
-      display: inline-flex;
-      align-items: center;
+    .cta-buttons {
+      display: flex;
       gap: 12px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.78rem;
-      color: var(--muted);
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      padding: 14px 24px;
-      border-radius: 2px;
-      transition: border-color 0.2s, color 0.2s;
-    }
-
-    .cta-link-box:hover {
-      border-color: rgba(255,255,255,0.15);
-      color: var(--white);
-    }
-
-    .cta-link-icon {
-      width: 14px;
-      height: 14px;
-      color: var(--amber);
-      flex-shrink: 0;
+      justify-content: center;
+      flex-wrap: wrap;
     }
 
     /* ── FOOTER ── */
@@ -645,14 +567,8 @@
     @media (max-width: 720px) {
       nav { padding: 0 20px; }
       .nav-links { display: none; }
-      .about-grid { grid-template-columns: 1fr; }
-      .roadmap-item { grid-template-columns: auto 1fr; }
-      .roadmap-num { display: none; }
+      .about-grid, .feature-grid { grid-template-columns: 1fr; }
       footer { flex-direction: column; align-items: flex-start; padding: 24px 20px; }
-    }
-
-    @media (max-width: 480px) {
-      .hero-title { letter-spacing: -0.025em; }
     }
   </style>
 </head>
@@ -662,13 +578,13 @@
   <nav>
     <a class="nav-logo" href="#"><img src="Ludora_logo.png" alt="Ludora" /></a>
     <ul class="nav-links">
-      <li><a href="#packages">Packages</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#screenshots">Screenshots</a></li>
       <li><a href="#about">About</a></li>
-      <li><a href="#roadmap">Roadmap</a></li>
     </ul>
     <div class="nav-status">
       <div class="nav-status-dot"></div>
-      Building
+      Beta
     </div>
   </nav>
 
@@ -679,27 +595,28 @@
 
     <div class="hero-eyebrow">
       <div class="hero-eyebrow-dot"></div>
-      Early development
+      Public Beta Release
     </div>
 
     <img class="hero-logo" src="Ludora_logo.png" alt="Ludora" />
 
     <p class="hero-sub">
-      A lean, Fedora-based operating system built for one thing.
-      Fast kernel. Zero bloat. Everything you need to play, working out of the box.
+      A gaming-focused Linux distribution built on Fedora.
+      Custom kernel with BORE scheduler. openSUSE-style bootable snapshots. Steam ready.
+      Zero configuration required.
     </p>
 
     <div class="hero-actions">
-      <a class="btn btn-fill" href="https://copr.fedorainfracloud.org/coprs/predze/ludora" target="_blank">
-        View COPR Repo
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      <a class="btn btn-fill" href="https://sourceforge.net/projects/ludora/files/beta/ludora-beta1-x86_64.iso/download" target="_blank">
+        Download ISO
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       </a>
-      <a class="btn btn-outline" href="#about">What is this?</a>
+      <a class="btn btn-outline" href="https://github.com/LarsSoeMikkelsen/Ludora" target="_blank">View on GitHub</a>
     </div>
 
     <div class="hero-meta">
       <div class="hero-meta-item">Base <span>Fedora 43</span></div>
-      <div class="hero-meta-item">Kernel <span>6.19.5-200.ludora</span></div>
+      <div class="hero-meta-item">Desktop <span>KDE Plasma</span></div>
       <div class="hero-meta-item">Arch <span>x86_64</span></div>
     </div>
   </section>
@@ -707,108 +624,116 @@
   <!-- MARQUEE -->
   <div class="marquee-wrap" aria-hidden="true">
     <div class="marquee-track">
-      <!-- repeated twice for seamless loop -->
-      <div class="marquee-item">kernel-ludora</div>
       <div class="marquee-item">BORE Scheduler</div>
       <div class="marquee-item">CachyOS Patches</div>
-      <div class="marquee-item">Mesa 26.0.1</div>
-      <div class="marquee-item">MangoHud</div>
-      <div class="marquee-item">GOverlay</div>
-      <div class="marquee-item">ProtonPlus</div>
-      <div class="marquee-item">Proton-GE</div>
+      <div class="marquee-item">Btrfs Snapshots</div>
+      <div class="marquee-item">Auto Rollback</div>
       <div class="marquee-item">Steam</div>
+      <div class="marquee-item">Proton-GE</div>
+      <div class="marquee-item">MangoHud</div>
       <div class="marquee-item">VA-API</div>
       <div class="marquee-item">Vulkan</div>
-      <div class="marquee-item">Fastfetch</div>
       <div class="marquee-item">KDE Plasma</div>
-      <div class="marquee-item">Fedora 43</div>
-      <div class="marquee-item">kernel-ludora</div>
       <div class="marquee-item">BORE Scheduler</div>
       <div class="marquee-item">CachyOS Patches</div>
-      <div class="marquee-item">Mesa 26.0.1</div>
-      <div class="marquee-item">MangoHud</div>
-      <div class="marquee-item">GOverlay</div>
-      <div class="marquee-item">ProtonPlus</div>
-      <div class="marquee-item">Proton-GE</div>
+      <div class="marquee-item">Btrfs Snapshots</div>
+      <div class="marquee-item">Auto Rollback</div>
       <div class="marquee-item">Steam</div>
+      <div class="marquee-item">Proton-GE</div>
+      <div class="marquee-item">MangoHud</div>
       <div class="marquee-item">VA-API</div>
       <div class="marquee-item">Vulkan</div>
-      <div class="marquee-item">Fastfetch</div>
       <div class="marquee-item">KDE Plasma</div>
-      <div class="marquee-item">Fedora 43</div>
     </div>
   </div>
 
-  <!-- PACKAGES -->
-  <section id="packages">
+  <!-- FEATURES -->
+  <section id="features">
     <div class="inner">
-      <p class="label">COPR — predze/ludora</p>
-      <h2 class="heading">What's been built so far.</h2>
-      <p class="subheading">Every package currently maintained and building in the Ludora COPR repository.</p>
+      <p class="label">What you get</p>
+      <h2 class="heading">Built for gaming. Engineered for reliability.</h2>
+      <p class="subheading">Everything a modern gaming system needs, with the stability and security of Fedora.</p>
 
-      <div class="pkg-grid">
-
-        <div class="pkg-card">
-          <div class="pkg-header">
-            <div class="pkg-name">kernel-ludora</div>
-            <div class="pkg-ver">6.19.5-200</div>
+      <div class="feature-grid">
+        
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
-          <p class="pkg-desc">Custom kernel with BORE scheduler and CachyOS patches — optimised for low-latency gaming workloads and responsiveness under load.</p>
-          <span class="pkg-tag"><span class="pkg-tag-dot"></span>Building</span>
+          <h3 class="feature-title">Custom Kernel with BORE</h3>
+          <p class="feature-desc">Optimized for low-latency gaming with BORE scheduler and CachyOS performance patches. Responsive under load, smooth frame delivery.</p>
         </div>
 
-        <div class="pkg-card">
-          <div class="pkg-header">
-            <div class="pkg-name">mesa</div>
-            <div class="pkg-ver">26.0.1-1</div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
           </div>
-          <p class="pkg-desc">Latest Mesa with Vulkan and OpenGL. Tracked independently of Fedora upstream to ship driver improvements as soon as they land.</p>
-          <span class="pkg-tag"><span class="pkg-tag-dot"></span>Building</span>
+          <h3 class="feature-title">Bootable Btrfs Snapshots</h3>
+          <p class="feature-desc">openSUSE-style automatic snapshots before every system update. Boot into any previous state directly from GRUB. One-click rollback script included.</p>
         </div>
 
-        <div class="pkg-card">
-          <div class="pkg-header">
-            <div class="pkg-name">libva</div>
-            <div class="pkg-ver">2.23.0-1</div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
           </div>
-          <p class="pkg-desc">VA-API library for hardware video acceleration — keeps the CPU free for the game while handling video decode in silicon.</p>
-          <span class="pkg-tag"><span class="pkg-tag-dot"></span>Building</span>
+          <h3 class="feature-title">Gaming Ready Out of Box</h3>
+          <p class="feature-desc">Steam, Proton-GE, MangoHud, and full codec support pre-installed. Launch Steam, download your library, play. No driver hunts.</p>
         </div>
 
-        <div class="pkg-card">
-          <div class="pkg-header">
-            <div class="pkg-name">mangohud</div>
-            <div class="pkg-ver">0.8.3-2</div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
           </div>
-          <p class="pkg-desc">In-game overlay showing FPS, frametime, GPU/CPU load, temps, and VRAM usage. No alt-tab required.</p>
-          <span class="pkg-tag"><span class="pkg-tag-dot"></span>Building</span>
+          <h3 class="feature-title">Refined KDE Desktop</h3>
+          <p class="feature-desc">Custom Ludora theme with clean aesthetics and gaming-focused defaults. Fast, familiar, and stays out of your way.</p>
         </div>
 
-        <div class="pkg-card">
-          <div class="pkg-header">
-            <div class="pkg-name">goverlay</div>
-            <div class="pkg-ver">1.7.5-1</div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
-          <p class="pkg-desc">Graphical frontend for configuring MangoHud and other overlays. No hand-editing config files.</p>
-          <span class="pkg-tag"><span class="pkg-tag-dot"></span>Building</span>
+          <h3 class="feature-title">Fedora Stability</h3>
+          <p class="feature-desc">Built on Fedora 43 stable base. Proven package ecosystem, robust SELinux security, and predictable six-month release cycle.</p>
         </div>
 
-        <div class="pkg-card">
-          <div class="pkg-header">
-            <div class="pkg-name">protonplus</div>
-            <div class="pkg-ver">0.5.16-1</div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="7.5 4.21 12 6.81 16.5 4.21"/><polyline points="7.5 19.79 7.5 14.6 3 12"/><polyline points="21 12 16.5 14.6 16.5 19.79"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
           </div>
-          <p class="pkg-desc">GUI tool for managing Proton and Wine builds — GE-Proton, Lutris runners, and more. Keeps compatibility layers current.</p>
-          <span class="pkg-tag"><span class="pkg-tag-dot"></span>Building</span>
+          <h3 class="feature-title">Active COPR Repository</h3>
+          <p class="feature-desc">All custom packages built and maintained in public COPR. Transparent build logs, automatic updates, reproducible from source.</p>
         </div>
 
-        <div class="pkg-card">
-          <div class="pkg-header">
-            <div class="pkg-name">fastfetch</div>
-            <div class="pkg-ver">2.59.0-1</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREENSHOTS -->
+  <section id="screenshots">
+    <div class="inner">
+      <p class="label">See it in action</p>
+      <h2 class="heading">Snapshots and desktop.</h2>
+      <p class="subheading">A look at the snapshot boot menu and the default desktop environment.</p>
+
+      <div class="screenshot-grid">
+      <div class="screenshot-item">
+          <img src="Ludora_KDE_Desktop.png" alt="Ludora KDE desktop" />
+          <div class="screenshot-caption">
+          <strong>Clean KDE Plasma desktop.</strong> Custom Ludora theme with amber accents. Fastfetch pre-configured to show system specs. Steam, Discord, and gaming tools pinned and ready.
           </div>
-          <p class="pkg-desc">Fast, highly-configurable system info display. Because every gaming distro needs a way to flex its specs.</p>
-          <span class="pkg-tag"><span class="pkg-tag-dot"></span>Building</span>
+        </div>
+
+        <div class="screenshot-item">
+          <img src="Ludora_Snapshoot_Boot.png" alt="GRUB snapshot boot menu" />
+          <div class="screenshot-caption">
+          <strong>Bootable snapshots in GRUB.</strong> Every system update creates a pre/post snapshot pair. Boot into any previous state if an update breaks something. No manual configuration required.
+          </div>
+        </div>
+          <div class="screenshot-item">
+          <img src="Ludora_Snapshot_Recovery.png" alt="One-click snapshot restore" />
+          <div class="screenshot-caption">
+          <strong>One-click snapshot restore.</strong> The system detects when booted into a snapshot. Restore is only a single click away.
+          </div>
         </div>
 
       </div>
@@ -818,143 +743,58 @@
   <!-- ABOUT -->
   <section id="about">
     <div class="inner">
-      <p class="label">Honest description</p>
-      <h2 class="heading">What Ludora actually is right now.</h2>
-      <p class="subheading">No marketing copy. Just facts.</p>
+      <p class="label">Transparency</p>
+      <h2 class="heading">What this actually is.</h2>
+      <p class="subheading">No marketing fluff. Just the facts.</p>
 
       <div class="about-grid">
         <div class="about-cell">
-          <div class="about-cell-label">Origin</div>
+          <div class="about-cell-label">Status</div>
           <p>
-            Ludora is a <strong>personal project</strong> to build a gaming-focused Linux distro on Fedora 43.
-            Take a solid RPM base, replace the kernel with something faster, maintain a dedicated repo
-            with the newest stable drivers, and ship only what a gamer actually uses.
+            Ludora is in <strong>public beta</strong>. The ISO is functional and tested, but expect rough edges.
+            Automatic snapshots work, the custom kernel is stable, and gaming works out of the box.
+            This is a personal project, not a commercial product.
           </p>
         </div>
         <div class="about-cell">
-          <div class="about-cell-label">Current state</div>
+          <div class="about-cell-label">Target audience</div>
           <p>
-            Right now it exists as a <strong><a href="https://copr.fedorainfracloud.org/coprs/predze/ludora" target="_blank">COPR repository</a></strong> —
-            a set of custom-built packages layered on a standard Fedora 43 install.
-            A public ISO is not ready yet.
+            If you're comfortable with <strong>Fedora</strong> or <strong>Linux in general</strong>, and you want a gaming-focused system
+            with automatic rollback capabilities, this is for you. If you've never used Linux before, start with Fedora or Ubuntu first.
           </p>
         </div>
         <div class="about-cell">
           <div class="about-cell-label">The name</div>
           <p>
             <strong>Ludo</strong> is Latin for "I am playing." The second half nods to <strong>Fedora</strong>,
-            the base it's built on. Simple.
+            the distribution it's built on. Simple etymology.
           </p>
         </div>
         <div class="about-cell">
-          <div class="about-cell-label">The goal</div>
+          <div class="about-cell-label">Source & builds</div>
           <p>
-            Install it. Open Steam. Play. No touching config files, no hunting for drivers —
-            but without compromising on performance. That's the whole brief.
+            All source is on <strong><a href="https://github.com/LarsSoeMikkelsen/Ludora" target="_blank">GitHub</a></strong>.
+            All packages build in <strong><a href="https://copr.fedorainfracloud.org/coprs/predze/ludora" target="_blank">COPR</a></strong>.
+            The kickstart definition is public and reproducible. Nothing hidden.
           </p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ROADMAP -->
-  <section id="roadmap">
-    <div class="inner">
-      <p class="label">Roadmap</p>
-      <h2 class="heading">Where this is going.</h2>
-      <p class="subheading">No promises, no deadlines. An honest list of what's done and what's next.</p>
-
-      <ul class="roadmap-list">
-        <li class="roadmap-item">
-          <span class="roadmap-state state-done">Done</span>
-          <div class="roadmap-text">
-            <strong>Custom kernel builds</strong>
-            <span>kernel-ludora 6.19.5 with BORE scheduler and CachyOS patches building cleanly on COPR.</span>
-          </div>
-          <span class="roadmap-num">01</span>
-        </li>
-        <li class="roadmap-item">
-          <span class="roadmap-state state-done">Done</span>
-          <div class="roadmap-text">
-            <strong>Maintained Mesa stack</strong>
-            <span>Mesa 26.0.1 and libva 2.23.0 built and tracked independently of Fedora upstream.</span>
-          </div>
-          <span class="roadmap-num">02</span>
-        </li>
-        <li class="roadmap-item">
-          <span class="roadmap-state state-done">Done</span>
-          <div class="roadmap-text">
-            <strong>Gaming tooling packages</strong>
-            <span>MangoHud, GOverlay, ProtonPlus, and Fastfetch all building in COPR.</span>
-          </div>
-          <span class="roadmap-num">03</span>
-        </li>
-        <li class="roadmap-item">
-          <span class="roadmap-state state-done">Done</span>
-          <div class="roadmap-text">
-            <strong>Steam + Proton-GE preinstalled</strong>
-            <span>Gaming-ready out of the box — no post-install setup required.</span>
-          </div>
-          <span class="roadmap-num">04</span>
-        </li>
-        <li class="roadmap-item">
-          <span class="roadmap-state state-done">Done</span>
-          <div class="roadmap-text">
-            <strong>Ludora KDE theme</strong>
-            <span>A custom KDE Plasma theme shipped as part of the distro identity.</span>
-          </div>
-          <span class="roadmap-num">05</span>
-        </li>
-        <li class="roadmap-item">
-          <span class="roadmap-state state-done">Done</span>
-          <div class="roadmap-text">
-            <strong>Kickstart / image definition</strong>
-            <span>A reproducible image definition that installs a Fedora 43 base with all Ludora packages applied.</span>
-          </div>
-          <span class="roadmap-num">06</span>
-        </li>
-        <li class="roadmap-item">
-          <span class="roadmap-state state-done">Done</span>
-          <div class="roadmap-text">
-            <strong>Bootable ISO</strong>
-            <span>An actual ISO someone can write to USB and install. The real milestone.</span>
-          </div>
-          <span class="roadmap-num">07</span>
-        </li>
-        <li class="roadmap-item">
-          <span class="roadmap-state state-wip">In progress</span>
-          <div class="roadmap-text">
-            <strong>openSUSE style snapshots</strong>
-            <span>Automatically created, bootable btrfs snapshots before/after dnf system changes. Working out of the box.</span>
-          </div>
-          <span class="roadmap-num">07</span>
-        </li>
-        <li class="roadmap-item">
-          <span class="roadmap-state state-later">Later</span>
-          <div class="roadmap-text">
-            <strong>Public release</strong>
-            <span>When it's good enough to hand to someone else without instructions.</span>
-          </div>
-          <span class="roadmap-num">08</span>
-        </li>
-      </ul>
-    </div>
-  </section>
-
   <!-- CTA -->
   <section id="cta">
     <div class="inner">
-      <p class="label">Follow progress</p>
-      <h2 class="heading">Watch it get built.</h2>
-      <p class="subheading">All packages are public. Every build, version, and failure — visible in real time.</p>
-      <a class="cta-link-box" href="https://copr.fedorainfracloud.org/coprs/predze/ludora" target="_blank">
-        <svg class="cta-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-          <polyline points="15 3 21 3 21 9"/>
-          <line x1="10" y1="14" x2="21" y2="3"/>
-        </svg>
-        copr.fedorainfracloud.org/coprs/predze/ludora
-      </a>
+      <p class="label">Get started</p>
+      <h2 class="heading">Download and install.</h2>
+      <p class="subheading">ISO hosted on SourceForge. Write to USB with Fedora Media Writer or Balena Etcher. Boot and install.</p>
+      <div class="cta-buttons">
+        <a class="btn btn-fill" href="https://sourceforge.net/projects/ludora/" target="_blank">
+          Download ISO
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </a>
+        <a class="btn btn-outline" href="https://github.com/LarsSoeMikkelsen/Ludora/releases" target="_blank">Release Notes</a>
+      </div>
     </div>
   </section>
 
@@ -962,9 +802,9 @@
   <footer>
     <a class="footer-logo" href="#"><img src="Ludora_logo.png" alt="Ludora" /></a>
     <ul class="footer-links">
+      <li><a href="https://github.com/LarsSoeMikkelsen/Ludora" target="_blank">GitHub</a></li>
+      <li><a href="https://sourceforge.net/projects/ludora/" target="_blank">Download</a></li>
       <li><a href="https://copr.fedorainfracloud.org/coprs/predze/ludora" target="_blank">COPR</a></li>
-      <li><a href="#packages">Packages</a></li>
-      <li><a href="#roadmap">Roadmap</a></li>
     </ul>
     <span class="footer-legal">Not affiliated with the Fedora Project or Red Hat.</span>
   </footer>
