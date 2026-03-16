@@ -25,10 +25,10 @@ Setting up openSUSE-style bootable snapshots on Fedora manually is complex:
 
 **Ludora handles all of this automatically** using a custom Calamares installer configuration. You get:
 
-✅ **Automatic snapshots** before and after every package update  
-✅ **Bootable from GRUB** - every snapshot appears in your boot menu  
-✅ **One-click rollback** - popup dialog when booting into snapshots  
-✅ **Hard to break** - always one reboot away from a working system  
+**Automatic snapshots** before and after every package update  
+**Bootable from GRUB** - every snapshot appears in your boot menu  
+**One-click rollback** - popup dialog when booting into snapshots  
+**Hard to break** - always one reboot away from a working system  
 
 ![Recovery Dialog](Ludora_Snapshot_Recovery.png)
 
