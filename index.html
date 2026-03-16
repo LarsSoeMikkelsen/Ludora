@@ -18,6 +18,9 @@
       --amber: #F2C12E;
       --amber-dim: rgba(242,193,46,0.15);
       --amber-glow: rgba(242,193,46,0.06);
+      --blue: #3C75D9;
+      --blue-dim: rgba(60,117,217,0.15);
+      --blue-glow: rgba(60,117,217,0.06);
       --white: #EFEFEF;
       --muted: #666;
       --muted2: #444;
@@ -26,6 +29,7 @@
       --bg3: #141414;
       --border: rgba(255,255,255,0.07);
       --border-amber: rgba(242,193,46,0.22);
+      --border-blue: rgba(60,117,217,0.22);
     }
 
     html { scroll-behavior: smooth; }
@@ -228,6 +232,17 @@
       color: var(--amber);
     }
 
+    .btn-fill-blue {
+      background: var(--blue);
+      color: #fff;
+      border: 1px solid var(--blue);
+    }
+
+    .btn-fill-blue:hover {
+      background: transparent;
+      color: var(--blue);
+    }
+
     .btn-outline {
       background: transparent;
       color: var(--muted);
@@ -340,6 +355,7 @@
 
     /* ── FEATURES ── */
     #features {
+      scroll-margin-top: 80px;
       background: var(--bg2);
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
@@ -578,6 +594,7 @@
   <nav>
     <a class="nav-logo" href="#"><img src="Ludora_logo.png" alt="Ludora" /></a>
     <ul class="nav-links">
+      <li><a href="#editions">Editions</a></li>
       <li><a href="#features">Features</a></li>
       <li><a href="#screenshots">Screenshots</a></li>
       <li><a href="#about">About</a></li>
@@ -601,17 +618,19 @@
     <img class="hero-logo" src="Ludora_logo.png" alt="Ludora" />
 
     <p class="hero-sub">
-      A gaming-focused Linux distribution built on Fedora.
-      Custom kernel with BORE scheduler. openSUSE-style bootable snapshots. Steam ready.
-      Zero configuration required.
+      Two editions for different needs: Gaming Edition with custom kernel and Steam pre-installed, 
+      or Base Edition for a vanilla Fedora workstation with openSUSE-style snapshots.
     </p>
 
     <div class="hero-actions">
-      <a class="btn btn-fill" href="https://sourceforge.net/projects/ludora/files/beta/ludora-beta1-x86_64.iso/download" target="_blank">
-        Download ISO
+      <a class="btn btn-fill" href="#editions">
+        Gaming Edition
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       </a>
-      <a class="btn btn-outline" href="https://github.com/LarsSoeMikkelsen/Ludora" target="_blank">View on GitHub</a>
+      <a class="btn btn-fill-blue" href="#editions">
+        Base Edition
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </a>
     </div>
 
     <div class="hero-meta">
@@ -621,7 +640,52 @@
     </div>
   </section>
 
-  <!-- MARQUEE -->
+  <!-- EDITIONS OVERVIEW -->
+  <section id="editions" style="scroll-margin-top: 60px; padding-top: 20px; background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <div class="inner">
+      <p class="label">Choose your edition</p>
+      <h2 class="heading">Two versions for different needs.</h2>
+      <p class="subheading">Whether you want a full gaming rig or a reliable workstation, Ludora has you covered.</p>
+
+      <div class="feature-grid" style="margin-top: 40px;">
+        
+        <!-- Gaming Edition -->
+        <div class="feature-card" id="gaming-edition" style="border-top: 3px solid var(--amber); display: flex; flex-direction: column;">
+          <h3 class="feature-title" style="color: var(--amber);">Gaming Edition</h3>
+          <p class="feature-desc">Full gaming stack with custom kernel, Steam, and all the tools you need to play on Linux.</p>
+          <ul style="margin-top: 16px; margin-left: 16px; font-size: 0.85rem; color: var(--muted); line-height: 2; flex-grow: 1;">
+            <li>Custom kernel with BORE scheduler</li>
+            <li>Custom Ludora KDE Plasma desktop</li>
+            <li>Steam + Proton-GE pre-installed</li>
+            <li>MangoHud, GameMode, Gamescope</li>
+            <li>Latest Mesa/Vulkan drivers</li>
+            <li>Automatic Btrfs snapshots</li>
+            <li>One-click rollback</li>
+          </ul>
+          <a class="btn btn-fill" href="https://sourceforge.net/projects/ludora/files/beta/ludora-beta1-x86_64.iso/download" target="_blank" style="margin-top: 24px;">
+            Download Gaming
+          </a>
+        </div>
+
+        <!-- Base Edition -->
+        <div class="feature-card" id="base-edition" style="border-top: 3px solid var(--blue); display: flex; flex-direction: column;">
+          <h3 class="feature-title" style="color: var(--blue);">Base Edition</h3>
+          <p class="feature-desc">Vanilla Fedora workstation with openSUSE-style bootable snapshots.</p>
+          <ul style="margin-top: 16px; margin-left: 16px; font-size: 0.85rem; color: var(--muted); line-height: 2; flex-grow: 1;">
+            <li>Stock Fedora kernel</li>
+            <li>Clean KDE Plasma desktop</li>
+            <li>Multimedia codecs included</li>
+            <li>Automatic Btrfs snapshots</li>
+            <li>One-click rollback</li>
+          </ul>
+          <a class="btn btn-fill-blue" href="https://sourceforge.net/projects/ludora/files/beta/ludora-beta1-base-x86_64.iso/download" target="_blank" style="margin-top: 24px;">
+            Download Base
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
   <div class="marquee-wrap" aria-hidden="true">
     <div class="marquee-track">
       <div class="marquee-item">BORE Scheduler</div>
@@ -650,7 +714,7 @@
   <!-- FEATURES -->
   <section id="features">
     <div class="inner">
-      <p class="label">What you get</p>
+      <p class="label">Gaming Edition</p>
       <h2 class="heading">Built for gaming. Engineered for reliability.</h2>
       <p class="subheading">Everything a modern gaming system needs, with the stability and security of Fedora.</p>
 
@@ -669,7 +733,7 @@
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
           </div>
           <h3 class="feature-title">Bootable Btrfs Snapshots</h3>
-          <p class="feature-desc">openSUSE-style automatic snapshots before every system update. Boot into any previous state directly from GRUB. One-click rollback script included.</p>
+          <p class="feature-desc">openSUSE-style automatic snapshots before and after every system update. Boot into any previous state directly from GRUB. One-click rollback script included.</p>
         </div>
 
         <div class="feature-card">
@@ -760,7 +824,7 @@
           <div class="about-cell-label">Target audience</div>
           <p>
             If you're comfortable with <strong>Fedora</strong> or <strong>Linux in general</strong>, and you want a gaming-focused system
-            with automatic rollback capabilities, this is for you. If you've never used Linux before, start with Fedora or Ubuntu first.
+            with automatic rollback capabilities, this is for you.
           </p>
         </div>
         <div class="about-cell">
@@ -789,11 +853,24 @@
       <h2 class="heading">Download and install.</h2>
       <p class="subheading">ISO hosted on SourceForge. Write to USB with Fedora Media Writer or Balena Etcher. Boot and install.</p>
       <div class="cta-buttons">
-        <a class="btn btn-fill" href="https://sourceforge.net/projects/ludora/" target="_blank">
-          Download ISO
+        <a class="btn btn-fill" href="https://sourceforge.net/projects/ludora/files/beta/ludora-beta1-x86_64.iso/download" target="_blank">
+          Gaming Edition
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         </a>
-        <a class="btn btn-outline" href="https://github.com/LarsSoeMikkelsen/Ludora/releases" target="_blank">Release Notes</a>
+        <a class="btn btn-fill-blue" href="https://sourceforge.net/projects/ludora/files/beta/ludora-beta1-base-x86_64.iso/download" target="_blank">
+          Base Edition
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </a>
+      </div>
+      <div style="margin-top: 32px;">
+        <a class="cta-link-box" href="https://github.com/LarsSoeMikkelsen/Ludora/releases" target="_blank">
+          <svg class="cta-link-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/>
+            <line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+          Release Notes
+        </a>
       </div>
     </div>
   </section>
