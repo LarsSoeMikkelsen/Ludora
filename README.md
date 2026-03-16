@@ -1,15 +1,36 @@
 # Ludora
 
-**A Fedora-based Linux distribution with openSUSE-style bootable snapshots**
+**The Fedora spin with openSUSE-style bootable snapshots built in**
 
 > **Status**: Public Beta - Functional but expect rough edges
 
-Ludora (*"Ludo"* - Latin: "I am playing" + *"dora"* from Fedora) is a Fedora-based Linux distribution built on Fedora 43, featuring openSUSE-style bootable Btrfs snapshots for system recovery. Available in two editions:
+Ludora (*"Ludo"* - Latin: "I am playing" + *"dora"* from Fedora) is a Fedora-based distribution that automatically sets up bootable Btrfs snapshots during installation - something that's surprisingly complicated to do manually on stock Fedora.
 
-- **Gaming Edition**: Full gaming stack with custom kernel, Steam, and performance optimizations
-- **Base Edition**: Vanilla Fedora workstation with automatic snapshots and multimedia codecs
+Break your system with a bad update? Just reboot, pick a snapshot from GRUB, and restore with one click.
 
-![Ludora Desktop](Ludora_KDE_Desktop.png)
+**Available in two editions:**
+- **Gaming Edition**: Full gaming stack with custom kernel, Steam, and performance optimizations + bootable snapshots
+- **Base Edition**: Clean Fedora workstation with multimedia codecs + bootable snapshots
+
+![Snapshot Boot Menu](Ludora_Snapshoot_Boot.png)
+
+---
+
+## Why Bootable Snapshots Matter
+
+Setting up openSUSE-style bootable snapshots on Fedora manually is complex:
+- The default Anaconda installer doesn't support the required Btrfs subvolume layout
+- Requires manual configuration of snapper, grub-btrfs, and DNF plugins
+- Easy to misconfigure and end up with non-bootable snapshots
+
+**Ludora handles all of this automatically** using a custom Calamares installer configuration. You get:
+
+✅ **Automatic snapshots** before and after every package update  
+✅ **Bootable from GRUB** - every snapshot appears in your boot menu  
+✅ **One-click rollback** - popup dialog when booting into snapshots  
+✅ **Hard to break** - always one reboot away from a working system  
+
+![Recovery Dialog](Ludora_Snapshot_Recovery.png)
 
 ---
 
@@ -39,20 +60,17 @@ Clean Fedora workstation with automatic snapshot protection:
 
 ---
 
-## Key Features
+## Technical Details
 
-### Bootable Btrfs Snapshots
-- **openSUSE-style snapshot system** integrated with GRUB bootloader
-- **Automatic snapshots** before and after DNF package transactions
-- **Automatic rollback script** for easy system recovery
-- Boot directly into any snapshot from GRUB menu and restore it with ease
+**Snapshot Implementation:**
+- **grub-btrfs** - Generates GRUB menu entries for snapshots
+- **snapper** - Creates and manages Btrfs snapshots
+- **libdnf5-plugin-snapper** - Automatic snapshots on package operations
+- **Custom Calamares config** - Sets up proper subvolume layout during installation
 
-![Snapshot Boot Menu](Ludora_Snapshoot_Boot.png)
-
-![Snapshot Boot Menu](Ludora_Snapshot_Recovery.png)
-
-### Fedora Stability
-- Built on **Fedora 43** stable base
+**Base System:**
+- Built on **Fedora 43** stable release
+- **KDE Plasma** desktop environment
 - Access to Fedora's extensive package repositories
 - Regular security updates from upstream
 

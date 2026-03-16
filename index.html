@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ludora — A Gaming Linux Distribution</title>
-  <meta name="description" content="Fedora-based gaming Linux with custom kernel, automatic snapshots, and zero setup required." />
+  <title>Ludora — Fedora with built-in bootable snapshots</title>
+  <meta name="description" content="Fedora with openSUSE-style bootable Btrfs snapshots. One-click system recovery when things break. Available in Gaming and Base editions." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -594,9 +594,9 @@
   <nav>
     <a class="nav-logo" href="#"><img src="Ludora_logo.png" alt="Ludora" /></a>
     <ul class="nav-links">
+      <li><a href="#snapshots">Snapshots</a></li>
       <li><a href="#editions">Editions</a></li>
       <li><a href="#features">Features</a></li>
-      <li><a href="#screenshots">Screenshots</a></li>
       <li><a href="#about">About</a></li>
     </ul>
     <div class="nav-status">
@@ -617,9 +617,18 @@
 
     <img class="hero-logo" src="Ludora_logo.png" alt="Ludora" />
 
+    <h1 class="hero-title" style="font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.3; margin-bottom: 24px; max-width: 700px; margin-left: auto; margin-right: auto;">
+      The Fedora spin with openSUSE-style bootable snapshots built in
+    </h1>
+
     <p class="hero-sub">
-      Two editions for different needs: Gaming Edition with custom kernel and Steam pre-installed, 
-      or Base Edition for a vanilla Fedora workstation with openSUSE-style snapshots.
+      Break your system with a bad update? Just reboot, pick a snapshot, and restore with one click. 
+      Setting this up manually on Fedora takes hours — Ludora does it automatically.
+      <a href="#snapshots" style="color: var(--white); text-decoration: underline; text-decoration-color: var(--muted); text-underline-offset: 3px; transition: text-decoration-color 0.2s; white-space: nowrap;" onmouseover="this.style.textDecorationColor='var(--white)'" onmouseout="this.style.textDecorationColor='var(--muted)'">See how it works →</a>
+    </p>
+
+    <p class="hero-sub" style="margin-top: 24px; margin-bottom: 12px; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; opacity: 0.6;">
+      Both editions include bootable snapshots
     </p>
 
     <div class="hero-actions">
@@ -637,6 +646,81 @@
       <div class="hero-meta-item">Base <span>Fedora 43</span></div>
       <div class="hero-meta-item">Desktop <span>KDE Plasma</span></div>
       <div class="hero-meta-item">Arch <span>x86_64</span></div>
+      <a class="hero-meta-item" href="https://github.com/LarsSoeMikkelsen/Ludora" target="_blank" style="cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">
+        GitHub <span style="text-decoration: underline; text-decoration-color: var(--muted); text-underline-offset: 2px;">View source</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- SNAPSHOTS FEATURE -->
+  <section id="snapshots" style="scroll-margin-top: 60px; padding-top: 80px;">
+    <div class="inner">
+      <p class="label" style="color: var(--white);">System Recovery</p>
+      <h2 class="heading">Boot into any snapshot. Restore with one click.</h2>
+      <p class="subheading">
+        Ludora automatically creates bootable Btrfs snapshots before and after every system update. 
+        If something breaks, just reboot, select a snapshot from GRUB, and restore your system to a working state.
+      </p>
+
+      <div style="margin-top: 48px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px;">
+        
+        <div>
+          <img src="Ludora_Snapshoot_Boot.png" alt="Snapshot boot menu" style="width: 100%; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 16px;" />
+          <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 8px;">1. Select snapshot from GRUB</h3>
+          <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.6;">
+            All snapshots appear in your boot menu. Choose any previous state of your system.
+          </p>
+        </div>
+
+        <div>
+          <img src="Ludora_Snapshot_Recovery.png" alt="Recovery dialog" style="width: 100%; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 16px;" />
+          <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 8px;">2. One-click restore</h3>
+          <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.6;">
+            A popup asks if you want to restore from this snapshot. Click yes, reboot, and you're back to a working system.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="feature-grid" style="margin-top: 48px;">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <h3 class="feature-title">Automatic snapshots</h3>
+          <p class="feature-desc">Snapshots are created automatically before and after DNF package operations. No manual intervention needed.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+          </div>
+          <h3 class="feature-title">Bootable from GRUB</h3>
+          <p class="feature-desc">openSUSE-style integration with GRUB means every snapshot is bootable. No live USB needed for recovery.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 class="feature-title">Hard to break</h3>
+          <p class="feature-desc">Test new kernels, drivers, or updates with confidence. You're always one reboot away from a working system.</p>
+        </div>
+
+      </div>
+
+      <div style="margin-top: 48px; padding: 32px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;">
+        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 12px;">Why this matters</h3>
+        <p style="font-size: 0.9rem; color: var(--muted); line-height: 1.7; margin-bottom: 16px;">
+          Setting up bootable Btrfs snapshots on Fedora manually is surprisingly complicated. The default Anaconda installer doesn't support 
+          the subvolume layout needed, so it requires manual post-install configuration before installing and setting up snapper, grub-btrfs, and DNF plugins.
+        </p>
+        <p style="font-size: 0.9rem; color: var(--muted); line-height: 1.7;">
+          Ludora handles all of this automatically during installation using a custom Calamares configuration. You get openSUSE-style 
+          snapshot protection on Fedora's stable base, with zero manual setup required.
+        </p>
+      </div>
+
     </div>
   </section>
 
@@ -644,8 +728,8 @@
   <section id="editions" style="scroll-margin-top: 60px; padding-top: 20px; background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
     <div class="inner">
       <p class="label">Choose your edition</p>
-      <h2 class="heading">Two versions for different needs.</h2>
-      <p class="subheading">Whether you want a full gaming rig or a reliable workstation, Ludora has you covered.</p>
+      <h2 class="heading">Gaming powerhouse or clean workstation?</h2>
+      <p class="subheading">Both editions include bootable snapshots. Choose based on whether you want gaming features or a minimal Fedora setup.</p>
 
       <div class="feature-grid" style="margin-top: 40px;">
         
