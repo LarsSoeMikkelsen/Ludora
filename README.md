@@ -1,21 +1,45 @@
 # Ludora
 
-**A Fedora-based Linux distribution optimized for gaming and system stability**
+**A Fedora-based Linux distribution with openSUSE-style bootable snapshots**
 
 > **Status**: Public Beta - Functional but expect rough edges
 
-Ludora (*"Ludo"* - Latin: "I am playing" + *"dora"* from Fedora) is a gaming-focused Linux distribution built on Fedora 43, featuring a custom kernel with BORE scheduler, openSUSE-style bootable Btrfs snapshots, and a gaming-ready environment with zero configuration required.
+Ludora (*"Ludo"* - Latin: "I am playing" + *"dora"* from Fedora) is a Fedora-based Linux distribution built on Fedora 43, featuring openSUSE-style bootable Btrfs snapshots for system recovery. Available in two editions:
+
+- **Gaming Edition**: Full gaming stack with custom kernel, Steam, and performance optimizations
+- **Base Edition**: Vanilla Fedora workstation with automatic snapshots and multimedia codecs
 
 ![Ludora Desktop](Ludora_KDE_Desktop.png)
 
 ---
 
-## Features
+## Editions
 
-### Custom Performance Kernel
-- **BORE (Burst-Oriented Response Enhancer) scheduler** for improved gaming performance
-- **CachyOS optimizations** and patches for enhanced responsiveness
-- Optimized for low-latency gaming workloads
+### Gaming Edition
+Full-featured gaming distribution with everything you need to play on Linux:
+- **Custom kernel with BORE scheduler** - Enhanced gaming performance
+- **Custom Ludora KDE Plasma desktop** - Themed with amber accents
+- **Steam + Proton-GE pre-installed** - Ready to game out of the box
+- **MangoHud, GameMode, Gamescope** - Performance monitoring and optimization
+- **Latest Mesa/Vulkan drivers** - Optimal graphics performance
+- **Automatic Btrfs snapshots** - System protection
+- **One-click rollback** - Easy system recovery
+
+**[Download Gaming Edition](https://sourceforge.net/projects/ludora/files/beta/ludora-beta1-x86_64.iso/download)**
+
+### Base Edition
+Clean Fedora workstation with automatic snapshot protection:
+- **Stock Fedora kernel** - Vanilla upstream kernel
+- **Clean KDE Plasma desktop** - No custom theming
+- **Multimedia codecs included** - Audio/video playback ready
+- **Automatic Btrfs snapshots** - System protection
+- **One-click rollback** - Easy system recovery
+
+**[Download Base Edition](https://sourceforge.net/projects/ludora/files/beta/ludora-beta1-base-x86_64.iso/download)**
+
+---
+
+## Key Features
 
 ### Bootable Btrfs Snapshots
 - **openSUSE-style snapshot system** integrated with GRUB bootloader
@@ -27,20 +51,6 @@ Ludora (*"Ludo"* - Latin: "I am playing" + *"dora"* from Fedora) is a gaming-foc
 
 ![Snapshot Boot Menu](Ludora_Snapshot_Recovery.png)
 
-### Gaming-Ready Out of the Box
-Pre-configured gaming stack with no additional setup required:
-- Steam with Proton compatibility layer
-- Proton-GE for enhanced game compatibility
-- MangoHud for performance overlay
-- GOverlay for MangoHud configuration
-- ProtonPlus for Proton version management
-- Fastfetch for system information
-
-### KDE Plasma Desktop
-- **Custom Ludora theme** with amber (#F2C12E) accents
-- Polished, modern desktop environment
-- Fully customizable to your preferences
-
 ### Fedora Stability
 - Built on **Fedora 43** stable base
 - Access to Fedora's extensive package repositories
@@ -51,11 +61,12 @@ Pre-configured gaming stack with no additional setup required:
 ## Download & Installation
 
 ### Download ISO
-Ludora ISO images are hosted on SourceForge due to file size:
+Ludora is available in two editions. Choose the one that fits your needs:
 
-**[Download from SourceForge](https://sourceforge.net/projects/ludora/files/)**
+- **[Gaming Edition](https://sourceforge.net/projects/ludora/files/beta/ludora-beta1-x86_64.iso/download)** - Full gaming stack with custom kernel
+- **[Base Edition](https://sourceforge.net/projects/ludora/files/beta/ludora-beta1-base-x86_64.iso/download)** - Clean Fedora workstation with snapshots
 
-Alternatively, check the [Releases](https://github.com/LarsSoeMikkelsen/Ludora/releases) page for the latest version and download links.
+Browse all files on **[SourceForge](https://sourceforge.net/projects/ludora/files/)** or check the [Releases](https://github.com/LarsSoeMikkelsen/Ludora/releases) page.
 
 ### Installation
 1. Download the latest Ludora ISO
@@ -65,14 +76,14 @@ Alternatively, check the [Releases](https://github.com/LarsSoeMikkelsen/Ludora/r
    - Rufus on Windows (use DD mode)
    - Etcher (cross-platform)
 3. Boot from the USB drive
-4. Follow the Anaconda installer prompts
+4. Install Ludora
 5. **Important**: Select Btrfs filesystem during installation to enable snapshot functionality
 
 ### Post-Installation
 Ludora is designed to work out of the box. After installation:
 - Log in to KDE Plasma
-- Launch Steam from the application menu
-- Start gaming!
+- **Gaming Edition**: Launch Steam and start gaming!
+- **Base Edition**: Enjoy a clean Fedora workstation with snapshot protection
 
 ---
 
