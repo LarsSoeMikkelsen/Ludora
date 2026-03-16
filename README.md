@@ -12,12 +12,12 @@ Ludora (*"Ludo"* - Latin: "I am playing" + *"dora"* from Fedora) is a gaming-foc
 
 ## Features
 
-### 🚀 Custom Performance Kernel
+### Custom Performance Kernel
 - **BORE (Burst-Oriented Response Enhancer) scheduler** for improved gaming performance
 - **CachyOS optimizations** and patches for enhanced responsiveness
 - Optimized for low-latency gaming workloads
 
-### 💾 Bootable Btrfs Snapshots
+### Bootable Btrfs Snapshots
 - **openSUSE-style snapshot system** integrated with GRUB bootloader
 - **Automatic snapshots** before and after DNF package transactions
 - **Automatic rollback script** for easy system recovery
@@ -27,7 +27,7 @@ Ludora (*"Ludo"* - Latin: "I am playing" + *"dora"* from Fedora) is a gaming-foc
 
 ![Snapshot Boot Menu](Ludora_Snapshot_Recovery.png)
 
-### 🎮 Gaming-Ready Out of the Box
+### Gaming-Ready Out of the Box
 Pre-configured gaming stack with no additional setup required:
 - Steam with Proton compatibility layer
 - Proton-GE for enhanced game compatibility
@@ -36,12 +36,12 @@ Pre-configured gaming stack with no additional setup required:
 - ProtonPlus for Proton version management
 - Fastfetch for system information
 
-### 🖥️ KDE Plasma Desktop
+### KDE Plasma Desktop
 - **Custom Ludora theme** with amber (#F2C12E) accents
 - Polished, modern desktop environment
 - Fully customizable to your preferences
 
-### 🔒 Fedora Stability
+### Fedora Stability
 - Built on **Fedora 43** stable base
 - Access to Fedora's extensive package repositories
 - Regular security updates from upstream
