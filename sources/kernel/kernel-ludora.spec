@@ -11,7 +11,7 @@
 
 # Linux Kernel Versions
 %define _basekver 6.19
-%define _stablekver 6
+%define _stablekver 8
 %define _rpmver %{version}-%{release}
 %define _kver %{_rpmver}.%{_arch}
 
@@ -84,16 +84,12 @@ BuildRequires:  python3-pyyaml
 BuildRequires:  python-srpm-macros
 
 # Sources
-Source0:        https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-%{_tarkver}.tar.xz
+Source0:        https://github.com/CachyOS/linux/archive/refs/tags/%{_tag}.tar.gz
 Source1:        https://raw.githubusercontent.com/CachyOS/linux-cachyos/master/linux-cachyos/config
 
-# CachyOS patches:
-Patch0:         %{_cachyos_patch_src}/all/0001-cachyos-base-all.patch
-Patch1:         %{_cachyos_patch_src}/sched/0001-bore-cachy.patch
-Patch2:         %{_cachyos_patch_src}/misc/0001-handheld.patch
+# CachyOS patch:
+Patch0:         %{_cachyos_patch_src}/sched/0001-bore-cachy.patch
 
-# Nobara patches_
-Patch3:         %{_nobara_patch_src}/linux-surface.patch
 
 %description
     The meta package for %{name}.
