@@ -24,6 +24,8 @@
     %define _tarkver %{version}
 %endif
 
+%define _tag cachyos-%{_tarkver}-1
+
 # Define the tickrate used by the kernel
 # Valid values: 100, 250, 300, 500, 600, 750 and 1000
 # An invalid value will not fail and continue to use
