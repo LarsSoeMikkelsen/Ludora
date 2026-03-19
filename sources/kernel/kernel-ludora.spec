@@ -16,8 +16,8 @@
 %define _kver %{_rpmver}.%{_arch}
 
 %define _tarkver %{version}
-
 %define _tag cachyos-%{_tarkver}-1
+%define _releasekver 100
 
 # Define the tickrate used by the kernel
 # Valid values: 100, 250, 300, 500, 600, 750 and 1000
