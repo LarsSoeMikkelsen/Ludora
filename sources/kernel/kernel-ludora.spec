@@ -15,14 +15,7 @@
 %define _rpmver %{version}-%{release}
 %define _kver %{_rpmver}.%{_arch}
 
-# Kernel Release Version
-%define _releasekver 100
-
-%if %{_stablekver} == 0
-    %define _tarkver %{_basekver}
-%else
-    %define _tarkver %{version}
-%endif
+%define _tarkver %{version}
 
 %define _tag cachyos-%{_tarkver}-1
 
@@ -39,21 +32,18 @@
 # x86_64_v3
 %define _x86_64_lvl 3
 
-# https://fedoraproject.org/wiki/Changes/EncourageI686LeafRemoval
-ExcludeArch:    %{ix86}
-
 # Define variables for directory paths
 # to be used during packaging
 %define _kernel_dir /lib/modules/%{_kver}
 %define _devel_dir %{_usrsrc}/kernels/%{_kver}
 
-%define _cachyos_patch_src https://raw.githubusercontent.com/CachyOS/kernel-patches/master/%{_basekver}
-%define _nobara_patch_src https://raw.githubusercontent.com/Nobara-Project/rpm-sources/refs/heads/43/baseos/kernel/%{_basekver}
+%define _patch_src https://raw.githubusercontent.com/CachyOS/kernel-patches/master/%{_basekver}
 
-%define _module_args KERNEL_UNAME=%{_kver} IGNORE_PREEMPT_RT_PRESENCE=1 SYSSRC=%{_builddir}/linux-%{_tarkver} SYSOUT=%{_builddir}/linux-%{_tarkver}
+
+%define _module_args KERNEL_UNAME=%{_kver} IGNORE_PREEMPT_RT_PRESENCE=1 SYSSRC=%{_builddir}/linux-%{_tag} SYSOUT=%{_builddir}/linux-%{_tag}
 
 Name:           kernel-ludora
-Summary:        Linux BORE CachyOS kernel with patches and modifications
+Summary:        Linux BORE CachyOS kernel
 Version:        %{_basekver}.%{_stablekver}
 Release:        %{_releasekver}.ludora%{?dist}
 License:        GPL-2.0-only
@@ -62,9 +52,7 @@ URL:            https://github.com/LarsSoeMikkelsen/Ludora
 Requires:       kernel-core-uname-r = %{_kver}
 Requires:       kernel-modules-uname-r = %{_kver}
 Requires:       kernel-modules-core-uname-r = %{_kver}
-Provides:       kernel-ludora > 6.12.9-cb1.0%{?dist}
 Provides:       installonlypkg(kernel)
-Obsoletes:      kernel-ludora <= 6.12.9-cb1.0.lto%{?dist}
 
 BuildRequires:  bc
 BuildRequires:  bison
@@ -84,29 +72,22 @@ BuildRequires:  perl-interpreter
 BuildRequires:  python3-devel
 BuildRequires:  python3-pyyaml
 BuildRequires:  python-srpm-macros
+BuildRequires:  clang
+BuildRequires:  lld
+BuildRequires:  llvm
 
-# Sources
+# Indexes 0-9 are reserved for the kernel. 10-19 will be reserved for NVIDIA
 Source0:        https://github.com/CachyOS/linux/archive/refs/tags/%{_tag}.tar.gz
 Source1:        https://raw.githubusercontent.com/CachyOS/linux-cachyos/master/linux-cachyos/config
 
-# CachyOS patch:
-Patch0:         %{_cachyos_patch_src}/sched/0001-bore-cachy.patch
-
+Patch0:         %{_patch_src}/sched/0001-bore-cachy.patch
 
 %description
     The meta package for %{name}.
 
 %prep
-    %setup -q %{?SOURCE10:-b 10} -n linux-%{_tarkver}
-    %autopatch -p1 -v -M 9
-    
-    # Apply CachyOS patches:
-    # patch -p1 -i %{PATCH0}
-    # patch -p1 -i %{PATCH1}
-    # patch -p1 -i %{PATCH2}
-    
-    # Apply Nobara patches:
-    # patch -p1 -i %{PATCH3}
+%setup -q %{?SOURCE10:-b 10} -n linux-%{_tag}
+%autopatch -p1 -v -M 9
 
     cp %{SOURCE1} .config
 
@@ -144,8 +125,8 @@ Patch0:         %{_cachyos_patch_src}/sched/0001-bore-cachy.patch
     scripts/config -e CONFIG_IMA_APPRAISE
     scripts/config -e CONFIG_IMA_ARCH_POLICY
 
-    %make_build olddefconfig
     diff -u %{SOURCE1} .config || :
+
 
 %build
     %make_build EXTRAVERSION=-%{release}.%{_arch} all
@@ -262,7 +243,7 @@ Patch0:         %{_cachyos_patch_src}/sched/0001-bore-cachy.patch
     dd if=/dev/zero of=%{buildroot}/boot/initramfs-%{_kver}.img bs=1M count=90
 
 %package core
-Summary:        Linux BORE CachyOS kernel with patches and modifications
+Summary:        Linux BORE Cachy Sauce Kernel by CachyOS with other patches and improvements
 AutoReq:        no
 Conflicts:      xfsprogs < 4.3.0-1
 Conflicts:      xorg-x11-drv-vmmouse < 13.0.99
@@ -370,7 +351,6 @@ Requires:       elfutils-libelf-devel
 Requires:       bison
 Requires:       flex
 Requires:       make
-Requires:       gcc
 
 %description devel
     This package provides kernel headers and makefiles sufficient to build modules against %{name}.
