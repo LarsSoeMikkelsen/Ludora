@@ -32,6 +32,9 @@
 # x86_64_v3
 %define _x86_64_lvl 3
 
+# https://fedoraproject.org/wiki/Changes/EncourageI686LeafRemoval
+ExcludeArch:    %{ix86}
+
 # Define variables for directory paths
 # to be used during packaging
 %define _kernel_dir /lib/modules/%{_kver}
