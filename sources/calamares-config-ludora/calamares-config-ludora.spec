@@ -1,5 +1,5 @@
 Name:           calamares-config-ludora
-Version:        1.4
+Version:        1.5
 Release:        1%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
