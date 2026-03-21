@@ -12,7 +12,7 @@ Break your system with a bad update? Just reboot, pick a snapshot from GRUB, and
 - **Gaming Edition**: Full gaming stack with custom kernel, Steam, and performance optimizations + bootable snapshots
 - **Base Edition**: Clean Fedora workstation with multimedia codecs + bootable snapshots
 
-![Snapshot Boot Menu](Ludora_Snapshoot_Boot.png)
+![Snapshot Boot Menu](Ludora_snapshot_Boot.png)
 
 ---
 
