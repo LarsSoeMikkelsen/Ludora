@@ -17,7 +17,7 @@
 
 %define _tarkver %{version}
 %define _tag cachyos-%{_tarkver}-1
-%define _releasekver 100
+%define _releasekver 200
 
 # Define the tickrate used by the kernel
 # Valid values: 100, 250, 300, 500, 600, 750 and 1000
@@ -84,6 +84,7 @@ Source0:        https://github.com/CachyOS/linux/archive/refs/tags/%{_tag}.tar.g
 Source1:        https://raw.githubusercontent.com/CachyOS/linux-cachyos/master/linux-cachyos/config
 
 Patch0:         %{_patch_src}/sched/0001-bore-cachy.patch
+Patch1:         0001-Allow-to-set-custom-USB-pollrate-for-specific-device.patch
 
 %description
     The meta package for %{name}.
