@@ -7,9 +7,10 @@ License:        GPL-3.0-or-later
 URL:            https://gitlab.com/Zesko/limine-snapper-sync
 Source0:        https://gitlab.com/Zesko/limine-snapper-sync/-/archive/%{version}/limine-snapper-sync-%{version}.tar.gz
 
+BuildRequires:  gradle
 BuildRequires:  java-21-openjdk-devel
 BuildRequires:  systemd-rpm-macros
-# Gradle wrapper downloads Gradle itself; network must be enabled in COPR
+# Gradle downloads Maven dependencies at build time; network must be enabled in COPR
 # (Project settings → Enable internet access during builds)
 
 Requires:       java-21-openjdk-headless
@@ -23,9 +24,7 @@ Recommends:     inotify-tools
 
 %description
 limine-snapper-sync automatically synchronizes Limine bootloader menu entries
-with Btrfs snapshots managed by Snapper. When snap-pac creates a snapshot on
-package install/upgrade/downgrade, this tool updates the Limine boot menu so
-you can boot directly into any previous system state.
+with Btrfs snapshots managed by Snapper.
 
 %prep
 %autosetup -n limine-snapper-sync-%{version}
@@ -33,7 +32,7 @@ you can boot directly into any previous system state.
 %build
 # Build using the Gradle wrapper (requires network; enable in COPR project settings)
 export JAVA_HOME=%{_jvmdir}/java-21-openjdk
-./gradlew --no-daemon --no-watch-fs installDist
+gradle --no-daemon --no-watch-fs installDist
 
 %install
 # --- JVM launcher (replaces the GraalVM native binary) ---
@@ -54,6 +53,7 @@ for f in install/arch-linux/usr/bin/*; do
 done
 
 # --- limine-mutex helper ---
+install -dm 0755 %{buildroot}/usr/lib/limine
 install -m 0755 install/arch-linux/usr/lib/limine/limine-mutex \
     %{buildroot}/usr/lib/limine/limine-mutex
 
@@ -74,6 +74,7 @@ install -m 0644 \
     %{buildroot}%{_unitdir}/snapper-cleanup.service.d/
 
 # --- Config file ---
+install -dm 0755 %{buildroot}%{_sysconfdir}
 install -m 0644 install/arch-linux/etc/limine-snapper-sync.conf \
     %{buildroot}%{_sysconfdir}/limine-snapper-sync.conf
 
