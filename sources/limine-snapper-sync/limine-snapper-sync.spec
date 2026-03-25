@@ -1,3 +1,5 @@
+%global debug_package %{nil}
+
 Name:           limine-snapper-sync
 Version:        1.24.0
 Release:        1%{?dist}
