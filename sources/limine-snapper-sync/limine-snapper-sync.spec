@@ -7,10 +7,11 @@ License:        GPL-3.0-or-later
 URL:            https://gitlab.com/Zesko/limine-snapper-sync
 Source0:        https://gitlab.com/Zesko/limine-snapper-sync/-/archive/%{version}/limine-snapper-sync-%{version}.tar.gz
 
-BuildRequires:  gradle
 BuildRequires:  java-21-openjdk-devel
+BuildRequires:  curl
+BuildRequires:  unzip
 BuildRequires:  systemd-rpm-macros
-# Gradle downloads Maven dependencies at build time; network must be enabled in COPR
+# Gradle and Maven dependencies are downloaded at build time; network must be enabled in COPR
 # (Project settings → Enable internet access during builds)
 
 Requires:       java-21-openjdk-headless
@@ -24,14 +25,23 @@ Recommends:     inotify-tools
 
 %description
 limine-snapper-sync automatically synchronizes Limine bootloader menu entries
-with Btrfs snapshots managed by Snapper.
+with Btrfs snapshots managed by Snapper. When snap-pac creates a snapshot on
+package install/upgrade/downgrade, this tool updates the Limine boot menu so
+you can boot directly into any previous system state.
 
 %prep
 %autosetup -n limine-snapper-sync-%{version}
 
 %build
-# Build using the Gradle wrapper (requires network; enable in COPR project settings)
 export JAVA_HOME=%{_jvmdir}/java-21-openjdk
+
+# Download Gradle (not packaged in Fedora 43)
+%global gradle_version 8.11
+curl -L "https://services.gradle.org/distributions/gradle-%{gradle_version}-bin.zip" \
+    -o gradle.zip
+unzip -q gradle.zip
+export PATH="$(pwd)/gradle-%{gradle_version}/bin:$PATH"
+
 gradle --no-daemon --no-watch-fs installDist
 
 %install
