@@ -11,13 +11,13 @@
 
 # Linux Kernel Versions
 %define _basekver 6.19
-%define _stablekver 9
+%define _stablekver 10
 %define _rpmver %{version}-%{release}
 %define _kver %{_rpmver}.%{_arch}
 
 %define _tarkver %{version}
 %define _tag cachyos-%{_tarkver}-1
-%define _releasekver 200
+%define _releasekver 100
 
 # Define the tickrate used by the kernel
 # Valid values: 100, 250, 300, 500, 600, 750 and 1000
@@ -85,6 +85,7 @@ Source1:        https://raw.githubusercontent.com/CachyOS/linux-cachyos/master/l
 
 Patch0:         %{_patch_src}/sched/0001-bore-cachy.patch
 Patch1:         0001-Allow-to-set-custom-USB-pollrate-for-specific-device.patch
+Patch2:         0001-handheld.patch
 
 %description
     The meta package for %{name}.
