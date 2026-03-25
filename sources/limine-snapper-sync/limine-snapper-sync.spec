@@ -7,6 +7,8 @@ License:        GPL-3.0-or-later
 URL:            https://gitlab.com/Zesko/limine-snapper-sync
 Source0:        https://gitlab.com/Zesko/limine-snapper-sync/-/archive/%{version}/limine-snapper-sync-%{version}.tar.gz
 
+ExclusiveArch:  x86_64
+
 BuildRequires:  java-21-openjdk-devel
 BuildRequires:  curl
 BuildRequires:  unzip
@@ -21,13 +23,11 @@ Requires:       btrfs-progs
 Requires:       libnotify
 Recommends:     inotify-tools
 
-# Arch-specific package manager hooks are intentionally NOT included
-
 %description
 limine-snapper-sync automatically synchronizes Limine bootloader menu entries
-with Btrfs snapshots managed by Snapper. When snap-pac creates a snapshot on
-package install/upgrade/downgrade, this tool updates the Limine boot menu so
-you can boot directly into any previous system state.
+with Btrfs snapshots managed by Snapper. When a snapshot is created, this tool
+updates the Limine boot menu so you can boot directly into any previous system
+state.
 
 %prep
 %autosetup -n limine-snapper-sync-%{version}
@@ -47,7 +47,7 @@ gradle --no-daemon --no-watch-fs installDist
 %install
 # --- JVM launcher (replaces the GraalVM native binary) ---
 install -dm 0755 %{buildroot}/usr/lib/limine/jlib
-cp build/install/limine-snapper-sync/lib/*.jar \
+cp build/install/*/lib/*.jar \
     %{buildroot}/usr/lib/limine/jlib/
 
 cat > %{buildroot}/usr/lib/limine/limine-snapper-sync << 'LAUNCHER'
@@ -67,7 +67,7 @@ install -dm 0755 %{buildroot}/usr/lib/limine
 install -m 0755 install/arch-linux/usr/lib/limine/limine-mutex \
     %{buildroot}/usr/lib/limine/limine-mutex
 
-# --- Snapper plugin (same path on Fedora) ---
+# --- Snapper plugin ---
 install -dm 0755 %{buildroot}/usr/lib/snapper/plugins
 install -m 0755 \
     "install/arch-linux/usr/lib/snapper/plugins/10-limine-snapper-sync" \
