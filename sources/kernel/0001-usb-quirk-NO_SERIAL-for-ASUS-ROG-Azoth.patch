@@ -3,14 +3,17 @@ Date: Thu, 26 Mar 2026 00:00:00 +0100
 Subject: [PATCH] usb: add USB_QUIRK_NO_SERIAL and apply to ASUS ROG Azoth
 
 The ASUS ROG Azoth keyboard (0b05:1a85) and its 2.4 GHz dongle receiver
-(0b05:1a83) report a garbled, non-UTF8 serial string on cold boot due to
-a firmware bug. Starting with systemd v259.4, the new property_is_valid()
-function rejects non-UTF8 sysfs attributes, causing logind TakeDevice to
-fail with ENODEV for all keyboard input events at boot in wireless mode.
+(0b05:1a83) report a garbled serial string on cold boot due to a firmware
+bug. The serial contains ASCII control characters (U+0001–U+001F), which
+are technically valid UTF-8 single-byte sequences but are rejected by
+systemd v258.7+'s property_is_valid() via its string_has_cc() check.
+This causes logind TakeDevice to fail with ENODEV for all keyboard input
+events at boot in wireless mode.
 
 Add a USB_QUIRK_NO_SERIAL quirk that validates the cached serial string
-for UTF-8 correctness and discards it if invalid, so sysfs never exposes
-the garbled value. Valid serials (e.g. after replug) are kept as-is.
+and discards it if it contains invalid UTF-8 or control characters, so
+sysfs never exposes the garbled value. Valid serials (e.g. after replug)
+are kept as-is.
 
 Fixes: https://bugzilla.redhat.com/show_bug.cgi?id=2448678
 Ref: https://github.com/systemd/systemd/issues/41296
@@ -48,7 +51,7 @@ Ref: https://github.com/systemd/systemd/issues/41296
 +			unicode_t u;
 +			int n = utf8_to_utf32(s, remaining, &u);
 +
-+			if (n < 0) {
++			if (n < 0 || u < 0x20 || u == 0x7f) {
 +				valid_utf8 = false;
 +				break;
 +			}
@@ -68,7 +71,7 @@ Ref: https://github.com/systemd/systemd/issues/41296
  	{ USB_DEVICE(0x0b05, 0x17e0), .driver_info =
  			USB_QUIRK_IGNORE_REMOTE_WAKEUP },
 
-+	/* ASUS ROG Azoth keyboard - reports garbled non-UTF8 serial on cold boot */
++	/* ASUS ROG Azoth keyboard - serial contains control chars on cold boot */
 +	{ USB_DEVICE(0x0b05, 0x1a83), .driver_info = USB_QUIRK_NO_SERIAL },
 +	{ USB_DEVICE(0x0b05, 0x1a85), .driver_info = USB_QUIRK_NO_SERIAL },
 +
