@@ -1,0 +1,53 @@
+From: predze <larssoemikkelsen@gmail.com>
+Date: Thu, 26 Mar 2026 00:00:00 +0100
+Subject: [PATCH] usb: add USB_QUIRK_NO_SERIAL and apply to ASUS ROG Azoth
+
+The ASUS ROG Azoth keyboard (0b05:1a85) and its 2.4 GHz dongle receiver
+(0b05:1a83) report a garbled, non-UTF8 serial string on cold boot due to
+a firmware bug. Starting with systemd v259.4, the new property_is_valid()
+function rejects non-UTF8 sysfs attributes, causing logind TakeDevice to
+fail with ENODEV for all keyboard input events at boot in wireless mode.
+
+Add a USB_QUIRK_NO_SERIAL quirk that causes the kernel to discard the
+serial string after fetching it, so sysfs never exposes the invalid value.
+
+Fixes: https://bugzilla.redhat.com/show_bug.cgi?id=2448678
+Ref: https://github.com/systemd/systemd/issues/41296
+---
+ drivers/usb/core/hub.c      |  4 ++++
+ drivers/usb/core/quirks.c   |  4 ++++
+ include/linux/usb/quirks.h  |  3 +++
+ 3 files changed, 11 insertions(+)
+
+--- a/include/linux/usb/quirks.h
++++ b/include/linux/usb/quirks.h
+@@ -78,4 +78,7 @@
+ /* skip BOS descriptor request */
+ #define USB_QUIRK_NO_BOS			BIT(17)
+
++/* device reports a garbled/non-UTF8 serial string; ignore it */
++#define USB_QUIRK_NO_SERIAL			BIT(18)
++
+ #endif /* __LINUX_USB_QUIRKS_H */
+--- a/drivers/usb/core/hub.c
++++ b/drivers/usb/core/hub.c
+@@ -2537,6 +2537,10 @@ static int usb_enumerate_device(struct usb_device *udev)
+ 	udev->serial = usb_cache_string(udev, udev->descriptor.iSerialNumber);
++	if (udev->quirks & USB_QUIRK_NO_SERIAL) {
++		kfree(udev->serial);
++		udev->serial = NULL;
++	}
+
+ 	err = usb_enumerate_device_otg(udev);
+--- a/drivers/usb/core/quirks.c
++++ b/drivers/usb/core/quirks.c
+@@ -444,6 +444,10 @@ static const struct usb_device_id usb_quirk_list[] = {
+ 	{ USB_DEVICE(0x0b05, 0x17e0), .driver_info =
+ 			USB_QUIRK_IGNORE_REMOTE_WAKEUP },
+
++	/* ASUS ROG Azoth keyboard - reports garbled non-UTF8 serial on cold boot */
++	{ USB_DEVICE(0x0b05, 0x1a83), .driver_info = USB_QUIRK_NO_SERIAL },
++	{ USB_DEVICE(0x0b05, 0x1a85), .driver_info = USB_QUIRK_NO_SERIAL },
++
+ 	/* ASUS TUF 4K PRO - BOS descriptor fetch hangs at SuperSpeed Plus */
+ 	{ USB_DEVICE(0x0b05, 0x1ab9), .driver_info = USB_QUIRK_NO_BOS },
