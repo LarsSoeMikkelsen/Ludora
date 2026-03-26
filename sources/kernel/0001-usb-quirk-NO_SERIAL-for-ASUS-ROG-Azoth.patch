@@ -15,7 +15,7 @@ the garbled value. Valid serials (e.g. after replug) are kept as-is.
 Fixes: https://bugzilla.redhat.com/show_bug.cgi?id=2448678
 Ref: https://github.com/systemd/systemd/issues/41296
 ---
- drivers/usb/core/hub.c     | 23 ++++++++++++++++++++++-
+ drivers/usb/core/hub.c     | 24 +++++++++++++++++++++++-
  drivers/usb/core/quirks.c  |  4 ++++
  include/linux/usb/quirks.h |  3 +++
  3 files changed, 29 insertions(+), 1 deletion(-)
@@ -37,7 +37,7 @@ Ref: https://github.com/systemd/systemd/issues/41296
 +#include <linux/nls.h>
  #include <linux/workqueue.h>
  #include <linux/minmax.h>
-@@ -2540,3 +2541,23 @@
+@@ -2540,3 +2541,24 @@
  	udev->serial = usb_cache_string(udev, udev->descriptor.iSerialNumber);
 +	if ((udev->quirks & USB_QUIRK_NO_SERIAL) && udev->serial) {
 +		const u8 *s = udev->serial;
