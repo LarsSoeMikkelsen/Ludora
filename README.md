@@ -1,6 +1,6 @@
 # Ludora
 
-**The gaming-ready Fedora spin with openSUSE-style bootable snapshots built in **
+**The gaming-ready Fedora spin with openSUSE-style bootable snapshots built in**
 
 > **Status**: Public Beta - Functional but expect rough edges
 
