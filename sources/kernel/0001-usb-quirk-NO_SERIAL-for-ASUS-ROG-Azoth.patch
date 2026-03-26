@@ -8,16 +8,17 @@ a firmware bug. Starting with systemd v259.4, the new property_is_valid()
 function rejects non-UTF8 sysfs attributes, causing logind TakeDevice to
 fail with ENODEV for all keyboard input events at boot in wireless mode.
 
-Add a USB_QUIRK_NO_SERIAL quirk that causes the kernel to discard the
-serial string after fetching it, so sysfs never exposes the invalid value.
+Add a USB_QUIRK_NO_SERIAL quirk that validates the cached serial string
+for UTF-8 correctness and discards it if invalid, so sysfs never exposes
+the garbled value. Valid serials (e.g. after replug) are kept as-is.
 
 Fixes: https://bugzilla.redhat.com/show_bug.cgi?id=2448678
 Ref: https://github.com/systemd/systemd/issues/41296
 ---
- drivers/usb/core/hub.c      |  4 ++++
- drivers/usb/core/quirks.c   |  4 ++++
- include/linux/usb/quirks.h  |  3 +++
- 3 files changed, 11 insertions(+)
+ drivers/usb/core/hub.c     | 23 ++++++++++++++++++++++-
+ drivers/usb/core/quirks.c  |  4 ++++
+ include/linux/usb/quirks.h |  3 +++
+ 3 files changed, 29 insertions(+), 1 deletion(-)
 
 --- a/include/linux/usb/quirks.h
 +++ b/include/linux/usb/quirks.h
@@ -31,17 +32,39 @@ Ref: https://github.com/systemd/systemd/issues/41296
  #endif /* __LINUX_USB_QUIRKS_H */
 --- a/drivers/usb/core/hub.c
 +++ b/drivers/usb/core/hub.c
-@@ -2537,6 +2537,10 @@ static int usb_enumerate_device(struct usb_device *udev)
+@@ -29,3 +29,4 @@
+ #include <linux/usb/quirks.h>
++#include <linux/nls.h>
+ #include <linux/workqueue.h>
+ #include <linux/minmax.h>
+@@ -2540,3 +2541,23 @@
  	udev->serial = usb_cache_string(udev, udev->descriptor.iSerialNumber);
-+	if (udev->quirks & USB_QUIRK_NO_SERIAL) {
-+		kfree(udev->serial);
-+		udev->serial = NULL;
++	if ((udev->quirks & USB_QUIRK_NO_SERIAL) && udev->serial) {
++		const u8 *s = udev->serial;
++		int remaining = strlen(udev->serial);
++		bool valid_utf8 = true;
++
++		while (remaining > 0) {
++			unicode_t u;
++			int n = utf8_to_utf32(s, remaining, &u);
++
++			if (n < 0) {
++				valid_utf8 = false;
++				break;
++			}
++			s += n;
++			remaining -= n;
++		}
++		if (!valid_utf8) {
++			kfree(udev->serial);
++			udev->serial = NULL;
++		}
 +	}
 
  	err = usb_enumerate_device_otg(udev);
 --- a/drivers/usb/core/quirks.c
 +++ b/drivers/usb/core/quirks.c
-@@ -444,6 +444,10 @@ static const struct usb_device_id usb_quirk_list[] = {
+@@ -444,6 +444,10 @@
  	{ USB_DEVICE(0x0b05, 0x17e0), .driver_info =
  			USB_QUIRK_IGNORE_REMOTE_WAKEUP },
 
