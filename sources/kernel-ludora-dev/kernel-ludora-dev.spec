@@ -45,7 +45,7 @@ ExcludeArch:    %{ix86}
 
 %define _module_args KERNEL_UNAME=%{_kver} IGNORE_PREEMPT_RT_PRESENCE=1 SYSSRC=%{_builddir}/linux-%{_tag} SYSOUT=%{_builddir}/linux-%{_tag}
 
-Name:           kernel-ludora
+Name:           kernel-ludora-dev
 Summary:        Linux BORE CachyOS kernel
 Version:        %{_basekver}.%{_stablekver}
 Release:        %{_releasekver}.ludora%{?dist}
