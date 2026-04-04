@@ -84,7 +84,7 @@ Source0:        https://github.com/CachyOS/linux/archive/refs/tags/%{_tag}.tar.g
 Source1:        https://raw.githubusercontent.com/CachyOS/linux-cachyos/master/linux-cachyos/config
 
 Patch0:         %{_patch_src}/sched/0001-bore-cachy.patch
-Patch1:         %{_patch_src}/all/0001-cachyos-base-all.patch
+Patch1:         %{_patch_src}/0006-t2.patch
 Patch2:         0001-hid-usbhid-sanitize-uniq-against-control-chars.patch
 
 %description
