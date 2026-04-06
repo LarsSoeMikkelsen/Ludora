@@ -16,7 +16,7 @@
 %define _kver %{_rpmver}.%{_arch}
 
 %define _tarkver %{version}
-%define _tag cachyos-%{_tarkver}-1
+%define _tag cachyos-%{_tarkver}-2
 %define _releasekver 100
 
 # Define the tickrate used by the kernel
