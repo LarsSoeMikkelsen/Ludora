@@ -1,4 +1,4 @@
-%global 	SHA256SUM0 2ed82b873b154033b4790a496887bf7098dfea1dfa3253827aad1879de82db4a
+%global 	SHA256SUM0 0f19f254cc207c706e8f06cea07fdb47240529d6152c9d489b25bf76e7a71cda
 %define         appid com.vysp3r.ProtonPlus
 
 Name:           protonplus
