@@ -1,6 +1,6 @@
 name: Build versions page
 
- on:
+ "on:"
    schedule:
      - cron: '0 6 * * *'   # daily at 06:00 UTC
    workflow_dispatch:       # allows manual runs from the Actions tab
