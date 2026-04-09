@@ -1,0 +1,26 @@
+name: Build versions page
+
+ on:
+   schedule:
+     - cron: '0 6 * * *'   # daily at 06:00 UTC
+   workflow_dispatch:       # allows manual runs from the Actions tab
+
+ permissions:
+   contents: write
+
+ jobs:
+   build:
+     runs-on: ubuntu-latest
+     steps:
+       - uses: actions/checkout@v4
+
+       - name: Run script
+         run: python3 ludora-versions.py
+
+       - name: Commit updated HTML
+         run: |
+           git config user.name "github-actions[bot]"
+           git config user.email "github-actions[bot]@users.noreply.github.com"
+           git add ludora-versions.html
+           git diff --cached --quiet || git commit -m "chore: update ludora-versions.html"
+           git push
