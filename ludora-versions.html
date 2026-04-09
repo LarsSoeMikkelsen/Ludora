@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ludora Packages</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      min-height: 100vh;
+      padding: 2.5rem 1.5rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #f0f6fc;
+      letter-spacing: -0.01em;
+    }
+
+    .generated {
+      margin-top: 0.4rem;
+      font-size: 0.8rem;
+      color: #484f58;
+    }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 1.2rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      color: #8b949e;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-green  { background: #238636; }
+    .dot-blue   { background: #1f6feb; }
+    .dot-yellow { background: #9e6a03; }
+    .dot-orange { background: #bd561d; }
+    .dot-red    { background: #b91c1c; }
+
+    section {
+      max-width: 1000px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .section-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #484f58;
+      margin-bottom: 0.85rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #21262d;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 0.85rem;
+    }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 1.1rem 1.3rem;
+      border-left: 3px solid;
+    }
+
+    .card.up-to-date  { border-left-color: #238636; }
+    .card.ahead       { border-left-color: #1f6feb; }
+    .card.behind-new  { border-left-color: #9e6a03; }
+    .card.behind-soon { border-left-color: #bd561d; }
+    .card.behind-old  { border-left-color: #b91c1c; }
+    .card.unknown     { border-left-color: #30363d; }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .pkg-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #f0f6fc;
+      text-decoration: none;
+    }
+
+    .pkg-name:hover { color: #58a6ff; text-decoration: underline; }
+
+    .badge {
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 0.18rem 0.5rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .badge.up-to-date  { background: #0f2d1a; color: #3fb950; border: 1px solid #238636; }
+    .badge.ahead       { background: #0d1f3c; color: #58a6ff; border: 1px solid #1f6feb; }
+    .badge.behind-new  { background: #2d1f04; color: #d29922; border: 1px solid #9e6a03; }
+    .badge.behind-soon { background: #2d1308; color: #f0883e; border: 1px solid #bd561d; }
+    .badge.behind-old  { background: #2d0b0b; color: #f85149; border: 1px solid #b91c1c; }
+    .badge.unknown     { background: #1c2128; color: #8b949e; border: 1px solid #30363d; }
+
+    .versions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .ver-block { flex: 1; min-width: 0; }
+
+    .ver-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #484f58;
+      margin-bottom: 0.2rem;
+    }
+
+    .ver-value {
+      font-family: 'SFMono-Regular', 'Fira Code', 'JetBrains Mono', monospace;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #e6edf3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ver-value.failed { color: #f85149; }
+
+    .ver-date {
+      font-size: 0.72rem;
+      color: #6e7681;
+      margin-top: 0.15rem;
+    }
+
+    .ver-rel {
+      font-size: 0.68rem;
+      color: #484f58;
+    }
+
+    .arrow {
+      font-size: 1rem;
+      flex-shrink: 0;
+      align-self: center;
+      color: #30363d;
+    }
+
+    .arrow.up-to-date { color: #238636; }
+    .arrow.ahead      { color: #1f6feb; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Ludora Packages</h1>
+    <p class="generated">Generated April 9, 2026 at 19:35</p>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot dot-green"></span>Up to date</span>
+      <span class="legend-item"><span class="legend-dot dot-blue"></span>Ahead of upstream</span>
+      <span class="legend-item"><span class="legend-dot dot-yellow"></span>Released ≤ 3 days ago</span>
+      <span class="legend-item"><span class="legend-dot dot-orange"></span>Behind 4–14 days</span>
+      <span class="legend-item"><span class="legend-dot dot-red"></span>Behind &gt; 14 days</span>
+    </div>
+  </header>
+  <section>
+    <h2 class="section-title">Core</h2>
+    <div class="grid">
+    <div class="card up-to-date">
+      <div class="card-header">
+        <a class="pkg-name" href="https://www.kernel.org" target="_blank" rel="noopener">Kernel</a>
+        <span class="badge up-to-date">Up to date</span>
+      </div>
+      <div class="versions">
+        <div class="ver-block">
+          <div class="ver-label">COPR</div>
+          <div class="ver-value">6.19.11</div>
+          <div class="ver-date">Apr 7, 2026</div>
+          <div class="ver-rel">2 days ago</div>
+        </div>
+        <div class="arrow up-to-date">✓</div>
+        <div class="ver-block">
+          <div class="ver-label">Upstream</div>
+          <div class="ver-value">6.19.11</div>
+          <div class="ver-date">Apr 2, 2026</div>
+          <div class="ver-rel">7 days ago</div>
+        </div>
+      </div>
+    </div>
+    <div class="card up-to-date">
+      <div class="card-header">
+        <a class="pkg-name" href="https://gitlab.freedesktop.org/mesa/mesa" target="_blank" rel="noopener">Mesa</a>
+        <span class="badge up-to-date">Up to date</span>
+      </div>
+      <div class="versions">
+        <div class="ver-block">
+          <div class="ver-label">COPR</div>
+          <div class="ver-value">26.0.4</div>
+          <div class="ver-date">Apr 5, 2026</div>
+          <div class="ver-rel">4 days ago</div>
+        </div>
+        <div class="arrow up-to-date">✓</div>
+        <div class="ver-block">
+          <div class="ver-label">Upstream</div>
+          <div class="ver-value">26.0.4</div>
+          <div class="ver-date">Apr 4, 2026</div>
+          <div class="ver-rel">5 days ago</div>
+        </div>
+      </div>
+    </div>
+    <div class="card up-to-date">
+      <div class="card-header">
+        <a class="pkg-name" href="https://github.com/intel/libva" target="_blank" rel="noopener">libva</a>
+        <span class="badge up-to-date">Up to date</span>
+      </div>
+      <div class="versions">
+        <div class="ver-block">
+          <div class="ver-label">COPR</div>
+          <div class="ver-value">2.23.0</div>
+          <div class="ver-date">Apr 6, 2026</div>
+          <div class="ver-rel">3 days ago</div>
+        </div>
+        <div class="arrow up-to-date">✓</div>
+        <div class="ver-block">
+          <div class="ver-label">Upstream</div>
+          <div class="ver-value">2.23.0</div>
+          <div class="ver-date">Dec 22, 2025</div>
+          <div class="ver-rel">108 days ago</div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+  <section>
+    <h2 class="section-title">Apps</h2>
+    <div class="grid">
+    <div class="card up-to-date">
+      <div class="card-header">
+        <a class="pkg-name" href="https://github.com/fastfetch-cli/fastfetch" target="_blank" rel="noopener">Fastfetch</a>
+        <span class="badge up-to-date">Up to date</span>
+      </div>
+      <div class="versions">
+        <div class="ver-block">
+          <div class="ver-label">COPR</div>
+          <div class="ver-value">2.61.0</div>
+          <div class="ver-date">Apr 7, 2026</div>
+          <div class="ver-rel">2 days ago</div>
+        </div>
+        <div class="arrow up-to-date">✓</div>
+        <div class="ver-block">
+          <div class="ver-label">Upstream</div>
+          <div class="ver-value">2.61.0</div>
+          <div class="ver-date">Mar 28, 2026</div>
+          <div class="ver-rel">12 days ago</div>
+        </div>
+      </div>
+    </div>
+    <div class="card up-to-date">
+      <div class="card-header">
+        <a class="pkg-name" href="https://github.com/benjamimgois/goverlay" target="_blank" rel="noopener">GOverlay</a>
+        <span class="badge up-to-date">Up to date</span>
+      </div>
+      <div class="versions">
+        <div class="ver-block">
+          <div class="ver-label">COPR</div>
+          <div class="ver-value">1.7.5</div>
+          <div class="ver-date">Apr 7, 2026</div>
+          <div class="ver-rel">2 days ago</div>
+        </div>
+        <div class="arrow up-to-date">✓</div>
+        <div class="ver-block">
+          <div class="ver-label">Upstream</div>
+          <div class="ver-value">1.7.5</div>
+          <div class="ver-date">Feb 28, 2026</div>
+          <div class="ver-rel">40 days ago</div>
+        </div>
+      </div>
+    </div>
+    <div class="card up-to-date">
+      <div class="card-header">
+        <a class="pkg-name" href="https://github.com/ilya-zlobintsev/LACT" target="_blank" rel="noopener">LACT</a>
+        <span class="badge up-to-date">Up to date</span>
+      </div>
+      <div class="versions">
+        <div class="ver-block">
+          <div class="ver-label">COPR</div>
+          <div class="ver-value">0.8.4</div>
+          <div class="ver-date">Mar 19, 2026</div>
+          <div class="ver-rel">21 days ago</div>
+        </div>
+        <div class="arrow up-to-date">✓</div>
+        <div class="ver-block">
+          <div class="ver-label">Upstream</div>
+          <div class="ver-value">0.8.4</div>
+          <div class="ver-date">Jan 25, 2026</div>
+          <div class="ver-rel">74 days ago</div>
+        </div>
+      </div>
+    </div>
+    <div class="card up-to-date">
+      <div class="card-header">
+        <a class="pkg-name" href="https://gitlab.com/coolercontrol/coolercontrol" target="_blank" rel="noopener">CoolerControl</a>
+        <span class="badge up-to-date">Up to date</span>
+      </div>
+      <div class="versions">
+        <div class="ver-block">
+          <div class="ver-label">COPR</div>
+          <div class="ver-value">4.1.0</div>
+          <div class="ver-date">Apr 7, 2026</div>
+          <div class="ver-rel">2 days ago</div>
+        </div>
+        <div class="arrow up-to-date">✓</div>
+        <div class="ver-block">
+          <div class="ver-label">Upstream</div>
+          <div class="ver-value">4.1.0</div>
+          <div class="ver-date">Mar 21, 2026</div>
+          <div class="ver-rel">19 days ago</div>
+        </div>
+      </div>
+    </div>
+    <div class="card up-to-date">
+      <div class="card-header">
+        <a class="pkg-name" href="https://github.com/Vysp3r/ProtonPlus" target="_blank" rel="noopener">ProtonPlus</a>
+        <span class="badge up-to-date">Up to date</span>
+      </div>
+      <div class="versions">
+        <div class="ver-block">
+          <div class="ver-label">COPR</div>
+          <div class="ver-value">0.5.17</div>
+          <div class="ver-date">Apr 7, 2026</div>
+          <div class="ver-rel">2 days ago</div>
+        </div>
+        <div class="arrow up-to-date">✓</div>
+        <div class="ver-block">
+          <div class="ver-label">Upstream</div>
+          <div class="ver-value">0.5.17</div>
+          <div class="ver-date">Feb 22, 2026</div>
+          <div class="ver-rel">46 days ago</div>
+        </div>
+      </div>
+    </div>
+    <div class="card ahead">
+      <div class="card-header">
+        <a class="pkg-name" href="https://github.com/flightlessmango/MangoHud" target="_blank" rel="noopener">MangoHud</a>
+        <span class="badge ahead">Ahead</span>
+      </div>
+      <div class="versions">
+        <div class="ver-block">
+          <div class="ver-label">COPR</div>
+          <div class="ver-value">0.8.3</div>
+          <div class="ver-date">Feb 21, 2026</div>
+          <div class="ver-rel">47 days ago</div>
+        </div>
+        <div class="arrow ahead">↑</div>
+        <div class="ver-block">
+          <div class="ver-label">Upstream</div>
+          <div class="ver-value">0.8.2</div>
+          <div class="ver-date">Nov 28, 2025</div>
+          <div class="ver-rel">132 days ago</div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+</body>
+</html>
