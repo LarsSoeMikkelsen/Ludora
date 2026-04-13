@@ -62,12 +62,12 @@ fi
 gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %changelog
-* Thu Feb 26 2026 Ludora Team <team@ludora.org> - 1.1-1
+* Thu Feb 26 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.1-1
 - Add custom Ludora amber color scheme replacing Breeze Dark blue accent
 - Update panel layout: centered taskbar, icons-only task manager, proper spacers
 - Fix kickoff launcher icon to use theme name instead of hardcoded path
 - Update metadata with website and description
 - Remove wallpaper package (wallpaper handled separately)
 
-* Mon Feb 24 2025 Ludora Team <team@ludora.org> - 1.0-1
+* Mon Feb 24 2025 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-1
 - Initial release of Ludora KDE theme

@@ -23,5 +23,5 @@ cp config.jsonc %{buildroot}%{_sysconfdir}/fastfetch/config.jsonc
 %{_datadir}/fastfetch/logos/ludora.txt
 %{_sysconfdir}/fastfetch/config.jsonc
 %changelog
-* Mon Feb 24 2025 Ludora Team <team@ludora.org> - 1.0-1
+* Mon Feb 24 2025 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-1
 - Initial Ludora fastfetch configuration

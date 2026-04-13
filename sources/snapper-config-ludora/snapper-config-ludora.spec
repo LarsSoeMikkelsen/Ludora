@@ -78,14 +78,14 @@ systemctl enable ludora-snapper-setup.service &>/dev/null || :
 /usr/share/applications/ludora-snapshot-commit.desktop
 
 %changelog
-* Thu Mar 12 2026 Ludora Team <team@ludora.org> - 1.0-3
+* Thu Mar 12 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-3
 - Add snapper-commit script for CachyOS-style snapshot workflow
 - Add automatic KDE notification when booted into snapshot
 - Add desktop launcher for manual snapshot commit
 - Add kdialog and konsole dependencies
 
-* Tue Mar 10 2026 Ludora Team <team@ludora.org> - 1.0-2
+* Tue Mar 10 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-2
 - Fix ConditionPathExists in systemd service
 
-* Tue Mar 10 2026 Ludora Team <team@ludora.org> - 1.0-1
+* Tue Mar 10 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-1
 - Initial release

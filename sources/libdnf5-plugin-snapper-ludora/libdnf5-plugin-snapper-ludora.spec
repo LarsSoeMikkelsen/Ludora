@@ -43,5 +43,5 @@ fi
 %files
 # No files owned by this package
 %changelog
-* Mon Mar 09 2026 Predze <predze@ludora> - 1.0-1
+* Mon Mar 09 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-1
 - Initial Ludora configuration package
