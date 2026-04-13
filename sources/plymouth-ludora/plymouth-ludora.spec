@@ -23,7 +23,7 @@ fi
 %files
 %{_datadir}/plymouth/themes/spinner/watermark.png
 %changelog
-* Fri Feb 28 2025 Ludora Team <ludora@example.com> - 1.0-2
+* Fri Feb 28 2025 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-2
 - Make dracut regeneration conditional to avoid anaconda installation failures
 - Only run dracut on initial install, not during system installation
 - Check for anaconda environment before running dracut

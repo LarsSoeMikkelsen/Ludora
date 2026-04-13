@@ -55,5 +55,5 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
-* Tue Mar 10 2026 Ludora Team <team@ludora.org> - 1.0-1
+* Tue Mar 10 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-1
 - Initial release
