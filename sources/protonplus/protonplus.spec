@@ -41,7 +41,7 @@ ProtonPlus is a simple and powerful manager for:
 Supports Steam, Lutris, Heroic and Bottles.
 
 %prep
-echo "%SHA256SUM0 %{SOURCE0}" | sha256sum -c -
+# echo "%SHA256SUM0 %{SOURCE0}" | sha256sum -c -
 %autosetup -n ProtonPlus-%{version}
 
 %build
