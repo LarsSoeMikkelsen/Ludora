@@ -1,0 +1,54 @@
+From: Lars Søe Mikkelsen <ludora@ludora.org>
+Subject: [PATCH] Blocklist drm_intel bufmgr types when intel_bufmgr.h is absent
+
+drm_intel (intel_bufmgr.h) was removed from libdrm >= 2.4.113 (Fedora 44+).
+When the header is missing, bindgen generates a 1-byte opaque placeholder
+for _drm_intel_bo instead of the expected 56-byte struct, causing a
+compile-time size assertion to fail with E0080.
+
+Rather than writing empty bindings (which would break i915/Xe GPU
+monitoring by removing drm_i915_* and drm_xe_* types that i915.rs and
+xe.rs depend on), blocklist only the drm_intel bufmgr types when the
+header is absent. The i915_drm.h and xe_drm.h headers are still present
+in F44 and their types are generated normally.
+
+--- a/lact-daemon/build.rs
++++ b/lact-daemon/build.rs
+@@ -18,12 +18,19 @@ fn main() {
+ fn gen_intel_bindings() {
+     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+
+-    bindgen::builder()
++    // drm_intel (intel_bufmgr.h) was removed from libdrm >= 2.4.113 (Fedora 44+).
++    // When missing, bindgen generates broken size assertions for _drm_intel_bo.
++    // Blocklist those types so i915/Xe bindings are still generated normally.
++    let intel_bufmgr_present = Path::new("/usr/include/libdrm/intel_bufmgr.h").exists();
++
++    let mut builder = bindgen::builder()
+         .header("include/intel.h")
+         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+         .dynamic_library_name("IntelDrm")
+-        // Don't generate bindings for functions and types related to file access
+-        // This is needed to avoid IntelDrm structure being marked as !Send
+         .allowlist_item("(DRM|drm).*")
+-        .blocklist_item(".*(FILE|file).*")
+-        .generate_comments(false)
+-        .generate()
+-        .expect("Unable to generate intel bindings")
+-        .write_to_file(out_path.join("intel_bindings.rs"))
+-        .expect("Couldn't write bindings!");
++        // Don't generate bindings for functions and types related to file access
++        // This is needed to avoid IntelDrm structure being marked as !Send
++        .blocklist_item(".*(FILE|file).*")
++        .generate_comments(false);
++
++    if !intel_bufmgr_present {
++        builder = builder.blocklist_item("(drm_intel|_drm_intel).*");
++    }
++
++    builder
++        .generate()
++        .expect("Unable to generate intel bindings")
++        .write_to_file(out_path.join("intel_bindings.rs"))
++        .expect("Couldn't write bindings!");
+ }
