@@ -12,13 +12,9 @@ xe.rs depend on), blocklist only the drm_intel bufmgr types when the
 header is absent. The i915_drm.h and xe_drm.h headers are still present
 in F44 and their types are generated normally.
 
----
- lact-daemon/build.rs | 25 +++++++++++++++++++++----
- 1 file changed, 21 insertions(+), 4 deletions(-)
-
 --- a/lact-daemon/build.rs
 +++ b/lact-daemon/build.rs
-@@ -18,12 +18,19 @@ fn main() {
+@@ -18,13 +18,24 @@ fn main() {
  fn gen_intel_bindings() {
      let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 
