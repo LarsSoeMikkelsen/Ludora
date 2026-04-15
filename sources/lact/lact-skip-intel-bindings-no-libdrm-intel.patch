@@ -15,7 +15,7 @@ in F44 and their types are generated normally.
 ---
  lact-daemon/build.rs | 25 +++++++++++++++++++++----
  1 file changed, 21 insertions(+), 4 deletions(-)
-``
+
 --- a/lact-daemon/build.rs
 +++ b/lact-daemon/build.rs
 @@ -18,12 +18,19 @@ fn main() {
