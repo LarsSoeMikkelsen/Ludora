@@ -11,12 +11,12 @@
 
 # Linux Kernel Versions
 %define _basekver 7.0
-%define _stablekver 0
+%define _stablekver 1
 %define _rpmver %{version}-%{release}
 %define _kver %{_rpmver}.%{_arch}
 
 %define _tarkver %{version}
-%define _tag cachyos-%{_tarkver}-2
+%define _tag cachyos-%{_tarkver}-1
 %define _releasekver 100
 
 # Define the tickrate used by the kernel
@@ -84,7 +84,7 @@ Source0:        https://github.com/CachyOS/linux/archive/refs/tags/%{_tag}.tar.g
 Source1:        https://raw.githubusercontent.com/CachyOS/linux-cachyos/master/linux-cachyos/config
 
 Patch0:         %{_patch_src}/sched/0001-bore-cachy.patch
-Patch1:         0001-hid-usbhid-sanitize-uniq-against-control-chars.patch
+Patch1:         0001-usb-core-truncate-string-descriptors-at-first-C0-con.patch
 
 %description
     The meta package for %{name}.
