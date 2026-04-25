@@ -33,7 +33,6 @@ install -Dm644 modules/dracut.conf       %{buildroot}%{_sysconfdir}/calamares/mo
 install -Dm644 modules/fstab.conf        %{buildroot}%{_sysconfdir}/calamares/modules/fstab.conf
 install -Dm644 modules/mount.conf        %{buildroot}%{_sysconfdir}/calamares/modules/mount.conf
 install -Dm644 modules/partition.conf    %{buildroot}%{_sysconfdir}/calamares/modules/partition.conf
-install -Dm644 modules/removeuser.conf   %{buildroot}%{_sysconfdir}/calamares/modules/removeuser.conf
 
 # Branding
 install -Dm644 branding/branding.desc    %{buildroot}%{_sysconfdir}/calamares/branding/ludora/branding.desc
