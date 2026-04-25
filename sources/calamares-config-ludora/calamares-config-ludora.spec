@@ -47,7 +47,6 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/modules/fstab.conf
 %{_sysconfdir}/calamares/modules/mount.conf
 %{_sysconfdir}/calamares/modules/partition.conf
-%{_sysconfdir}/calamares/modules/removeuser.conf
 %{_sysconfdir}/calamares/branding/ludora/branding.desc
 %{_sysconfdir}/calamares/branding/ludora/show.qml
 %{_sysconfdir}/calamares/branding/ludora/logo.png
