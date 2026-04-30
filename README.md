@@ -2,15 +2,9 @@
 
 **The gaming-ready Fedora spin with openSUSE-style bootable snapshots built in**
 
-> **Status**: Public Beta - Functional but expect rough edges
-
 Ludora (*"Ludo"* - Latin: "I am playing" + *"dora"* from Fedora) is a Fedora-based distribution that automatically sets up bootable Btrfs snapshots during installation - something that's surprisingly complicated to do manually on stock Fedora.
 
 Break your system with a bad update? Just reboot, pick a snapshot from GRUB, and restore with one click.
-
-**Available in two editions:**
-- **Gaming Edition**: Full gaming stack with custom kernel, Steam, and performance optimizations + bootable snapshots
-- **Base Edition**: Clean Fedora workstation with multimedia codecs + bootable snapshots
 
 ![Snapshot Boot Menu](Ludora_Snapshot_Boot.png)
 
@@ -34,32 +28,6 @@ Setting up openSUSE-style bootable snapshots on Fedora manually is complex:
 
 ---
 
-## Editions
-
-### Gaming Edition
-Full-featured gaming distribution with everything you need to play on Linux:
-- **Custom kernel with BORE scheduler** - Enhanced gaming performance
-- **Custom Ludora KDE Plasma desktop** - Themed with amber accents
-- **Steam + Proton-GE pre-installed** - Ready to game out of the box
-- **MangoHud, GameMode, Gamescope** - Performance monitoring and optimization
-- **Latest Mesa/Vulkan drivers** - Optimal graphics performance
-- **Automatic Btrfs snapshots** - System protection
-- **One-click rollback** - Easy system recovery
-
-**[Download Gaming Edition](https://sourceforge.net/projects/ludora/files/beta/ludora-beta1-x86_64.iso/download)**
-
-### Base Edition
-Clean Fedora workstation with automatic snapshot protection:
-- **Stock Fedora kernel** - Vanilla upstream kernel
-- **Clean KDE Plasma desktop** - No custom theming
-- **Multimedia codecs included** - Audio/video playback ready
-- **Automatic Btrfs snapshots** - System protection
-- **One-click rollback** - Easy system recovery
-
-**[Download Base Edition](https://sourceforge.net/projects/ludora/files/beta/ludora-beta1-base-x86_64.iso/download)**
-
----
-
 ## Technical Details
 
 **Snapshot Implementation:**
@@ -69,7 +37,7 @@ Clean Fedora workstation with automatic snapshot protection:
 - **Custom Calamares config** - Sets up proper subvolume layout during installation
 
 **Base System:**
-- Built on **Fedora 43** stable release
+- Built on **Fedora 44** stable release
 - **KDE Plasma** desktop environment
 - Access to Fedora's extensive package repositories
 - Regular security updates from upstream
@@ -79,10 +47,7 @@ Clean Fedora workstation with automatic snapshot protection:
 ## Download & Installation
 
 ### Download ISO
-Ludora is available in two editions. Choose the one that fits your needs:
-
-- **[Gaming Edition](https://sourceforge.net/projects/ludora/files/beta/ludora-beta1-x86_64.iso/download)** - Full gaming stack with custom kernel
-- **[Base Edition](https://sourceforge.net/projects/ludora/files/beta/ludora-beta1-base-x86_64.iso/download)** - Clean Fedora workstation with snapshots
+**[Download Ludora 44](https://sourceforge.net/projects/ludora/files/ludora44/ludora44-x86_64_2026-04-30.iso/download)**
 
 Browse all files on **[SourceForge](https://sourceforge.net/projects/ludora/files/)** or check the [Releases](https://github.com/LarsSoeMikkelsen/Ludora/releases) page.
 
@@ -100,8 +65,7 @@ Browse all files on **[SourceForge](https://sourceforge.net/projects/ludora/file
 ### Post-Installation
 Ludora is designed to work out of the box. After installation:
 - Log in to KDE Plasma
-- **Gaming Edition**: Launch Steam and start gaming!
-- **Base Edition**: Enjoy a clean Fedora workstation with snapshot protection
+- Launch Steam and start gaming!
 
 ---
 
@@ -144,12 +108,11 @@ sudo snapper delete <snapshot-number>
 
 ## Contributing
 
-Ludora is in **public beta** and contributions are welcome! Areas where you can help:
+Contributions are welcome! Areas where you can help:
 - Bug reports and testing
 - Package improvements and optimizations
 - Documentation improvements
 - Theme and artwork enhancements
-- Build system automation
 
 Please open issues for bugs or feature requests, and pull requests for improvements.
 
@@ -186,7 +149,4 @@ Ludora is an independent derivative distribution based on Fedora. All trademarks
 Ludora builds upon the work of many open-source projects:
 - **Fedora Project** - Base distribution
 - **CachyOS** - Kernel patches and optimizations
-- **openSUSE** - Snapshot system inspiration
-- **KDE Community** - Plasma desktop environment
-- **Valve** - Steam and Proton
 - **GloriousEggroll** - Proton-GE builds
