@@ -30,7 +30,7 @@ srpm:
 		cd $(CURDIR) && \
 		tar czf /tmp/calamares-config-ludora-1.7.tar.gz \
 			--transform 's|^|calamares-config-ludora-1.7/|' \
-			settings.conf modules branding && \
+			settings.conf modules branding scripts && \
 		rpmbuild -bs \
 			--define "_sourcedir /tmp" \
 			--define "_srcrpmdir $(outdir)" \
