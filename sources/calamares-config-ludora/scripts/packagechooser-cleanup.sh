@@ -30,7 +30,8 @@ if ! selected "ffmpeg"; then
         gstreamer1-vaapi || true
 fi
 
-# Kernel: remove whichever kernel the user did NOT choose (grep check: kernel-ludora)
+# Kernel: remove whichever kernel the user did NOT choose.
+# Both kernels are present in the squashfs; this picks one to keep.
 if selected "kernel-ludora"; then
     dnf remove -y --noautoremove kernel kernel-core kernel-modules || true
 else
