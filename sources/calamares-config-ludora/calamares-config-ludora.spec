@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -79,6 +79,12 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Tue May 05 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-3
+- Fix kernel removal: add --setopt=protect_running_kernel=false so DNF removes
+  kernel-ludora even when the live ISO is running it
+- Ludora Desktop Customization is now all-or-nothing (only kde-ludora listed
+  in netinstall, cleanup removes all four packages as a unit)
+
 * Tue May 05 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-2
 - Fix ludora_selections module path: install to %%{_libdir}/calamares/modules/
   instead of %%{_sysconfdir} — Calamares on Fedora loads Python module code

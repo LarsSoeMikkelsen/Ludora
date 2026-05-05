@@ -41,10 +41,13 @@ remove_if_missing \
 
 # Kernel: all-or-nothing — only kernel-ludora is listed in netinstall so the
 # group is toggled as a unit; removing it also removes -core and -modules.
+# protect_running_kernel=false is required because the live ISO itself runs
+# kernel-ludora, so DNF would otherwise refuse to remove it.
 if selected "kernel-ludora"; then
     dnf remove -y --noautoremove kernel kernel-core kernel-modules || true
 else
-    dnf remove -y --noautoremove kernel-ludora kernel-ludora-core kernel-ludora-modules || true
+    dnf remove -y --noautoremove --setopt=protect_running_kernel=false \
+        kernel-ludora kernel-ludora-core kernel-ludora-modules || true
 fi
 
 # Gaming Stack (mesa-libGL/EGL/dri kept — desktop needs them)
@@ -63,9 +66,9 @@ remove_if_missing \
     protonplus \
     lact
 
-# Ludora Desktop Customization
-remove_if_missing \
-    fastfetch \
-    fastfetch-settings \
-    kde-ludora \
-    desktop-defaults-ludora
+# Ludora Desktop Customization: all-or-nothing — only kde-ludora is listed in
+# netinstall so the group is toggled as a unit.
+if ! selected "kde-ludora"; then
+    dnf remove -y --noautoremove \
+        fastfetch fastfetch-settings kde-ludora desktop-defaults-ludora || true
+fi
