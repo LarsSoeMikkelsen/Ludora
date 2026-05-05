@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -43,11 +43,12 @@ install -Dm644 modules/partition.conf       %{buildroot}%{_sysconfdir}/calamares
 install -Dm644 modules/removeuser.conf      %{buildroot}%{_sysconfdir}/calamares/modules/removeuser.conf
 install -Dm644 modules/shellprocess.conf    %{buildroot}%{_sysconfdir}/calamares/modules/shellprocess.conf
 
-# ludora_selections Python module
+# ludora_selections Python module (must be in libdir, not sysconfdir — Calamares
+# only loads Python module code from /usr/lib64/calamares/modules/ on Fedora)
 install -Dm644 modules/ludora_selections/module.desc \
-    %{buildroot}%{_sysconfdir}/calamares/modules/ludora_selections/module.desc
+    %{buildroot}%{_libdir}/calamares/modules/ludora_selections/module.desc
 install -Dm644 modules/ludora_selections/main.py \
-    %{buildroot}%{_sysconfdir}/calamares/modules/ludora_selections/main.py
+    %{buildroot}%{_libdir}/calamares/modules/ludora_selections/main.py
 
 # Scripts
 install -Dm755 scripts/packagechooser-cleanup.sh %{buildroot}%{_sysconfdir}/calamares/scripts/packagechooser-cleanup.sh
@@ -69,8 +70,8 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/modules/partition.conf
 %{_sysconfdir}/calamares/modules/removeuser.conf
 %{_sysconfdir}/calamares/modules/shellprocess.conf
-%{_sysconfdir}/calamares/modules/ludora_selections/module.desc
-%{_sysconfdir}/calamares/modules/ludora_selections/main.py
+%{_libdir}/calamares/modules/ludora_selections/module.desc
+%{_libdir}/calamares/modules/ludora_selections/main.py
 %{_sysconfdir}/calamares/scripts/packagechooser-cleanup.sh
 %{_sysconfdir}/calamares/branding/ludora/branding.desc
 %{_sysconfdir}/calamares/branding/ludora/show.qml
@@ -78,6 +79,11 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Tue May 05 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-2
+- Fix ludora_selections module path: install to %%{_libdir}/calamares/modules/
+  instead of %%{_sysconfdir} — Calamares on Fedora loads Python module code
+  from /usr/lib64/calamares/modules/, not /etc/calamares/modules/
+
 * Tue May 05 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-1
 - Replace packagechooser with netinstall for component selection UI
 - Add ludora_selections Python module to bridge netinstall selections to cleanup
