@@ -1,0 +1,5 @@
+---
+type:       "job"
+name:       "ludora_selections"
+interface:  "python"
+script:     "main.py"
