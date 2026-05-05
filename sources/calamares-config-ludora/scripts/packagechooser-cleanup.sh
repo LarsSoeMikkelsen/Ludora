@@ -1,21 +1,22 @@
 #!/bin/bash
-# Called by Calamares shellprocess with the packagechooser selection string as argument.
-# Removes packages from any group the user deselected.
+# Called by Calamares shellprocess after unpackfs.
+# Reads /tmp/ludora-selections (written by the ludora_selections Python module)
+# and removes packages from any group the user deselected in netinstall.
 # All packages are present in the squashfs; this just prunes unselected ones.
 
-SELECTED="$*"
+SELECTED=$(cat /tmp/ludora-selections 2>/dev/null || echo "")
 
 selected() {
-    echo "$SELECTED" | grep -q "$1"
+    echo "$SELECTED" | grep -qF "$1"
 }
 
-# If no selection data (packagechooser not shown or empty), keep everything
+# If no selection data, keep everything
 if [ -z "$SELECTED" ] || [ "$SELECTED" = "null" ]; then
     exit 0
 fi
 
-# Codecs
-if ! selected "codecs"; then
+# Codecs (grep check: ffmpeg)
+if ! selected "ffmpeg"; then
     dnf remove -y --noautoremove \
         ffmpeg \
         gstreamer1-plugins-base \
@@ -29,15 +30,15 @@ if ! selected "codecs"; then
         gstreamer1-vaapi || true
 fi
 
-# Kernel: remove whichever kernel the user did NOT choose
-if selected "kernel_ludora"; then
+# Kernel: remove whichever kernel the user did NOT choose (grep check: kernel-ludora)
+if selected "kernel-ludora"; then
     dnf remove -y --noautoremove kernel kernel-core kernel-modules || true
 else
     dnf remove -y --noautoremove kernel-ludora kernel-ludora-core kernel-ludora-modules || true
 fi
 
-# Gaming stack (mesa-libGL/EGL/dri kept — desktop needs them)
-if ! selected "gaming_stack"; then
+# Gaming stack — mesa-libGL/EGL/dri kept, only mesa-vulkan-drivers is optional (grep check: gamemode)
+if ! selected "gamemode"; then
     dnf remove -y --noautoremove \
         mesa-vulkan-drivers \
         gamemode \
@@ -46,8 +47,8 @@ if ! selected "gaming_stack"; then
         vulkan-tools || true
 fi
 
-# Gaming applications
-if ! selected "gaming_apps"; then
+# Gaming applications (grep check: steam)
+if ! selected "steam"; then
     dnf remove -y --noautoremove \
         steam \
         discord \
@@ -56,8 +57,8 @@ if ! selected "gaming_apps"; then
         lact || true
 fi
 
-# Ludora desktop customization
-if ! selected "ludora_desktop"; then
+# Ludora desktop customization (grep check: kde-ludora)
+if ! selected "kde-ludora"; then
     dnf remove -y --noautoremove \
         fastfetch \
         fastfetch-settings \
