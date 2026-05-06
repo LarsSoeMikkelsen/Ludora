@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -79,6 +79,10 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Wed May 06 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-4
+- Skip apply-ludora-theme-to-users.sh gracefully when Ludora KDE customizations
+  are not selected (script absent); guard with existence check in shellprocess.conf
+
 * Tue May 05 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-3
 - Fix kernel removal: add --setopt=protect_running_kernel=false so DNF removes
   kernel-ludora even when the live ISO is running it
