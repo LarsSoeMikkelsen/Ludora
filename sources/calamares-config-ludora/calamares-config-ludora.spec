@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -79,6 +79,12 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Wed May 06 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-5
+- Rename netinstall groups to "Ludora Custom KDE" and "Ludora Custom Kernel"
+- Move Ludora Custom KDE above Ludora Custom Kernel in group order
+- Shorten Ludora Custom Kernel description
+- Set all netinstall groups to critical: true
+
 * Wed May 06 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-4
 - Skip apply-ludora-theme-to-users.sh gracefully when Ludora KDE customizations
   are not selected (script absent); guard with existence check in shellprocess.conf
