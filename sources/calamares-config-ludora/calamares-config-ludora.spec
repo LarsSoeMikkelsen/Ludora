@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -77,6 +77,10 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Wed May 07 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-7
+- Fix packagechooser-cleanup.sh: deselecting all components now correctly
+  removes all optional packages instead of keeping everything
+
 * Tue May 06 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-6
 - Add netinstall translations for 14 languages (de, fr, es, it, pt, zh_CN, ja,
   ko, pl, nl, da, fi, nb, sv) covering label, group names and descriptions
