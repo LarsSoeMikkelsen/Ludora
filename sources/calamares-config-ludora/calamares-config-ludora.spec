@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -77,6 +77,11 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Wed May 07 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-9
+- Fix missing SDDM when Ludora Custom KDE is deselected: mark sddm and
+  plasma-workspace as explicitly installed before removing kde-ludora so
+  they are not removed as orphaned dependencies
+
 * Wed May 07 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-8
 - Fix dracut failure when kernel-ludora is deselected: remove dracut from
   Calamares exec sequence and run dracut --regenerate-all --force from

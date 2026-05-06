@@ -73,7 +73,10 @@ remove_if_missing \
 
 # Ludora Desktop Customization: all-or-nothing — only kde-ludora is listed in
 # netinstall so the group is toggled as a unit.
+# Mark sddm and plasma-workspace as explicitly installed first so they are
+# never removed as orphaned dependencies of kde-ludora.
 if ! selected "kde-ludora"; then
+    dnf mark install sddm plasma-workspace || true
     dnf remove -y --noautoremove \
         fastfetch fastfetch-settings kde-ludora desktop-defaults-ludora || true
 fi
