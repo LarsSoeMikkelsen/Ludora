@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -38,7 +38,6 @@ install -Dm644 modules/dracut.conf          %{buildroot}%{_sysconfdir}/calamares
 install -Dm644 modules/fstab.conf           %{buildroot}%{_sysconfdir}/calamares/modules/fstab.conf
 install -Dm644 modules/mount.conf           %{buildroot}%{_sysconfdir}/calamares/modules/mount.conf
 install -Dm644 modules/netinstall.conf      %{buildroot}%{_sysconfdir}/calamares/modules/netinstall.conf
-install -Dm644 modules/packages.conf        %{buildroot}%{_sysconfdir}/calamares/modules/packages.conf
 install -Dm644 modules/partition.conf       %{buildroot}%{_sysconfdir}/calamares/modules/partition.conf
 install -Dm644 modules/removeuser.conf      %{buildroot}%{_sysconfdir}/calamares/modules/removeuser.conf
 install -Dm644 modules/shellprocess.conf    %{buildroot}%{_sysconfdir}/calamares/modules/shellprocess.conf
@@ -66,7 +65,6 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/modules/fstab.conf
 %{_sysconfdir}/calamares/modules/mount.conf
 %{_sysconfdir}/calamares/modules/netinstall.conf
-%{_sysconfdir}/calamares/modules/packages.conf
 %{_sysconfdir}/calamares/modules/partition.conf
 %{_sysconfdir}/calamares/modules/removeuser.conf
 %{_sysconfdir}/calamares/modules/shellprocess.conf
@@ -79,6 +77,11 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Tue May 06 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-6
+- Add netinstall translations for 14 languages (de, fr, es, it, pt, zh_CN, ja,
+  ko, pl, nl, da, fi, nb, sv) covering label, group names and descriptions
+- Remove unused packagechooser.conf and packages.conf
+
 * Wed May 06 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-5
 - Rename netinstall groups to "Ludora Custom KDE" and "Ludora Custom Kernel"
 - Move Ludora Custom KDE above Ludora Custom Kernel in group order
