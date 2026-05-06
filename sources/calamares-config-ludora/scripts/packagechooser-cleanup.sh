@@ -4,17 +4,22 @@
 # and removes any optional package the user deselected in netinstall.
 # All packages are present in the squashfs; this just prunes unselected ones.
 
-SELECTED=$(cat /tmp/ludora-selections 2>/dev/null || echo "")
+# If the file doesn't exist the module never ran — keep everything as-is
+if [ ! -f /tmp/ludora-selections ]; then
+    exit 0
+fi
+
+SELECTED=$(cat /tmp/ludora-selections)
+
+# Guard against unexpected null output from the Python module
+if [ "$SELECTED" = "null" ]; then
+    exit 0
+fi
 
 # Exact whole-line match against the package list
 selected() {
     echo "$SELECTED" | grep -qxF "$1"
 }
-
-# If no selection data, keep everything
-if [ -z "$SELECTED" ] || [ "$SELECTED" = "null" ]; then
-    exit 0
-fi
 
 remove_if_missing() {
     local REMOVE=()
