@@ -8,8 +8,9 @@
 # gstreamer1-plugins-base: sddm → sddm-wayland-generic → weston → weston-libs
 # depends on it; if it gets orphaned (install_reason=dep, all codec parents removed),
 # DNF5 may clean it even with --noautoremove, cascading to remove sddm entirely.
+# vulkan-tools: kinfocenter hard-depends on it; removing it forces kinfocenter out.
 # Mark these before any removal so they are treated as user-installed.
-dnf mark install gstreamer1-plugins-base sddm plasma-workspace || true
+dnf mark install gstreamer1-plugins-base sddm plasma-workspace vulkan-tools || true
 
 # If the file doesn't exist the module never ran — keep everything as-is
 if [ ! -f /tmp/ludora-selections ]; then
@@ -64,12 +65,13 @@ else
 fi
 
 # Gaming Stack (mesa-libGL/EGL/dri kept — desktop needs them)
+# vulkan-tools is intentionally excluded: kinfocenter hard-depends on it,
+# so removing it forces kinfocenter out as a reverse dependency.
 remove_if_missing \
     mesa-vulkan-drivers \
     gamemode \
     gamescope \
-    vkbasalt \
-    vulkan-tools
+    vkbasalt
 
 # Gaming Applications
 remove_if_missing \
