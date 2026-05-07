@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        12%{?dist}
+Release:        14%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -79,6 +79,15 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Thu May 07 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-14
+- Remove vulkan-tools from Gaming Stack cleanup and netinstall.conf:
+  kinfocenter hard-depends on it, so removing it forces kinfocenter out
+  as a reverse dependency when Gaming Stack is deselected
+
+* Thu May 07 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-13
+- shellprocess.conf: remove calamares, calamares-libs, calamares-config-ludora
+  from the installed system at the end of post-install steps
+
 * Thu May 07 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-12
 - users.conf: drop libpwquality block — libpwquality enforces a hardcoded
   floor of 6 characters even with minlen=0, so omitting the block skips
