@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        11%{?dist}
+Release:        12%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -79,6 +79,11 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Thu May 07 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-12
+- users.conf: drop libpwquality block — libpwquality enforces a hardcoded
+  floor of 6 characters even with minlen=0, so omitting the block skips
+  strength checking and lets minLength: 0 take full effect
+
 * Thu May 07 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-11
 - Add users.conf: override Fedora system pwquality.conf (minlen=10) with
   minLength=0 and libpwquality minlen=0/minclass=0 to remove password
