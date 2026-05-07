@@ -43,8 +43,6 @@ The installer presents five component groups, all selected by default. Deselect 
 ![All components selected](Ludora_Calamares_Components_All.png)
 ![Custom component selection](Ludora_Calamares_Components_Selection.png)
 
-Deselect the Gaming Stack and Gaming Applications and you get a clean, stable Fedora 44 KDE desktop with bootable snapshots and multimedia codecs — no gaming bloat.
-
 ---
 
 ## Technical Details
