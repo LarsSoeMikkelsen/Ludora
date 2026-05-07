@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ludora — Fedora with built-in bootable snapshots</title>
-  <meta name="description" content="Fedora with openSUSE-style bootable Btrfs snapshots. Gaming-ready with custom kernel, Steam, and one-click system recovery when things break." />
+  <meta name="description" content="Fedora with openSUSE-style bootable Btrfs snapshots and a modular installer. Gaming-ready by default — or skip the gaming stack for a clean KDE desktop with automatic rollback." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -595,12 +595,13 @@
     <a class="nav-logo" href="#"><img src="Ludora_logo.png" alt="Ludora" /></a>
     <ul class="nav-links">
       <li><a href="#snapshots">Snapshots</a></li>
+      <li><a href="#install">Install</a></li>
       <li><a href="#features">Features</a></li>
       <li><a href="#about">About</a></li>
     </ul>
     <div class="nav-status">
       <div class="nav-status-dot"></div>
-      Ludora 44
+      Ludora 44.1
     </div>
   </nav>
 
@@ -611,24 +612,24 @@
 
     <div class="hero-eyebrow">
       <div class="hero-eyebrow-dot"></div>
-      Ludora 44 Now Available
+      Ludora 44.1 Now Available
     </div>
 
     <img class="hero-logo" src="Ludora_logo.png" alt="Ludora" />
 
     <h1 class="hero-title" style="font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.3; margin-bottom: 24px; max-width: 700px; margin-left: auto; margin-right: auto;">
-      The gaming-ready Fedora spin with openSUSE-style bootable snapshots built in
+      Fedora with openSUSE-style bootable snapshots — not just for gamers
     </h1>
 
     <p class="hero-sub">
-      Break your system with a bad update? Just reboot, pick a snapshot, and restore with one click. 
-      Setting this up manually on Fedora takes hours — Ludora does it automatically.
+      Full gaming setup out of the box, or strip it down to a clean KDE desktop with automatic rollback.
+      You choose what gets installed. Setting up bootable snapshots on Fedora manually takes hours — Ludora does it automatically.
       <a href="#snapshots" style="color: var(--white); text-decoration: underline; text-decoration-color: var(--muted); text-underline-offset: 3px; transition: text-decoration-color 0.2s; white-space: nowrap;" onmouseover="this.style.textDecorationColor='var(--white)'" onmouseout="this.style.textDecorationColor='var(--muted)'">See how it works →</a>
     </p>
 
     <div class="hero-actions">
-      <a class="btn btn-fill" href="https://sourceforge.net/projects/ludora/files/ludora44/ludora44-x86_64_2026-04-30.iso/download" target="_blank">
-        Download Ludora 44
+      <a class="btn btn-fill" href="https://sourceforge.net/projects/ludora/files/ludora44/Ludora44_1-x86_64-2026-05-07.iso/download" target="_blank">
+        Download Ludora 44.1
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       </a>
       <a class="btn btn-outline" href="https://github.com/LarsSoeMikkelsen/Ludora/releases" target="_blank">Release Notes</a>
@@ -716,28 +717,127 @@
     </div>
   </section>
 
+  <!-- COMPONENT CHOOSER -->
+  <section id="install" style="scroll-margin-top: 60px; border-top: 1px solid var(--border);">
+    <div class="inner">
+      <p class="label">Modular Installer</p>
+      <h2 class="heading">Your install. Your way.</h2>
+      <p class="subheading">All five component groups are pre-selected for a full gaming setup. Deselect any of them during installation — Ludora installs exactly what you choose.</p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 32px; margin-bottom: 48px;">
+        <div>
+          <img src="Ludora_Calamares_Components_All.png" alt="All components selected in the Ludora installer" style="width: 100%; height: auto; display: block; border: 1px solid var(--border); border-radius: 2px; margin-bottom: 12px;" />
+          <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.6;"><strong style="color: var(--white); font-weight: 600;">Full gaming setup.</strong> All five components selected — the default. Install and you're ready to game immediately.</p>
+        </div>
+        <div>
+          <img src="Ludora_Calamares_Components_Selection.png" alt="Custom component selection in the Ludora installer" style="width: 100%; height: auto; display: block; border: 1px solid var(--border); border-radius: 2px; margin-bottom: 12px;" />
+          <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.6;"><strong style="color: var(--white); font-weight: 600;">Pick and choose.</strong> Deselect the gaming components you don't want. Each group is independent.</p>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 24px;">
+
+        <div style="background: var(--bg2); padding: 20px 28px; display: flex; align-items: flex-start; gap: 18px;">
+          <div style="color: var(--amber); opacity: 0.75; flex-shrink: 0; padding-top: 3px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
+              <span style="font-size: 0.93rem; font-weight: 600;">Multimedia Codecs</span>
+              <span style="font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--border-amber); color: var(--amber); opacity: 0.65; border-radius: 1px;">on by default</span>
+            </div>
+            <p style="font-size: 0.83rem; color: var(--muted); line-height: 1.6; margin: 0;">ffmpeg and GStreamer plugins for video and audio playback</p>
+          </div>
+        </div>
+
+        <div style="background: var(--bg2); padding: 20px 28px; display: flex; align-items: flex-start; gap: 18px;">
+          <div style="color: var(--amber); opacity: 0.75; flex-shrink: 0; padding-top: 3px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
+              <span style="font-size: 0.93rem; font-weight: 600;">Ludora Custom KDE</span>
+              <span style="font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--border-amber); color: var(--amber); opacity: 0.65; border-radius: 1px;">on by default</span>
+            </div>
+            <p style="font-size: 0.83rem; color: var(--muted); line-height: 1.6; margin: 0;">Ludora theme, Fastfetch system info, and custom KDE defaults</p>
+          </div>
+        </div>
+
+        <div style="background: var(--bg2); padding: 20px 28px; display: flex; align-items: flex-start; gap: 18px;">
+          <div style="color: var(--amber); opacity: 0.75; flex-shrink: 0; padding-top: 3px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
+              <span style="font-size: 0.93rem; font-weight: 600;">Ludora Custom Kernel</span>
+              <span style="font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--border-amber); color: var(--amber); opacity: 0.65; border-radius: 1px;">on by default</span>
+            </div>
+            <p style="font-size: 0.83rem; color: var(--muted); line-height: 1.6; margin: 0;">Gaming kernel with BORE scheduler and CachyOS performance patches. Deselect to use the standard Fedora kernel.</p>
+          </div>
+        </div>
+
+        <div style="background: var(--bg2); padding: 20px 28px; display: flex; align-items: flex-start; gap: 18px;">
+          <div style="color: var(--amber); opacity: 0.75; flex-shrink: 0; padding-top: 3px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
+              <span style="font-size: 0.93rem; font-weight: 600;">Gaming Stack</span>
+              <span style="font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--border-amber); color: var(--amber); opacity: 0.65; border-radius: 1px;">on by default</span>
+            </div>
+            <p style="font-size: 0.83rem; color: var(--muted); line-height: 1.6; margin: 0;">Vulkan drivers, GameMode, Gamescope, VkBasalt, and Vulkan tools</p>
+          </div>
+        </div>
+
+        <div style="background: var(--bg2); padding: 20px 28px; display: flex; align-items: flex-start; gap: 18px;">
+          <div style="color: var(--amber); opacity: 0.75; flex-shrink: 0; padding-top: 3px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
+              <span style="font-size: 0.93rem; font-weight: 600;">Gaming Applications</span>
+              <span style="font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--border-amber); color: var(--amber); opacity: 0.65; border-radius: 1px;">on by default</span>
+            </div>
+            <p style="font-size: 0.83rem; color: var(--muted); line-height: 1.6; margin: 0;">Steam, Discord, ProtonPlus, LACT, and GOverlay</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="padding: 24px 28px; border: 1px solid var(--border-amber); background: var(--amber-glow);">
+        <p style="font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px;">Not a gamer?</p>
+        <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.7; margin: 0;">Deselect the Gaming Stack and Gaming Applications during installation and you get a clean Fedora 44 KDE desktop with bootable snapshots and multimedia codecs — no Steam, no gaming tools, just a stable base that's hard to break.</p>
+      </div>
+
+    </div>
+  </section>
+
 <div class="marquee-wrap" aria-hidden="true">
     <div class="marquee-track">
       <div class="marquee-item">BORE Scheduler</div>
       <div class="marquee-item">CachyOS Patches</div>
       <div class="marquee-item">Btrfs Snapshots</div>
       <div class="marquee-item">Auto Rollback</div>
+      <div class="marquee-item">Modular Installer</div>
       <div class="marquee-item">Steam</div>
       <div class="marquee-item">Proton-GE</div>
       <div class="marquee-item">MangoHud</div>
       <div class="marquee-item">VA-API</div>
       <div class="marquee-item">Vulkan</div>
       <div class="marquee-item">KDE Plasma</div>
+      <div class="marquee-item">Pick Your Stack</div>
       <div class="marquee-item">BORE Scheduler</div>
       <div class="marquee-item">CachyOS Patches</div>
       <div class="marquee-item">Btrfs Snapshots</div>
       <div class="marquee-item">Auto Rollback</div>
+      <div class="marquee-item">Modular Installer</div>
       <div class="marquee-item">Steam</div>
       <div class="marquee-item">Proton-GE</div>
       <div class="marquee-item">MangoHud</div>
       <div class="marquee-item">VA-API</div>
       <div class="marquee-item">Vulkan</div>
       <div class="marquee-item">KDE Plasma</div>
+      <div class="marquee-item">Pick Your Stack</div>
     </div>
   </div>
 
@@ -745,8 +845,8 @@
   <section id="features">
     <div class="inner">
       <p class="label">What's included</p>
-      <h2 class="heading">Built for gaming. Engineered for reliability.</h2>
-      <p class="subheading">Everything a modern gaming system needs, with the stability and security of Fedora.</p>
+      <h2 class="heading">Built for gaming. Works for everyone.</h2>
+      <p class="subheading">Everything a modern gaming system needs — or just the parts you want. Built on the stability and security of Fedora.</p>
 
       <div class="feature-grid">
         
@@ -798,6 +898,14 @@
           <p class="feature-desc">All custom packages built and maintained in public COPR. Transparent build logs, automatic updates, reproducible from source.</p>
         </div>
 
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </div>
+          <h3 class="feature-title">Modular Installation</h3>
+          <p class="feature-desc">Five independent component groups. Install the full gaming setup or strip it down to a clean KDE desktop with snapshots. You decide at install time.</p>
+        </div>
+
       </div>
     </div>
   </section>
@@ -845,15 +953,16 @@
         <div class="about-cell">
           <div class="about-cell-label">Status</div>
           <p>
-            Ludora 44 is available now. Automatic snapshots work, the custom kernel is stable, and gaming works out of the box.
+            Ludora 44.1 is available now. Automatic snapshots work, the custom kernel is stable, and gaming works out of the box.
             This is a personal project, not a commercial product.
           </p>
         </div>
         <div class="about-cell">
           <div class="about-cell-label">Target audience</div>
           <p>
-            If you're comfortable with <strong>Fedora</strong> or <strong>Linux in general</strong>, and you want a gaming-focused system
-            with automatic rollback capabilities, this is for you.
+            Anyone comfortable with <strong>Fedora</strong> or <strong>Linux in general</strong> who wants automatic rollback built in.
+            That includes gamers who want a ready-to-go gaming system, and non-gamers who just want a
+            <strong>stable KDE desktop</strong> that's hard to break.
           </p>
         </div>
         <div class="about-cell">
@@ -868,7 +977,7 @@
           <p>
             All source is on <strong><a href="https://github.com/LarsSoeMikkelsen/Ludora" target="_blank">GitHub</a></strong>.
             All packages build in <strong><a href="https://copr.fedorainfracloud.org/coprs/predze/ludora" target="_blank">COPR</a></strong>.
-            The kickstart definition is public and reproducible. Nothing hidden.
+            Nothing hidden.
           </p>
         </div>
       </div>
@@ -882,8 +991,8 @@
       <h2 class="heading">Download and install.</h2>
       <p class="subheading">ISO hosted on SourceForge. Write to USB with Fedora Media Writer or Balena Etcher. Boot and install.</p>
       <div class="cta-buttons">
-        <a class="btn btn-fill" href="https://sourceforge.net/projects/ludora/files/ludora44/ludora44-x86_64_2026-04-30.iso/download" target="_blank">
-          Download Ludora 44
+        <a class="btn btn-fill" href="https://sourceforge.net/projects/ludora/files/ludora44/Ludora44_1-x86_64-2026-05-07.iso/download" target="_blank">
+          Download Ludora 44.1
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         </a>
         <a class="btn btn-outline" href="https://github.com/LarsSoeMikkelsen/Ludora/releases" target="_blank">Release Notes</a>
