@@ -1,8 +1,8 @@
 # Ludora
 
-**The gaming-ready Fedora spin with openSUSE-style bootable snapshots built in**
+**Fedora with openSUSE-style bootable snapshots — not just for gamers**
 
-Ludora (*"Ludo"* - Latin: "I am playing" + *"dora"* from Fedora) is a Fedora-based distribution that automatically sets up bootable Btrfs snapshots during installation - something that's surprisingly complicated to do manually on stock Fedora.
+Ludora (*"Ludo"* - Latin: "I am playing" + *"dora"* from Fedora) is a Fedora-based distribution that automatically sets up bootable Btrfs snapshots during installation. The installer lets you pick exactly what gets installed: go full gaming setup, or strip out all the gaming components for a clean Fedora 44 KDE with automatic rollback.
 
 Break your system with a bad update? Just reboot, pick a snapshot from GRUB, and restore with one click.
 
@@ -28,6 +28,25 @@ Setting up openSUSE-style bootable snapshots on Fedora manually is complex:
 
 ---
 
+## Choose Your Components
+
+The installer presents five component groups, all selected by default. Deselect any of them — Ludora removes them from the final system.
+
+| Component | What it includes | Default |
+|---|---|---|
+| **Multimedia Codecs** | ffmpeg and GStreamer plugins for video and audio | ✓ On |
+| **Ludora Custom KDE** | Ludora theme, Fastfetch, custom KDE defaults | ✓ On |
+| **Ludora Custom Kernel** | Gaming kernel with BORE scheduler and CachyOS patches | ✓ On |
+| **Gaming Stack** | Vulkan drivers, GameMode, Gamescope, VkBasalt | ✓ On |
+| **Gaming Applications** | Steam, Discord, ProtonPlus, LACT, GOverlay | ✓ On |
+
+![All components selected](Ludora_Calamares_Components_All.png)
+![Custom component selection](Ludora_Calamares_Components_Selection.png)
+
+Deselect the Gaming Stack and Gaming Applications and you get a clean, stable Fedora 44 KDE desktop with bootable snapshots and multimedia codecs — no gaming bloat.
+
+---
+
 ## Technical Details
 
 **Snapshot Implementation:**
@@ -47,7 +66,7 @@ Setting up openSUSE-style bootable snapshots on Fedora manually is complex:
 ## Download & Installation
 
 ### Download ISO
-**[Download Ludora 44](https://sourceforge.net/projects/ludora/files/ludora44/ludora44-x86_64_2026-04-30.iso/download)**
+**[Download Ludora 44.1](https://sourceforge.net/projects/ludora/files/ludora44/Ludora44_1-x86_64-2026-05-07.iso/download)**
 
 Browse all files on **[SourceForge](https://sourceforge.net/projects/ludora/files/)** or check the [Releases](https://github.com/LarsSoeMikkelsen/Ludora/releases) page.
 
@@ -65,7 +84,8 @@ Browse all files on **[SourceForge](https://sourceforge.net/projects/ludora/file
 ### Post-Installation
 Ludora is designed to work out of the box. After installation:
 - Log in to KDE Plasma
-- Launch Steam and start gaming!
+- If you installed the Gaming Applications: launch Steam and start gaming
+- If you skipped the gaming components: enjoy a clean Fedora 44 KDE desktop with automatic rollback
 
 ---
 
