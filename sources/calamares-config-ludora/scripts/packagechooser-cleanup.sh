@@ -4,6 +4,13 @@
 # and removes any optional package the user deselected in netinstall.
 # All packages are present in the squashfs; this just prunes unselected ones.
 
+# Protect packages that must never be autoremoved, regardless of user selections.
+# gstreamer1-plugins-base: sddm → sddm-wayland-generic → weston → weston-libs
+# depends on it; if it gets orphaned (install_reason=dep, all codec parents removed),
+# DNF5 may clean it even with --noautoremove, cascading to remove sddm entirely.
+# Mark these before any removal so they are treated as user-installed.
+dnf mark install gstreamer1-plugins-base sddm plasma-workspace || true
+
 # If the file doesn't exist the module never ran — keep everything as-is
 if [ ! -f /tmp/ludora-selections ]; then
     exit 0
@@ -32,9 +39,10 @@ remove_if_missing() {
 }
 
 # Codecs
+# gstreamer1-plugins-base is intentionally excluded: sddm depends on it, so
+# removing it would force sddm out as a reverse dependency.
 remove_if_missing \
     ffmpeg \
-    gstreamer1-plugins-base \
     gstreamer1-plugins-good \
     gstreamer1-plugins-bad-free \
     gstreamer1-plugins-ugly-free \

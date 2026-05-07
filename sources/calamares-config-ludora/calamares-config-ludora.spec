@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        9%{?dist}
+Release:        11%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -41,6 +41,7 @@ install -Dm644 modules/netinstall.conf      %{buildroot}%{_sysconfdir}/calamares
 install -Dm644 modules/partition.conf       %{buildroot}%{_sysconfdir}/calamares/modules/partition.conf
 install -Dm644 modules/removeuser.conf      %{buildroot}%{_sysconfdir}/calamares/modules/removeuser.conf
 install -Dm644 modules/shellprocess.conf    %{buildroot}%{_sysconfdir}/calamares/modules/shellprocess.conf
+install -Dm644 modules/users.conf          %{buildroot}%{_sysconfdir}/calamares/modules/users.conf
 
 # ludora_selections Python module (must be in libdir, not sysconfdir — Calamares
 # only loads Python module code from /usr/lib64/calamares/modules/ on Fedora)
@@ -68,6 +69,7 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/modules/partition.conf
 %{_sysconfdir}/calamares/modules/removeuser.conf
 %{_sysconfdir}/calamares/modules/shellprocess.conf
+%{_sysconfdir}/calamares/modules/users.conf
 %{_libdir}/calamares/modules/ludora_selections/module.desc
 %{_libdir}/calamares/modules/ludora_selections/main.py
 %{_sysconfdir}/calamares/scripts/packagechooser-cleanup.sh
@@ -77,6 +79,16 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Thu May 07 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-11
+- Add users.conf: override Fedora system pwquality.conf (minlen=10) with
+  minLength=0 and libpwquality minlen=0/minclass=0 to remove password
+  length enforcement in the installer
+
+* Thu May 07 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-10
+- Fix missing SDDM when Multimedia Codecs are deselected: remove
+  gstreamer1-plugins-base from the codec cleanup list — sddm depends on it,
+  so removing it forces sddm out as a reverse dependency
+
 * Wed May 07 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-9
 - Fix missing SDDM when Ludora Custom KDE is deselected: mark sddm and
   plasma-workspace as explicitly installed before removing kde-ludora so
