@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Ludora Welcome
+Comment=Learn about your Ludora system
+Exec=/usr/bin/ludora-welcome --force
+Icon=ludora-start-here
+Terminal=false
+Categories=System;

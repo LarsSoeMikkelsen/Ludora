@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Ludora Welcome
+Exec=/usr/bin/ludora-welcome
+Icon=ludora-start-here
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

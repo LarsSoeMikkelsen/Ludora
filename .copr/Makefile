@@ -63,4 +63,16 @@ srpm:
 			--define "_srcrpmdir $(outdir)" \
 			--define "_builddir $(CURDIR)" \
 			$(spec); \
+	elif echo "$(spec)" | grep -q "ludora-welcome"; then \
+		cd $(CURDIR) && \
+		tar czf /tmp/ludora-welcome-1.0.tar.gz \
+			--transform 's|^|ludora-welcome-1.0/|' \
+			ludora-welcome.py \
+			ludora-welcome.desktop \
+			ludora-welcome-app.desktop && \
+		rpmbuild -bs \
+			--define "_sourcedir /tmp" \
+			--define "_srcrpmdir $(outdir)" \
+			--define "_builddir $(CURDIR)" \
+			$(spec); \
 	fi

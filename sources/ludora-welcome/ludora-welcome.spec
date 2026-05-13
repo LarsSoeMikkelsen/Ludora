@@ -1,0 +1,40 @@
+Name:           ludora-welcome
+Version:        1.0
+Release:        0%{?dist}
+Summary:        First-boot welcome application for Ludora
+License:        GPLv3+
+URL:            https://ludora.org
+Source0:        ludora-welcome-%{version}.tar.gz
+BuildArch:      noarch
+Requires:       python3-pyqt6
+Requires:       kde-ludora
+
+%description
+A simple welcome application that runs on first boot, introducing the user
+to Ludora, explaining how to upgrade the system with dnf instead of KDE Discover,
+and guiding NVIDIA driver installation using the pre-enabled RPM Fusion repositories.
+
+%define debug_package %{nil}
+
+%prep
+%setup -q -n ludora-welcome-%{version}
+
+%build
+# Nothing to build
+
+%install
+install -Dm755 ludora-welcome.py \
+    %{buildroot}%{_bindir}/ludora-welcome
+
+install -Dm644 ludora-welcome.desktop \
+    %{buildroot}%{_sysconfdir}/xdg/autostart/ludora-welcome.desktop
+
+install -Dm644 ludora-welcome-app.desktop \
+    %{buildroot}%{_datadir}/applications/ludora-welcome.desktop
+
+%files
+%{_bindir}/ludora-welcome
+%{_sysconfdir}/xdg/autostart/ludora-welcome.desktop
+%{_datadir}/applications/ludora-welcome.desktop
+
+%changelog
