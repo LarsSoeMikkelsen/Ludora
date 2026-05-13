@@ -1,5 +1,5 @@
 Name:           ludora-welcome
-Version:        1.2
+Version:        1.3
 Release:        0%{?dist}
 Summary:        First-boot welcome application for Ludora
 License:        GPLv3+
@@ -38,6 +38,9 @@ install -Dm644 ludora-welcome-app.desktop \
 %{_datadir}/applications/ludora-welcome.desktop
 
 %changelog
+* Wed May 13 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 1.3-0
+- Welcome tab: expand Btrfs+Snapper into individual components with usage note
+
 * Wed May 13 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 1.2-0
 - Welcome tab: expand optional section to list all five netinstall groups
 - Upgrading tab: remove major Fedora version upgrade section

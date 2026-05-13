@@ -26,14 +26,18 @@ _CODE = (
 WELCOME_HTML = """
 <h2>Welcome to Ludora</h2>
 <p>Ludora is a Fedora-based Linux distribution built to be ready to use out of the box.
-While it includes a curated set of gaming tools, Ludora is designed for anyone who
+While it includes a curated set of optional gaming tools, Ludora is designed for anyone who
 wants a polished, practical desktop — not just for gamers.</p>
 
 <h3>Always included</h3>
 <ul>
   <li><b>RPM Fusion repositories</b> — pre-enabled for drivers, codecs, and extra apps</li>
-  <li><b>Btrfs + Snapper</b> — automatic snapshots taken before every system update</li>
+  <li><b>snapper</b> — snapshot management</li>
+  <li><b>libdnf5-plugin-snapper</b> — dnf5 hook for creating pre and post snapshots</li>
+  <li><b>grub-btrfs</b> — automatically populates the grub menu with all snapshots</li>
+  <li><b>custom snapper-commit script</b> — one-click snapshot rollback (will pop up when booted into a snapshot)</li>
 </ul>
+<p><b>Note:</b> Snapshot support is active unless you chose a different filesystem than Btrfs during installation.</p>
 
 <h3>Selected during installation</h3>
 <p>The installer lets you choose which components to include.
