@@ -1,5 +1,5 @@
 Name:           ludora-welcome
-Version:        1.3
+Version:        1.4
 Release:        0%{?dist}
 Summary:        First-boot welcome application for Ludora
 License:        GPLv3+
@@ -38,6 +38,9 @@ install -Dm644 ludora-welcome-app.desktop \
 %{_datadir}/applications/ludora-welcome.desktop
 
 %changelog
+* Wed May 13 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 1.4-0
+- Increase default window size to avoid scrolling
+
 * Wed May 13 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 1.3-0
 - Welcome tab: expand Btrfs+Snapper into individual components with usage note
 

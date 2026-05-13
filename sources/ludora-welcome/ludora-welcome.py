@@ -131,8 +131,8 @@ class WelcomeWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Welcome to Ludora")
         self.setWindowIcon(QIcon.fromTheme("ludora-start-here"))
-        self.setMinimumSize(720, 520)
-        self.resize(740, 560)
+        self.setMinimumSize(800, 680)
+        self.resize(820, 720)
 
         tabs = QTabWidget()
         tabs.addTab(self._tab(WELCOME_HTML), "Welcome")
