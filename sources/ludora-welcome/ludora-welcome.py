@@ -35,9 +35,13 @@ wants a polished, practical desktop — not just for gamers.</p>
   <li><b>Btrfs + Snapper</b> — automatic snapshots taken before every system update</li>
 </ul>
 
-<h3>Included based on your installation choices</h3>
+<h3>Selected during installation</h3>
+<p>The installer lets you choose which components to include.
+The following were available as options:</p>
 <ul>
-  <li><b>Custom kernel</b> — tuned for responsiveness and gaming workloads</li>
+  <li><b>Multimedia codecs</b> — ffmpeg and GStreamer plugins for video and audio playback</li>
+  <li><b>Ludora custom KDE</b> — Ludora theme, Fastfetch system info and custom KDE defaults</li>
+  <li><b>Custom kernel</b> — gaming-tuned kernel; deselecting installs the standard Fedora kernel instead</li>
   <li><b>Gaming stack</b> — Vulkan drivers, GameMode, Gamescope and VkBasalt</li>
   <li><b>Gaming applications</b> — Steam, Discord, ProtonPlus, LACT and GOverlay</li>
 </ul>
@@ -64,11 +68,6 @@ and readable feedback.</p>
 <p>Snapper automatically snapshots your system before each upgrade,
 so you can roll back if anything goes wrong.</p>
 
-<h3>Major Fedora version upgrade</h3>
-<p>When a new Fedora release is available:</p>
-<pre style="{_CODE}">sudo dnf system-upgrade download --releasever=45
-sudo dnf system-upgrade reboot</pre>
-<p>Replace <b>45</b> with the target release number.</p>
 """
 
 NVIDIA_HTML = f"""
