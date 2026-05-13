@@ -29,14 +29,17 @@ WELCOME_HTML = """
 While it includes a curated set of gaming tools, Ludora is designed for anyone who
 wants a polished, practical desktop — not just for gamers.</p>
 
-<h3>What's included</h3>
+<h3>Always included</h3>
 <ul>
-  <li><b>KDE Plasma</b> — a powerful, fully customizable desktop environment</li>
   <li><b>RPM Fusion repositories</b> — pre-enabled for drivers, codecs, and extra apps</li>
-  <li><b>Gaming tools</b> — MangoHud, GOverlay, Gamescope, Steam, Proton and more</li>
   <li><b>Btrfs + Snapper</b> — automatic snapshots taken before every system update</li>
-  <li><b>CoolerControl</b> — visual fan and cooling management</li>
+</ul>
+
+<h3>Included based on your installation choices</h3>
+<ul>
   <li><b>Custom kernel</b> — tuned for responsiveness and gaming workloads</li>
+  <li><b>Gaming stack</b> — Vulkan drivers, GameMode, Gamescope and VkBasalt</li>
+  <li><b>Gaming applications</b> — Steam, Discord, ProtonPlus, LACT and GOverlay</li>
 </ul>
 
 <p>You can reopen this window any time from <b>System &rarr; Ludora Welcome</b>
@@ -87,19 +90,26 @@ Follow these steps to install the right driver for your GPU.</p>
     <th align="left">Package to install</th>
   </tr>
   <tr style="background:#1e1e2e; color:#cdd6f4;">
-    <td>GTX 750 Ti and newer<br>
-        <small>GTX 9xx / 10xx / 16xx &mdash; RTX 20xx / 30xx / 40xx</small></td>
+    <td>RTX 20xx and newer (Turing+)<br>
+        <small>RTX 20xx / 30xx / 40xx / 50xx</small></td>
     <td><code>akmod-nvidia</code></td>
   </tr>
   <tr style="background:#313244; color:#cdd6f4;">
+    <td>GTX 750 Ti &mdash; GTX 16xx (Maxwell &amp; Pascal)<br>
+        <small>GTX 9xx / 10xx / 16xx</small></td>
+    <td><code>akmod-nvidia-580xx</code></td>
+  </tr>
+  <tr style="background:#1e1e2e; color:#cdd6f4;">
     <td>GTX 600 / GTX 700 series (Kepler)</td>
     <td><code>akmod-nvidia-470xx</code></td>
   </tr>
 </table>
 
 <h3>Step 3 &mdash; Install</h3>
-<p><b>GTX 750 Ti and newer:</b></p>
+<p><b>RTX 20xx and newer:</b></p>
 <pre style="{_CODE}">sudo dnf install akmod-nvidia xorg-x11-drv-nvidia-cuda</pre>
+<p><b>GTX 750 Ti &mdash; GTX 16xx (Maxwell &amp; Pascal):</b></p>
+<pre style="{_CODE}">sudo dnf install akmod-nvidia-580xx xorg-x11-drv-nvidia-580xx-cuda</pre>
 <p><b>GTX 600 / 700 series (Kepler):</b></p>
 <pre style="{_CODE}">sudo dnf install akmod-nvidia-470xx</pre>
 

@@ -1,5 +1,5 @@
 Name:           ludora-welcome
-Version:        1.0
+Version:        1.1
 Release:        0%{?dist}
 Summary:        First-boot welcome application for Ludora
 License:        GPLv3+
@@ -38,3 +38,6 @@ install -Dm644 ludora-welcome-app.desktop \
 %{_datadir}/applications/ludora-welcome.desktop
 
 %changelog
+* Wed May 13 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 1.1-0
+- Update Welcome tab: split included/optional components to reflect modular installer
+- Update NVIDIA tab: add 580xx legacy branch for Maxwell/Pascal (GTX 9xx/10xx/16xx)
