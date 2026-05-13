@@ -5,7 +5,7 @@
 %global cargo_install_lib 0
 
 Name:           %{project}d
-Version:        4.2.1
+Version:        4.3.0
 Release:        %{?autorelease}%{!?autorelease:0%{?dist}}
 Summary:        Powerful cooling control and monitoring
 Obsoletes:      coolercontrol-liqctld <= 2.2.2
@@ -22,7 +22,7 @@ Recommends:     python3-liquidctl
 Recommends:     lm_sensors
 
 Source0:        https://gitlab.com/%{project}/%{project}/-/releases/%{version}/downloads/packages/%{project}-%{version}.tar.gz
-Source1:        https://gitlab.com/%{project}/%{project}/-/releases/%{version}/downloads/packages/%{name}-vendor.tar.gz
+Source1:        https://gitlab.com/%{project}/%{project}/-/releases/%{version}/downloads/packages/%{name}-vendor-%{version}.tar.gz
 
 %description
 This is the system daemon for CoolerControl.
@@ -78,6 +78,9 @@ popd
 %systemd_postun_with_restart %{name}.service
 
 %changelog
+* Sun May 10 2026 Guy Boldon <gb@guyboldon.com> - 4.3.0-1
+- 4.3.0 Release
+
 * Tue Apr 21 2026 Guy Boldon <gb@guyboldon.com> - 4.2.1-1
 - 4.2.1 Release
 
