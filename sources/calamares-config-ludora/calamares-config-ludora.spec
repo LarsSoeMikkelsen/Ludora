@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        14%{?dist}
+Release:        15%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -79,6 +79,9 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Wed May 13 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-15
+- Remove ludora-welcome from netinstall packages; pulled in as dep of kde-ludora
+
 * Thu May 07 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-14
 - Remove vulkan-tools from Gaming Stack cleanup and netinstall.conf:
   kinfocenter hard-depends on it, so removing it forces kinfocenter out

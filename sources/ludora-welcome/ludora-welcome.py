@@ -25,30 +25,17 @@ _CODE = (
 
 WELCOME_HTML = """
 <h2>Welcome to Ludora</h2>
-<p>Ludora is a Fedora-based Linux distribution built to be ready to use out of the box.
-While it includes a curated set of optional gaming tools, Ludora is designed for anyone who
-wants a polished, practical desktop — not just for gamers.</p>
+<p>You're up and running. Here are a few things worth doing after a fresh install.</p>
 
-<h3>Always included</h3>
-<ul>
-  <li><b>RPM Fusion repositories</b> — pre-enabled for drivers, codecs, and extra apps</li>
-  <li><b>snapper</b> — snapshot management</li>
-  <li><b>libdnf5-plugin-snapper</b> — dnf5 hook for creating pre and post snapshots</li>
-  <li><b>grub-btrfs</b> — automatically populates the grub menu with all snapshots</li>
-  <li><b>custom snapper-commit script</b> — one-click snapshot rollback (will pop up when booted into a snapshot)</li>
-</ul>
-<p><b>Note:</b> Snapshot support is active unless you chose a different filesystem than Btrfs during installation.</p>
+<h3>1. Update your system</h3>
+<p>Before anything else, run a full system update. See the <b>Upgrading</b> tab for instructions.</p>
 
-<h3>Selected during installation</h3>
-<p>The installer lets you choose which components to include.
-The following were available as options:</p>
-<ul>
-  <li><b>Multimedia codecs</b> — ffmpeg and GStreamer plugins for video and audio playback</li>
-  <li><b>Ludora custom KDE</b> — Ludora theme, Fastfetch system info and custom KDE defaults</li>
-  <li><b>Custom kernel</b> — gaming-tuned kernel; deselecting installs the standard Fedora kernel instead</li>
-  <li><b>Gaming stack</b> — Vulkan drivers, GameMode, Gamescope and VkBasalt</li>
-  <li><b>Gaming applications</b> — Steam, Discord, ProtonPlus, LACT and GOverlay</li>
-</ul>
+<h3>2. Install NVIDIA drivers</h3>
+<p>If you have an NVIDIA GPU, see the <b>NVIDIA Drivers</b> tab for step-by-step instructions.</p>
+
+<h3>3. Set up GE-Proton in Steam</h3>
+<p>If you installed Steam, GE-Proton is already included. To set it as the default compatibility tool,
+open Steam and go to <b>Settings &rarr; Compatibility &rarr; Default compatibility tool</b> and select GE-Proton.</p>
 
 <p>You can reopen this window any time from <b>System &rarr; Ludora Welcome</b>
 in the application menu.</p>
@@ -57,21 +44,20 @@ in the application menu.</p>
 UPGRADE_HTML = f"""
 <h2>Keeping Your System Updated</h2>
 
-<p>Ludora is based on Fedora and uses <b>dnf</b> as its package manager.
-For system upgrades, always use dnf in a terminal rather than KDE Discover.</p>
+<p>Do this first after a fresh install, and regularly after that.
+Ludora uses <b>dnf</b> for system updates — always use it in a terminal rather than KDE Discover.</p>
+
+<h3>Update your system</h3>
+<p>Run this to update all installed packages:</p>
+<pre style="{_CODE}">sudo dnf upgrade</pre>
+<p>Snapper automatically snapshots your system before each upgrade,
+so you can roll back if anything goes wrong.</p>
 
 <h3>Why not KDE Discover?</h3>
 <p>KDE Discover is useful for browsing and installing apps, but for full system
 upgrades on an RPM-based distro it can be unreliable — sometimes leaving packages
 in a broken state or failing without clear output. dnf gives you full control
 and readable feedback.</p>
-
-<h3>Regular updates</h3>
-<p>Run this to update all installed packages:</p>
-<pre style="{_CODE}">sudo dnf upgrade</pre>
-<p>Snapper automatically snapshots your system before each upgrade,
-so you can roll back if anything goes wrong.</p>
-
 """
 
 NVIDIA_HTML = f"""

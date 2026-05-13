@@ -1,5 +1,5 @@
 Name:           ludora-welcome
-Version:        1.4
+Version:        1.5
 Release:        0%{?dist}
 Summary:        First-boot welcome application for Ludora
 License:        GPLv3+
@@ -38,6 +38,10 @@ install -Dm644 ludora-welcome-app.desktop \
 %{_datadir}/applications/ludora-welcome.desktop
 
 %changelog
+* Wed May 13 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 1.5-0
+- Rewrite Welcome tab as post-install first steps guide
+- Upgrading tab: lead with "do this first" framing, move command before KDE Discover note
+
 * Wed May 13 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 1.4-0
 - Increase default window size to avoid scrolling
 
