@@ -1,5 +1,5 @@
 Name:           ludora-welcome
-Version:        1.5
+Version:        1.6
 Release:        0%{?dist}
 Summary:        First-boot welcome application for Ludora
 License:        GPLv3+
@@ -38,6 +38,9 @@ install -Dm644 ludora-welcome-app.desktop \
 %{_datadir}/applications/ludora-welcome.desktop
 
 %changelog
+* Thu May 14 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 1.6-0
+- Skip autostart when running as liveuser (live USB session)
+
 * Wed May 13 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 1.5-0
 - Rewrite Welcome tab as post-install first steps guide
 - Upgrading tab: lead with "do this first" framing, move command before KDE Discover note

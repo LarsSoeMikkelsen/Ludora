@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import getpass
 import sys
 from pathlib import Path
 
@@ -150,6 +151,9 @@ class WelcomeWindow(QMainWindow):
 
 
 def main():
+    if getpass.getuser() == 'liveuser':
+        sys.exit(0)
+
     force = "--force" in sys.argv
 
     if not force and FLAG_FILE.exists():
