@@ -64,7 +64,7 @@ The installer presents five component groups, all selected by default. Deselect 
 ## Download & Installation
 
 ### Download ISO
-**[Download Ludora 44.1](https://sourceforge.net/projects/ludora/files/ludora44/Ludora44_1-x86_64-2026-05-07.iso/download)**
+**[Download Ludora 44.2](https://sourceforge.net/projects/ludora/files/ludora44/Ludora44.2-x86_64.iso/download)**
 
 Browse all files on **[SourceForge](https://sourceforge.net/projects/ludora/files/)** or check the [Releases](https://github.com/LarsSoeMikkelsen/Ludora/releases) page.
 
