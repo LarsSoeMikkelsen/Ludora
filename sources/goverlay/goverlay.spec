@@ -4,7 +4,7 @@ Release:        %autorelease
 Epoch:          2
 Summary:        Project that aims to create a Graphical UI to help manage Linux overlays
 ExclusiveArch:  %{fpc_arches}
-%global commit 85476e05bb768dc4e9e0b0f02afbd6bcbf394e5a
+%global commit bfe87a60732c30ecc5cb733fae1f0ee2f4ba5780
 
 License:        GPLv3+
 URL:            https://github.com/benjamimgois/goverlay
