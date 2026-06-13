@@ -5,7 +5,7 @@ Summary:        Fast neofetch-like system information tool
 
 License:        MIT
 URL:            https://github.com/fastfetch-cli/fastfetch
-Source0:        %{url}/archive/%{version}/%{name}-%{version}.tar.gz
+Source0:        %{url}/archive/refs/tags/%{version}.tar.gz
 
 BuildRequires:  cmake
 BuildRequires:  python3
