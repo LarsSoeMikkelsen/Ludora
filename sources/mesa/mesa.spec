@@ -1,13 +1,3 @@
-## START: Set by rpmautospec
-## (rpmautospec version 0.8.4)
-## RPMAUTOSPEC: autorelease
-%define autorelease(e:s:pb:n) %{?-p:0.}%{lua:
-    release_number = 1;
-    base_release_number = tonumber(rpm.expand("%{?-b*}%{!?-b:1}"));
-    print(release_number + base_release_number - 1);
-}%{?-e:.%{-e*}}%{?-s:.%{-s*}}%{!?-n:%{?dist}}
-## END: Set by rpmautospec
-
 %global _default_patch_fuzz 2
 
 %ifnarch s390x
@@ -83,7 +73,7 @@
 
 Name:           mesa
 Summary:        Mesa graphics libraries
-Version:        26.1.1
+Version:        26.1.2
 Release:        %autorelease
 License:        MIT AND BSD-3-Clause AND SGI-B-2.0
 URL:            http://www.mesa3d.org
@@ -724,5 +714,3 @@ ln -s libGLX_mesa.so.0 %{buildroot}%{_libdir}/libGLX_system.so.0
 %{_datadir}/vulkan/icd.d/powervr_mesa_icd.*.json
 %endif
 %endif
-
-%changelog
