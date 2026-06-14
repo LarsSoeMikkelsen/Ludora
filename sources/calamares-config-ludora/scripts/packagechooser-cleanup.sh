@@ -55,10 +55,15 @@ remove_if_missing \
 
 # Kernel: all-or-nothing — only kernel-ludora is listed in netinstall so the
 # group is toggled as a unit; removing it also removes -core and -modules.
-# protect_running_kernel=false is required because the live ISO itself runs
-# kernel-ludora, so DNF would otherwise refuse to remove it.
+# protect_running_kernel=false is required in both branches: the live ISO runs
+# kernel-ludora, so DNF inside the chroot may protect either kernel depending
+# on how it resolves uname -r. Using rpm -q to get exact installed NEVRAs
+# avoids dnf5 accidentally matching via Provides: kernel.
 if selected "kernel-ludora"; then
-    dnf remove -y --noautoremove kernel kernel-core kernel-modules || true
+    STD_KERNELS=$(rpm -q --queryformat '%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH} ' \
+        kernel kernel-core kernel-modules 2>/dev/null | tr ' ' '\n' | grep -v 'not installed' | tr '\n' ' ')
+    [ -n "$STD_KERNELS" ] && dnf remove -y --noautoremove \
+        --setopt=protect_running_kernel=false $STD_KERNELS || true
 else
     dnf remove -y --noautoremove --setopt=protect_running_kernel=false \
         kernel-ludora kernel-ludora-core kernel-ludora-modules || true
