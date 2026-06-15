@@ -49,6 +49,8 @@ really likes Linux and Gaming.
 
 %build
 %set_build_flags
+mkdir -p ~/.lazarus
+cp /etc/lazarus/environmentoptions.xml ~/.lazarus/environmentoptions.xml
 %make_build
 
 
