@@ -18,6 +18,7 @@ BuildRequires:  lazarus-lcl-qt6
 BuildRequires:  libappstream-glib
 BuildRequires:  libglvnd-devel
 BuildRequires:  make
+BuildRequires:  sdl2-compat-devel
 
 Requires:       hicolor-icon-theme
 Requires:       mangohud%{?_isa}
