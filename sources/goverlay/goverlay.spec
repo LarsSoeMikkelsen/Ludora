@@ -70,7 +70,9 @@ desktop-file-validate %{buildroot}%{_datadir}/applications/*.desktop
 %{_datadir}/applications/*.desktop
 %{_datadir}/icons/hicolor/*/*/*.png
 %{_datadir}/%{name}/assets/
+%{_datadir}/%{name}/bgmod/
 %{_datadir}/%{name}/data/
 %{_libexecdir}/%{name}
+%{_libexecdir}/pascube
 %{_mandir}/man1/*.1*
 %{_metainfodir}/*.xml
