@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        15%{?dist}
+Release:        16%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
