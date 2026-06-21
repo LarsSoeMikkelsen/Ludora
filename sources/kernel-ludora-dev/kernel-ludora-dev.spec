@@ -123,6 +123,8 @@ The meta package for %{name}.
     cp .config %{buildroot}%{_kernel_dir}/config
     cp System.map %{buildroot}%{_kernel_dir}/System.map
 
+    rm -f %{buildroot}%{_kernel_dir}/build
+
     install -dm755 %{buildroot}/boot
     dd if=/dev/zero of=%{buildroot}/boot/initramfs-%{_kver}.img bs=1M count=90
 
@@ -216,3 +218,7 @@ Kernel modules for %{name}-core.
     %{_kernel_dir}/kernel
 
 %files
+
+%changelog
+* Sun Jun 21 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.1.1-200.ludora
+- Initial clean kernel.org + BORE build
