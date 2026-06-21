@@ -10,43 +10,28 @@
 %undefine _include_frame_pointers
 
 # Linux Kernel Versions
-%define _basekver 7.0
-%define _stablekver 4
+%define _basekver 7.1
+%define _stablekver 1
+%define _releasekver 200
 %define _rpmver %{version}-%{release}
 %define _kver %{_rpmver}.%{_arch}
 
-%define _tarkver %{version}
-%define _tag cachyos-%{_tarkver}-1
-%define _releasekver 200
-
 # Define the tickrate used by the kernel
 # Valid values: 100, 250, 300, 500, 600, 750 and 1000
-# An invalid value will not fail and continue to use
-# 1000Hz tickrate
 %define _hz_tick 1000
 
-# Defines the x86_64 ISA level used
-# to compile the kernel
+# Defines the x86_64 ISA level used to compile the kernel
 # Valid values are 1-4
-# An invalid value will continue and use
-# x86_64_v3
 %define _x86_64_lvl 3
 
 # https://fedoraproject.org/wiki/Changes/EncourageI686LeafRemoval
 ExcludeArch:    %{ix86}
 
-# Define variables for directory paths
-# to be used during packaging
 %define _kernel_dir /lib/modules/%{_kver}
 %define _devel_dir %{_usrsrc}/kernels/%{_kver}
 
-%define _patch_src https://raw.githubusercontent.com/CachyOS/kernel-patches/master/%{_basekver}
-
-
-%define _module_args KERNEL_UNAME=%{_kver} IGNORE_PREEMPT_RT_PRESENCE=1 SYSSRC=%{_builddir}/linux-%{_tag} SYSOUT=%{_builddir}/linux-%{_tag}
-
 Name:           kernel-ludora-dev
-Summary:        Linux BORE CachyOS kernel
+Summary:        Linux BORE kernel
 Version:        %{_basekver}.%{_stablekver}
 Release:        %{_releasekver}.ludora%{?dist}
 License:        GPL-2.0-only
@@ -75,36 +60,26 @@ BuildRequires:  perl-interpreter
 BuildRequires:  python3-devel
 BuildRequires:  python3-pyyaml
 BuildRequires:  python-srpm-macros
-BuildRequires:  clang
-BuildRequires:  lld
-BuildRequires:  llvm
 
-# Indexes 0-9 are reserved for the kernel. 10-19 will be reserved for NVIDIA
-Source0:        https://github.com/CachyOS/linux/archive/refs/tags/%{_tag}.tar.gz
-Source1:        https://raw.githubusercontent.com/CachyOS/linux-cachyos/master/linux-cachyos/config
+Source0:        https://cdn.kernel.org/pub/linux/kernel/v7.x/linux-%{version}.tar.xz
+Source1:        config
 
-Patch0:         %{_patch_src}/sched/0001-bore-cachy.patch
-Patch1:         0001-usb-core-truncate-string-descriptors-at-first-C0-con.patch
+Patch0:         0001-bore.patch
 
 %description
-    The meta package for %{name}.
+The meta package for %{name}.
 
 %prep
-%setup -q %{?SOURCE10:-b 10} -n linux-%{_tag}
+%setup -q -n linux-%{version}
 %autopatch -p1 -v -M 9
 
     cp %{SOURCE1} .config
+    make olddefconfig
 
-    # Default configs to always enable
-    # Enable CACHY sauce and the scheduler
-    # used in the default linux-cachyos kernel
-    scripts/config -e CACHY -e SCHED_BORE
+    scripts/config -e SCHED_BORE
 
-    # Use SElinux by default
-    # https://github.com/sirlucjan/copr-linux-cachyos/pull/1
     scripts/config --set-str CONFIG_LSM lockdown,yama,integrity,selinux,bpf,landlock
 
-    # Do not change the system's hostname
     scripts/config -u DEFAULT_HOSTNAME
 
     case %{_hz_tick} in
@@ -122,132 +97,37 @@ Patch1:         0001-usb-core-truncate-string-descriptors-at-first-C0-con.patch
         scripts/config --set-val X86_64_VERSION 3
     %endif
 
-    # Enable Secure boot support
-    scripts/config -e CONFIG_IMA_SECURE_AND_OR_TRUSTED_BOOT
-    scripts/config -e CONFIG_IMA
-    scripts/config -e CONFIG_IMA_APPRAISE_BOOTPARAM
-    scripts/config -e CONFIG_IMA_APPRAISE
-    scripts/config -e CONFIG_IMA_ARCH_POLICY
+    # Gaming tuning
+    # Full static preemption — lower latency than Fedora's PREEMPT_DYNAMIC/LAZY default
+    scripts/config -d PREEMPT_NONE -d PREEMPT_VOLUNTARY -d PREEMPT_LAZY -d PREEMPT_DYNAMIC -e PREEMPT
 
-    diff -u %{SOURCE1} .config || :
+    # BBR built-in and default — better latency under load than cubic
+    scripts/config -e TCP_CONG_BBR --set-str DEFAULT_TCP_CONG bbr
 
+    # FQ built-in — pairs with BBR for per-flow pacing
+    scripts/config -e NET_SCH_FQ
+
+    # LATENCYTOP adds per-task latency tracking overhead with no gaming benefit
+    scripts/config -d LATENCYTOP
+
+    # NUMA auto-balancing adds latency jitter on single-socket systems
+    scripts/config -d NUMA_BALANCING_DEFAULT_ENABLED
 
 %build
     %make_build EXTRAVERSION=-%{release}.%{_arch} all
-    %make_build -C tools/bpf/bpftool vmlinux.h feature-clang-bpf-co-re=1
 
 %install
-    echo "Installing the kernel image..."
     install -Dm644 "$(%make_build -s image_name)" "%{buildroot}%{_kernel_dir}/vmlinuz"
     zstdmt -19 < Module.symvers > %{buildroot}%{_kernel_dir}/symvers.zst
-
-    echo "Installing kernel modules..."
     ZSTD_CLEVEL=19 %make_build INSTALL_MOD_PATH="%{buildroot}" INSTALL_MOD_STRIP=1 DEPMOD=/doesnt/exist modules_install
-
-    echo "Installing files for the development package..."
-    install -Dt %{buildroot}%{_devel_dir} -m644 .config Makefile Module.symvers System.map tools/bpf/bpftool/vmlinux.h
     cp .config %{buildroot}%{_kernel_dir}/config
     cp System.map %{buildroot}%{_kernel_dir}/System.map
-    cp --parents `find  -type f -name "Makefile*" -o -name "Kconfig*"` %{buildroot}%{_devel_dir}
-    rm -rf %{buildroot}%{_devel_dir}/scripts
-    rm -rf %{buildroot}%{_devel_dir}/include
-    cp -a scripts %{buildroot}%{_devel_dir}
-    rm -rf %{buildroot}%{_devel_dir}/scripts/tracing
-    rm -f %{buildroot}%{_devel_dir}/scripts/spdxcheck.py
 
-    # The cp commands below are needed for parity with Fedora's packaging
-    # Install files that are needed for `make scripts` to succeed
-    cp -a --parents security/selinux/include/classmap.h %{buildroot}%{_devel_dir}
-    cp -a --parents security/selinux/include/initial_sid_to_string.h %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/tools/be_byteshift.h %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/tools/le_byteshift.h %{buildroot}%{_devel_dir}
-
-    # Install files that are needed for `make prepare` to succeed -- Generic
-    cp -a --parents tools/include/linux/compiler* %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/linux/types.h %{buildroot}%{_devel_dir}
-    cp -a --parents tools/build/Build.include %{buildroot}%{_devel_dir}
-    cp --parents tools/build/fixdep.c %{buildroot}%{_devel_dir}
-    cp --parents tools/objtool/sync-check.sh %{buildroot}%{_devel_dir}
-    cp -a --parents tools/bpf/resolve_btfids %{buildroot}%{_devel_dir}
-
-    cp --parents security/selinux/include/policycap_names.h %{buildroot}%{_devel_dir}
-    cp --parents security/selinux/include/policycap.h %{buildroot}%{_devel_dir}
-
-    cp -a --parents tools/include/asm %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/asm-generic %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/linux %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/uapi/asm %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/uapi/asm-generic %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/uapi/linux %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/vdso %{buildroot}%{_devel_dir}
-    cp --parents tools/scripts/utilities.mak %{buildroot}%{_devel_dir}
-    cp -a --parents tools/lib/subcmd %{buildroot}%{_devel_dir}
-    cp --parents tools/lib/*.c %{buildroot}%{_devel_dir}
-    cp --parents tools/objtool/*.[ch] %{buildroot}%{_devel_dir}
-    cp --parents tools/objtool/Build %{buildroot}%{_devel_dir}
-    cp --parents tools/objtool/include/objtool/*.h %{buildroot}%{_devel_dir}
-    cp -a --parents tools/lib/bpf %{buildroot}%{_devel_dir}
-    cp --parents tools/lib/bpf/Build %{buildroot}%{_devel_dir}
-
-    # Misc headers
-    cp -a --parents arch/x86/include %{buildroot}%{_devel_dir}
-    cp -a --parents tools/arch/x86/include %{buildroot}%{_devel_dir}
-    cp -a include %{buildroot}%{_devel_dir}/include
-    cp -a sound/soc/sof/sof-audio.h %{buildroot}%{_devel_dir}/sound/soc/sof
-    cp -a tools/objtool/objtool %{buildroot}%{_devel_dir}/tools/objtool/
-    cp -a tools/objtool/fixdep %{buildroot}%{_devel_dir}/tools/objtool/
-
-    # Install files that are needed for `make prepare` to succeed -- for x86_64
-    cp -a --parents arch/x86/entry/syscalls/syscall_32.tbl %{buildroot}%{_devel_dir}
-    cp -a --parents arch/x86/entry/syscalls/syscall_64.tbl %{buildroot}%{_devel_dir}
-    cp -a --parents arch/x86/tools/relocs_32.c %{buildroot}%{_devel_dir}
-    cp -a --parents arch/x86/tools/relocs_64.c %{buildroot}%{_devel_dir}
-    cp -a --parents arch/x86/tools/relocs.c %{buildroot}%{_devel_dir}
-    cp -a --parents arch/x86/tools/relocs_common.c %{buildroot}%{_devel_dir}
-    cp -a --parents arch/x86/tools/relocs.h %{buildroot}%{_devel_dir}
-    cp -a --parents arch/x86/purgatory/purgatory.c %{buildroot}%{_devel_dir}
-    cp -a --parents arch/x86/purgatory/stack.S %{buildroot}%{_devel_dir}
-    cp -a --parents arch/x86/purgatory/setup-x86_64.S %{buildroot}%{_devel_dir}
-    cp -a --parents arch/x86/purgatory/entry64.S %{buildroot}%{_devel_dir}
-    cp -a --parents arch/x86/boot/string.h %{buildroot}%{_devel_dir}
-    cp -a --parents arch/x86/boot/string.c %{buildroot}%{_devel_dir}
-    cp -a --parents arch/x86/boot/ctype.h %{buildroot}%{_devel_dir}
-
-    cp -a --parents scripts/syscalltbl.sh %{buildroot}%{_devel_dir}
-    cp -a --parents scripts/syscallhdr.sh %{buildroot}%{_devel_dir}
-
-    cp -a --parents tools/arch/x86/include/asm %{buildroot}%{_devel_dir}
-    cp -a --parents tools/arch/x86/include/uapi/asm %{buildroot}%{_devel_dir}
-    cp -a --parents tools/objtool/arch/x86/lib %{buildroot}%{_devel_dir}
-    cp -a --parents tools/arch/x86/lib/ %{buildroot}%{_devel_dir}
-    cp -a --parents tools/arch/x86/tools/gen-insn-attr-x86.awk %{buildroot}%{_devel_dir}
-    cp -a --parents tools/objtool/arch/x86/ %{buildroot}%{_devel_dir}
-
-    # Final cleanups ala Fedora
-    echo "Cleaning up development files..."
-    find %{buildroot}%{_devel_dir}/scripts \( -iname "*.o" -o -iname "*.cmd" \) -exec rm -f {} +
-    find %{buildroot}%{_devel_dir}/tools \( -iname "*.o" -o -iname "*.cmd" \) -exec rm -f {} +
-    touch -r %{buildroot}%{_devel_dir}/Makefile \
-        %{buildroot}%{_devel_dir}/include/generated/uapi/linux/version.h \
-        %{buildroot}%{_devel_dir}/include/config/auto.conf
-
-    # These links will be owned by the modules package, creating a broken
-    # link unless the -devel package is installed. why??
-    rm -rf %{buildroot}%{_kernel_dir}/build
-    ln -s %{_devel_dir} %{buildroot}%{_kernel_dir}/build
-    ln -s %{_kernel_dir}/build %{buildroot}%{_kernel_dir}/source
-
-    # Create stub initramfs to inflate disk space requirements.
-    # This should hopefully prevent some initramfs failures due to
-    # insufficient space in /boot (#bz #530778)
-    # 90 seems to be a safe value nowadays. It is slightly inflated than the
-    # measured average to also account for installed vmlinuz in /boot
-    echo "Creating stub initramfs..."
     install -dm755 %{buildroot}/boot
     dd if=/dev/zero of=%{buildroot}/boot/initramfs-%{_kver}.img bs=1M count=90
 
 %package core
-Summary:        Linux BORE Cachy Sauce Kernel by CachyOS with other patches and improvements
+Summary:        Linux BORE kernel
 AutoReq:        no
 Conflicts:      xfsprogs < 4.3.0-1
 Conflicts:      xorg-x11-drv-vmmouse < 13.0.99
@@ -265,10 +145,8 @@ Requires(preun):systemd >= 200
 Recommends:     linux-firmware
 
 %description core
-    The kernel package contains the Linux kernel (vmlinuz), the core of any
-    Linux operating system.  The kernel handles the basic functions
-    of the operating system: memory allocation, process allocation, device
-    input and output, etc.
+The kernel package contains the Linux kernel (vmlinuz), the core of any
+Linux operating system.
 
 %post core
     mkdir -p %{_localstatedir}/lib/rpm-state/%{name}
@@ -304,19 +182,18 @@ Recommends:     linux-firmware
     %{_kernel_dir}/System.map
 
 %package modules
-Summary:        Kernel modules package for %{name}
+Summary:        Kernel modules for %{name}
 Provides:       kernel-modules = %{_rpmver}
 Provides:       kernel-modules-core = %{_rpmver}
 Provides:       kernel-modules-extra = %{_rpmver}
 Provides:       kernel-modules-uname-r = %{_kver}
 Provides:       kernel-modules-core-uname-r = %{_kver}
 Provides:       kernel-modules-extra-uname-r = %{_kver}
-Provides:       v4l2loopback-kmod = 0.14.0
 Provides:       installonlypkg(kernel-module)
 Requires:       kernel-uname-r = %{_kver}
 
 %description modules
-    This package provides kernel modules for the %{name}-core kernel package.
+Kernel modules for %{name}-core.
 
 %post modules
     if [ ! -f %{_localstatedir}/lib/rpm-state/%{name}/installing_core_%{_kver} ]; then
@@ -329,7 +206,6 @@ Requires:       kernel-uname-r = %{_kver}
     /sbin/depmod -a %{_kver}
     if [ ! -e /run/ostree-booted ]; then
         if [ -f %{_localstatedir}/lib/rpm-state/%{name}/need_to_run_dracut_%{_kver} ]; then
-            echo "Running: dracut -f --kver %{_kver}"
             dracut -f --kver "%{_kver}" || exit $?
         fi
     fi
@@ -337,52 +213,6 @@ Requires:       kernel-uname-r = %{_kver}
 %files modules
     %dir %{_kernel_dir}
     %{_kernel_dir}/modules.order
-    %{_kernel_dir}/build
-    %{_kernel_dir}/source
     %{_kernel_dir}/kernel
-
-%package devel
-Summary:        Development package for building kernel modules to match %{name}
-Provides:       kernel-devel = %{_rpmver}
-Provides:       kernel-devel-uname-r = %{_kver}
-Provides:       installonlypkg(kernel)
-AutoReqProv:    no
-Requires(pre):  findutils
-Requires:       findutils
-Requires:       perl-interpreter
-Requires:       openssl-devel
-Requires:       elfutils-libelf-devel
-Requires:       bison
-Requires:       flex
-Requires:       make
-
-%description devel
-    This package provides kernel headers and makefiles sufficient to build modules against %{name}.
-
-%post devel
-    if [ -f /etc/sysconfig/kernel ]; then
-        . /etc/sysconfig/kernel || exit $?
-    fi
-    if [ "$HARDLINK" != "no" -a -x /usr/bin/hardlink -a ! -e /run/ostree-booted ]; then
-        (cd /usr/src/kernels/%{_kver} &&
-        /usr/bin/find . -type f | while read f; do
-            hardlink -c /usr/src/kernels/*%{?dist}.*/$f $f > /dev/null
-        done;
-        )
-    fi
-
-%files devel
-    %{_devel_dir}
-
-%package devel-matched
-Summary:        Meta package to install matching core and devel packages for %{name}
-Provides:       kernel-devel-matched = %{_rpmver}
-Requires:       %{name}-core = %{_rpmver}
-Requires:       %{name}-devel = %{_rpmver}
-
-%description devel-matched
-    This meta package is used to install matching core and devel packages for %{name}.
-
-%files devel-matched
 
 %files
