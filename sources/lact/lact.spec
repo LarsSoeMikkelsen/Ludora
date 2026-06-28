@@ -5,19 +5,29 @@ Summary:        GPU control utility
 License:        MIT
 URL:            https://github.com/ilya-zlobintsev/LACT
 Source0:        https://github.com/ilya-zlobintsev/LACT/archive/refs/tags/v%{version}.tar.gz
+Source1:        https://raw.githubusercontent.com/LarsSoeMikkelsen/Ludora/main/sources/lact/lact-%{version}-vendor.tar.gz
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:  rust cargo gtk4-devel gcc libdrm-devel dbus libadwaita-devel curl make clang git vulkan-tools clinfo
-Requires:       gtk4 libdrm libadwaita hwdata vulkan-tools clinfo
+BuildRequires:  rust cargo gtk4-devel gcc libdrm-devel dbus libadwaita-devel libdisplay-info-devel curl make clang git vulkan-tools clinfo
+Requires:       gtk4 libdrm libadwaita libdisplay-info hwdata vulkan-tools clinfo
 
 %description
 GPU control utility
 
 %prep
 %setup -q -n LACT-%{version}
+tar xf %{SOURCE1} --strip-components=1
+mkdir -p .cargo
+cat > .cargo/config.toml << 'EOF'
+[source.crates-io]
+replace-with = "vendored-sources"
+
+[source.vendored-sources]
+directory = "vendor"
+EOF
 
 %build
-VERGEN_GIT_SHA=454a6e2 make build-release %{?_smp_mflags}
+VERGEN_GIT_SHA=6a7d096 make build-release %{?_smp_mflags}
 
 %install
 rm -rf %{buildroot}
