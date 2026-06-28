@@ -1,12 +1,3 @@
-## START: Set by rpmautospec
-## (rpmautospec version 0.8.4)
-## RPMAUTOSPEC: autorelease
-%define autorelease(e:s:pb:n) %{?-p:0.}%{lua:
-    release_number = 1;
-    base_release_number = tonumber(rpm.expand("%{?-b*}%{!?-b:1}"));
-    print(release_number + base_release_number - 1);
-}%{?-e:.%{-e*}}%{?-s:.%{-s*}}%{!?-n:%{?dist}}
-## END: Set by rpmautospec
 
 %global _default_patch_fuzz 2
 
@@ -84,7 +75,7 @@
 Name:           mesa
 Summary:        Mesa graphics libraries
 Version:        26.1.3
-Release:        %autorelease
+Release:        2%{?dist}
 License:        MIT AND BSD-3-Clause AND SGI-B-2.0
 URL:            http://www.mesa3d.org
 
