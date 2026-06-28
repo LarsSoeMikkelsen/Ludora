@@ -270,26 +270,14 @@ Provides:       libEGL-devel%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Summary:        Mesa-based DRI drivers
 Requires:       %{name}-filesystem%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 Requires:       %{name}-libgbm%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires:       (%{name}-libgallium%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release} or %{name}-libgallium-freeworld%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release})
-%if 0%{?with_va}
-Recommends:     %{name}-va-drivers%{?_isa}
-%endif
 Obsoletes:      %{name}-libglapi < 25.0.0~rc2-1
+Obsoletes:      %{name}-va-drivers < 26.0.0-5
+Provides:       %{name}-va-drivers = %{?epoch:%{epoch}:}%{version}-%{release}
+Provides:       %{name}-va-drivers%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+Obsoletes:      %{name}-vaapi-drivers < 22.2.0-5
+Obsoletes:      %{name}-libgallium < %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description dri-drivers
-%{summary}.
-
-%package libgallium
-Summary:        Mesa-based libgallium driver
-Requires:       %{name}-filesystem%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-%if 0%{?with_va}
-Recommends:     %{name}-va-drivers%{?_isa}
-%endif
-Provides:       %{name}-libgallium%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-Obsoletes:      %{name}-va-drivers < %{?epoch:%{epoch}:}%{version}-%{release}
-Provides:       %{name}-va-drivers%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
-
-%description libgallium
 %{summary}.
 
 %package libgbm
@@ -551,6 +539,7 @@ ln -s libGLX_mesa.so.0 %{buildroot}%{_libdir}/libGLX_system.so.0
 
 %files dri-drivers
 %{_datadir}/drirc.d/00-mesa-defaults.conf
+%{_libdir}/libgallium-*.so
 %{_libdir}/gbm/dri_gbm.so
 %{_libdir}/dri/kms_swrast_dri.so
 %{_libdir}/dri/libdril_dri.so
@@ -567,12 +556,14 @@ ln -s libGLX_mesa.so.0 %{buildroot}%{_libdir}/libGLX_system.so.0
 %endif
 %{_libdir}/dri/radeonsi_dri.so
 %endif
-%ifarch %{ix86} aarch64 x86_64
+%ifarch %{ix86} x86_64
 %{_libdir}/dri/crocus_dri.so
-%{_libdir}/dri/i915_dri.so
 %{_libdir}/dri/iris_dri.so
+%if 0%{?with_i915}
+%{_libdir}/dri/i915_dri.so
 %endif
-%ifarch aarch64 x86_64 %{ix86}
+%endif
+%ifnarch s390x
 %if 0%{?with_asahi}
 %{_libdir}/dri/apple_dri.so
 %{_libdir}/dri/asahi_dri.so
@@ -650,9 +641,6 @@ ln -s libGLX_mesa.so.0 %{buildroot}%{_libdir}/libGLX_system.so.0
 %if 0%{?with_vulkan_hw}
 %{_libdir}/dri/zink_dri.so
 %endif
-
-%files libgallium
-%{_libdir}/libgallium-*.so
 %if 0%{?with_va}
 %{_libdir}/dri/nouveau_drv_video.so
 %if 0%{?with_r600}
