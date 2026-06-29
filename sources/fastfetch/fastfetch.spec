@@ -1,5 +1,5 @@
 Name:           fastfetch
-Version:        2.65.1
+Version:        2.65.2
 Release:        1%{?dist}
 Summary:        Fast neofetch-like system information tool
 
