@@ -1,7 +1,7 @@
 #global pre_release .pre1
 
 Name:		libva
-Version:	2.23.0
+Version:	2.24.1
 Release:	%autorelease
 Summary:	Video Acceleration (VA) API for Linux
 # va/wayland/wayland-drm.xml is HPND-sell-variant

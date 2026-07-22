@@ -1,5 +1,5 @@
 Name:           goverlay
-Version:        1.8.4
+Version:        1.8.9
 Release:        %autorelease
 Epoch:          2
 Summary:        Project that aims to create a Graphical UI to help manage Linux overlays

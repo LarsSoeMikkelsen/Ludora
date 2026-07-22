@@ -11,7 +11,7 @@
 
 # Linux Kernel Versions
 %define _basekver 7.1
-%define _stablekver 1
+%define _stablekver 4
 %define _releasekver 200
 %define _rpmver %{version}-%{release}
 %define _kver %{_rpmver}.%{_arch}
@@ -220,5 +220,9 @@ Kernel modules for %{name}-core.
 %files
 
 %changelog
+* Wed Jul 22 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.1.4-200.ludora
+- Update to kernel 7.1.4
+- BORE patch verified against current CachyOS 7.1 branch (Piotr Gorski variant, unchanged since 7.1.3)
+
 * Sun Jun 21 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.1.1-200.ludora
 - Initial clean kernel.org + BORE build
