@@ -74,5 +74,7 @@ desktop-file-validate %{buildroot}%{_datadir}/applications/*.desktop
 %{_datadir}/%{name}/data/
 %{_libexecdir}/%{name}
 %{_libexecdir}/pascube
+%{_libexecdir}/bgmod
+%{_libexecdir}/bgmod-uninstaller
 %{_mandir}/man1/*.1*
 %{_metainfodir}/*.xml
