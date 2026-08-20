@@ -20,12 +20,17 @@ BuildRequires:  libappstream-glib
 BuildRequires:  meson >= 1.0.0
 BuildRequires:  ninja-build
 BuildRequires:  vala
+BuildRequires:  pkgconfig(appstream)
+BuildRequires:  pkgconfig(cairo)
 BuildRequires:  pkgconfig(gee-0.8)
+BuildRequires:  pkgconfig(gio-unix-2.0)
 BuildRequires:  pkgconfig(gtk4)
 BuildRequires:  pkgconfig(json-glib-1.0)
-BuildRequires:  pkgconfig(libadwaita-1) >= 1.5.0
+BuildRequires:  pkgconfig(libadwaita-1) >= 1.6
 BuildRequires:  pkgconfig(libarchive)
+BuildRequires:  pkgconfig(libnotify)
 BuildRequires:  pkgconfig(libsoup-3.0)
+BuildRequires:  pkgconfig(sdl3) >= 3.2.0
 
 # Need for TLS support
 Requires:       glib-networking
