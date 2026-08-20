@@ -1,50 +1,50 @@
+%global debug_package %{nil}
+
 Name:           lact
-Version:        0.9.1
-Release:        1
+Version:        0.10.0
+Release:        1%{?dist}
 Summary:        GPU control utility
 License:        MIT
 URL:            https://github.com/ilya-zlobintsev/LACT
-Source0:        https://github.com/ilya-zlobintsev/LACT/archive/refs/tags/v%{version}.tar.gz
-Source1:        https://raw.githubusercontent.com/LarsSoeMikkelsen/Ludora/main/sources/lact/lact-%{version}-vendor.tar.gz
+# Repackages upstream's own signed Fedora 44 build instead of compiling from
+# source: COPR has no network during %%build (cargo needs it to fetch crates
+# without a pre-made vendor tarball), and no Rust toolchain is available
+# locally to regenerate one. Upstream publishes a Fedora-44-specific binary
+# for every release, signed with the key at https://github.com/ilya-zlobintsev/LACT/releases/download/v%{version}/lact.pubkey
+Source0:        %{url}/releases/download/v%{version}/lact-%{version}-0.x86_64.fedora-44.rpm
+Source1:        https://raw.githubusercontent.com/ilya-zlobintsev/LACT/v%{version}/LICENSE
 
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:  rust cargo gtk4-devel gcc libdrm-devel dbus libadwaita-devel libdisplay-info-devel curl make clang git vulkan-tools clinfo
+ExclusiveArch:  x86_64
 Requires:       gtk4 libdrm libadwaita libdisplay-info hwdata vulkan-tools clinfo
 
 %description
 GPU control utility
 
 %prep
-%setup -q -n LACT-%{version}
-tar xf %{SOURCE1} --strip-components=1
-mkdir -p .cargo
-cat > .cargo/config.toml << 'EOF'
-[source.crates-io]
-replace-with = "vendored-sources"
-
-[source.vendored-sources]
-directory = "vendor"
-EOF
+rpm2cpio %{SOURCE0} | cpio -idm
+cp %{SOURCE1} .
 
 %build
-VERGEN_GIT_SHA=6a7d096 make build-release %{?_smp_mflags}
+# nothing to build - repackaging upstream's prebuilt binary
 
 %install
-rm -rf %{buildroot}
-make install PREFIX=/usr DESTDIR=%{buildroot}
+cp -a usr %{buildroot}/
 
 %files
-%defattr(-,root,root,-)
 %license LICENSE
-%doc README.md
 /usr/bin/lact
 /usr/lib/systemd/system/lactd.service
 /usr/share/applications/io.github.ilya_zlobintsev.LACT.desktop
 /usr/share/icons/hicolor/512x512/apps/io.github.ilya_zlobintsev.LACT.png
 /usr/share/icons/hicolor/scalable/apps/io.github.ilya_zlobintsev.LACT.svg
 /usr/share/metainfo/io.github.ilya_zlobintsev.LACT.metainfo.xml
+/usr/share/polkit-1/actions/io.github.ilya_zlobintsev.LACT.policy
 
 %changelog
+* Thu Aug 20 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 0.10.0-1
+- Switch to repackaging upstream's official signed Fedora 44 binary release
+  instead of building from source - no Rust toolchain available locally to
+  regenerate the cargo vendor tarball the source build needs.
 * Sat Jun 28 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 0.9.1-1
 - Update to v0.9.1
 * Sat Apr 25 2026 - ilya-zlobintsev - v0.9.0
