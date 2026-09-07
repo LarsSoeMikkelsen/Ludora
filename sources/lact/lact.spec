@@ -1,7 +1,7 @@
 %global debug_package %{nil}
 
 Name:           lact
-Version:        0.10.0
+Version:        0.10.1
 Release:        1%{?dist}
 Summary:        GPU control utility
 License:        MIT
@@ -41,6 +41,8 @@ cp -a usr %{buildroot}/
 /usr/share/polkit-1/actions/io.github.ilya_zlobintsev.LACT.policy
 
 %changelog
+* Mon Sep 07 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 0.10.1-1
+- Update to v0.10.1
 * Thu Aug 20 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 0.10.0-1
 - Switch to repackaging upstream's official signed Fedora 44 binary release
   instead of building from source - no Rust toolchain available locally to

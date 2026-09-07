@@ -2,7 +2,7 @@
 %define         appid com.vysp3r.ProtonPlus
 
 Name:           protonplus
-Version:        0.6.4
+Version:        0.6.6
 Release:        1%{?dist}
 Summary:        Simple and powerful manager for Wine, Proton, DXVK and VKD3D
 
