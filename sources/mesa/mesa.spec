@@ -107,9 +107,6 @@ Source13:       https://raw.githubusercontent.com/LarsSoeMikkelsen/Ludora/main/s
 Source14:       https://raw.githubusercontent.com/LarsSoeMikkelsen/Ludora/main/sources/mesa/unicode-ident-%{rust_unicode_ident_ver}.tar.gz
 Source15:       https://raw.githubusercontent.com/LarsSoeMikkelsen/Ludora/main/sources/mesa/rustc-hash-%{rustc_hash_ver}.tar.gz
 
-# https://gitlab.com/evlaV/mesa/
-Patch30:        valve.patch
-
 BuildRequires:  meson >= 1.3.0
 BuildRequires:  gcc
 BuildRequires:  gcc-c++
