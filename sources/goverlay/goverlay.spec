@@ -72,6 +72,7 @@ desktop-file-validate %{buildroot}%{_datadir}/applications/*.desktop
 %{_datadir}/%{name}/assets/
 %{_datadir}/%{name}/bgmod/
 %{_datadir}/%{name}/data/
+%{_datadir}/%{name}/languages/
 %{_libexecdir}/%{name}
 %{_libexecdir}/pascube
 %{_libexecdir}/bgmod
