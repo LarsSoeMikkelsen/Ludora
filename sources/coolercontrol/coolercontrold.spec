@@ -4,6 +4,11 @@
 # prevent library files from being installed
 %global cargo_install_lib 0
 
+# brp-mangle-shebangs misidentifies Rust inner attributes (e.g. the brotli
+# crate's `#![allow(unknown_lints)]`) copied into the debug source tree as
+# invalid shebangs, aborting the build. Same fix as kernel-ludora.spec.
+%undefine __brp_mangle_shebangs
+
 Name:           %{project}d
 Version:        5.0.0
 Release:        %{?autorelease}%{!?autorelease:0%{?dist}}
