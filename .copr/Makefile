@@ -76,4 +76,16 @@ srpm:
 			--define "_srcrpmdir $(outdir)" \
 			--define "_builddir $$_dir" \
 			$(spec); \
+	elif echo "$(spec)" | grep -q "snapper-packagekit"; then \
+		_dir=$$(dirname $(spec)) && \
+		tar czf /tmp/snapper-packagekit-1.0.tar.gz \
+			-C $$_dir \
+			--transform 's|^|snapper-packagekit-1.0/|' \
+			snapper-packagekit \
+			snapper-packagekit.service && \
+		rpmbuild -bs \
+			--define "_sourcedir /tmp" \
+			--define "_srcrpmdir $(outdir)" \
+			--define "_builddir $$_dir" \
+			$(spec); \
 	fi

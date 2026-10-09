@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+"""Automatic snapper pre/post snapshots for PackageKit transactions."""
+
+import dbus
+import dbus.mainloop.glib
+from gi.repository import GLib
+import subprocess
+import logging
+import sys
+
+MODIFYING_ROLES = frozenset({
+    'install-packages',
+    'update-packages',
+    'remove-packages',
+    'install-files',
+    'upgrade-system',
+    'repair-system',
+})
+
+log = logging.getLogger('snapper-packagekit')
+
+
+def snap_create(*args):
+    result = subprocess.run(
+        ['snapper', 'create', '--print-number'] + list(args),
+        capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        log.error('snapper create failed: %s', result.stderr.strip())
+        return None
+    return result.stdout.strip()
+
+
+class Watcher:
+    def __init__(self, bus):
+        self.bus = bus
+        self.pending = {}  # transaction object path -> pre snapshot number
+
+    def start(self):
+        pk_obj = self.bus.get_object(
+            'org.freedesktop.PackageKit',
+            '/org/freedesktop/PackageKit',
+        )
+        pk_iface = dbus.Interface(pk_obj, 'org.freedesktop.PackageKit')
+        pk_iface.connect_to_signal('TransactionListChanged', self._on_list_changed)
+
+        # path_keyword lets us identify which transaction sent the Finished signal
+        self.bus.add_signal_receiver(
+            self._on_finished,
+            signal_name='Finished',
+            dbus_interface='org.freedesktop.PackageKit.Transaction',
+            path_keyword='path',
+        )
+        log.info('watching PackageKit transactions')
+
+    def _on_list_changed(self, tids):
+        for tid in tids:
+            if tid not in self.pending:
+                self._attach(tid)
+
+    def _attach(self, tid):
+        self.pending[tid] = None
+        try:
+            obj = self.bus.get_object('org.freedesktop.PackageKit', tid)
+            props = dbus.Interface(obj, 'org.freedesktop.DBus.Properties')
+            role = str(props.Get('org.freedesktop.PackageKit.Transaction', 'Role'))
+        except dbus.DBusException as e:
+            log.warning('could not read role for %s: %s', tid, e)
+            del self.pending[tid]
+            return
+
+        if role not in MODIFYING_ROLES:
+            del self.pending[tid]
+            return
+
+        # Take pre-snapshot before RPM touches anything (download may still be in progress)
+        pre = snap_create(
+            '--type', 'pre',
+            '--cleanup-algorithm', 'number',
+            '--description', f'packagekit {role}',
+        )
+        self.pending[tid] = pre
+        log.info('pre #%s  role=%s', pre, role)
+
+    def _on_finished(self, exit_code, runtime, path=None):
+        pre = self.pending.pop(path, None)
+        if pre is None:
+            return
+        post = snap_create(
+            '--type', 'post',
+            '--cleanup-algorithm', 'number',
+            '--pre-number', pre,
+            '--description', f'packagekit post ({exit_code})',
+        )
+        log.info('post #%s  pre #%s  exit=%s', post, pre, exit_code)
+
+
+def main():
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s %(levelname)s %(message)s',
+        stream=sys.stdout,
+    )
+    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+    bus = dbus.SystemBus()
+    Watcher(bus).start()
+    GLib.MainLoop().run()
+
+
+if __name__ == '__main__':
+    main()

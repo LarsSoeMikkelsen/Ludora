@@ -1,0 +1,16 @@
+[Unit]
+Description=Automatic snapper snapshots for PackageKit transactions
+Documentation=https://ludora.org
+After=dbus.service
+Requires=dbus.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/snapper-packagekit
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
