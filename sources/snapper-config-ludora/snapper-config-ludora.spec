@@ -1,5 +1,5 @@
 Name:           snapper-config-ludora
-Version:        1.8
+Version:        1.9
 Release:        1%{?dist}
 Summary:        Snapper first-boot setup and rollback wrapper for Ludora Gaming Edition
 License:        GPLv3+
@@ -78,6 +78,10 @@ systemctl enable ludora-snapper-setup.service &>/dev/null || :
 /usr/share/applications/ludora-snapshot-commit.desktop
 
 %changelog
+* Tue Oct 13 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.9-1
+- Fix /.snapshots fstab entry on encrypted installs (reuse root device verbatim
+  instead of assuming UUID=); mount only /.snapshots instead of mount -a
+
 * Thu Mar 12 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-3
 - Add snapper-commit script for CachyOS-style snapshot workflow
 - Add automatic KDE notification when booted into snapshot

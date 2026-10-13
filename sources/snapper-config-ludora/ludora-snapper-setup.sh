@@ -38,14 +38,19 @@ snapper -c root set-config \
 
 # Add /.snapshots to fstab so systemd generates a .snapshots.mount unit,
 # which grub-btrfs.path BindsTo= and requires to start.
-# Get the UUID of the btrfs root partition from the existing / entry.
-BTRFS_UUID=$(awk '$2=="/" && $3=="btrfs" {print $1}' /etc/fstab | sed 's/UUID=//')
+# Reuse the device field of the existing / entry verbatim: Calamares writes
+# UUID=... for plain installs but /dev/mapper/luks-... for encrypted ones.
+ROOT_DEV=$(awk '$2=="/" && $3=="btrfs" {print $1}' /etc/fstab)
+if [ -z "${ROOT_DEV}" ]; then
+    echo "ERROR: No btrfs / entry found in /etc/fstab — not adding /.snapshots"
+    exit 1
+fi
 BTRFS_OPTS=$(awk '$2=="/" && $3=="btrfs" {print $4}' /etc/fstab | sed 's/subvol=[^,]*,\?//')
-echo "UUID=${BTRFS_UUID}  /.snapshots  btrfs  subvol=/@/.snapshots,${BTRFS_OPTS}  0 0" >> /etc/fstab
+echo "${ROOT_DEV}  /.snapshots  btrfs  subvol=/@/.snapshots,${BTRFS_OPTS}  0 0" >> /etc/fstab
 
 # Mount /.snapshots now so grub-btrfs.path can start without a reboot
 mkdir -p /.snapshots
-mount -a
+mount /.snapshots
 
 # Reload systemd so it picks up the new .snapshots.mount unit from fstab
 systemctl daemon-reload
