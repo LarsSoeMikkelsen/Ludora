@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        17%{?dist}
+Release:        18%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -80,6 +80,13 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Thu Oct 15 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-18
+- partition: keep /boot unencrypted (noEncrypt) on encrypted installs; fixes
+  double LUKS prompt and slow GRUB unlock (#7, #5)
+- settings: add luksbootkeyfile + dracutlukscfg before fstab so manual
+  layouts with an encrypted /boot get a single (GRUB) prompt; both are
+  no-ops for the default layout
+
 * Thu Oct 15 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-17
 - branding.desc: take the version from %%{fedora} at build time instead of
   hard-coding 44, so F44 and F45 chroots each get the right "Ludora NN"
