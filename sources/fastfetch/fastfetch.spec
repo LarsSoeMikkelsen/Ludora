@@ -1,5 +1,5 @@
 Name:           fastfetch
-Version:        2.69.0
+Version:        2.70.0
 Release:        1%{?dist}
 Summary:        Fast neofetch-like system information tool
 
@@ -25,7 +25,6 @@ BuildRequires:  glib2-devel
 BuildRequires:  ocl-icd-devel
 BuildRequires:  rpm-devel
 BuildRequires:  libdrm-devel
-BuildRequires:  pulseaudio-libs-devel
 BuildRequires:  elfutils-libelf-devel
 BuildRequires:  vulkan-loader-devel
 BuildRequires:  chafa-devel
@@ -41,9 +40,7 @@ Suggests:       ImageMagick-libs
 Suggests:       glib2
 Suggests:       ocl-icd
 Suggests:       chafa-libs
-Suggests:       libddcutil
 Suggests:       libdrm
-Suggests:       pulseaudio-libs
 Suggests:       elfutils-libelf
 
 # The shell completion files were previously provided as separate subpackages
