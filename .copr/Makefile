@@ -65,9 +65,9 @@ srpm:
 			$(spec); \
 	elif echo "$(spec)" | grep -q "ludora-welcome"; then \
 		_dir=$$(dirname $(spec)) && \
-		tar czf /tmp/ludora-welcome-1.6.tar.gz \
+		tar czf /tmp/ludora-welcome-1.7.tar.gz \
 			-C $$_dir \
-			--transform 's|^|ludora-welcome-1.6/|' \
+			--transform 's|^|ludora-welcome-1.7/|' \
 			ludora-welcome.py \
 			ludora-welcome.desktop \
 			ludora-welcome-app.desktop && \

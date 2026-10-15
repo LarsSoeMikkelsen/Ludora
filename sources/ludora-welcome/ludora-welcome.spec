@@ -1,5 +1,5 @@
 Name:           ludora-welcome
-Version:        1.6
+Version:        1.7
 Release:        0%{?dist}
 Summary:        First-boot welcome application for Ludora
 License:        GPLv3+
@@ -38,6 +38,10 @@ install -Dm644 ludora-welcome-app.desktop \
 %{_datadir}/applications/ludora-welcome.desktop
 
 %changelog
+* Thu Oct 15 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 1.7-0
+- NVIDIA tab: install kernel-ludora-devel-matched alongside akmod-nvidia so the
+  module can be built (#9); add black-screen recovery steps
+
 * Thu May 14 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 1.6-0
 - Skip autostart when running as liveuser (live USB session)
 
