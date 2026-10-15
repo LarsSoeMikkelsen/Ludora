@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        16%{?dist}
+Release:        17%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -55,6 +55,7 @@ install -Dm755 scripts/packagechooser-cleanup.sh %{buildroot}%{_sysconfdir}/cala
 
 # Branding
 install -Dm644 branding/branding.desc    %{buildroot}%{_sysconfdir}/calamares/branding/ludora/branding.desc
+sed -i "s/@FEDORA_VERSION@/%{fedora}/g" %{buildroot}%{_sysconfdir}/calamares/branding/ludora/branding.desc
 install -Dm644 branding/show.qml         %{buildroot}%{_sysconfdir}/calamares/branding/ludora/show.qml
 install -Dm644 branding/logo.png         %{buildroot}%{_sysconfdir}/calamares/branding/ludora/logo.png
 install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/branding/ludora/welcome.png
@@ -79,6 +80,10 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Thu Oct 15 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-17
+- branding.desc: take the version from %%{fedora} at build time instead of
+  hard-coding 44, so F44 and F45 chroots each get the right "Ludora NN"
+
 * Wed May 13 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-15
 - Remove ludora-welcome from netinstall packages; pulled in as dep of kde-ludora
 
