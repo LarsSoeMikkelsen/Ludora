@@ -1,8 +1,8 @@
 # Ludora
 
-**Fedora with openSUSE-style bootable snapshots — not just for gamers**
+**Gaming-ready Fedora with openSUSE-style bootable snapshots**
 
-Ludora (*"Ludo"* - Latin: "I am playing" + *"dora"* from Fedora) is a Fedora-based distribution that automatically sets up bootable Btrfs snapshots during installation. The installer lets you pick exactly what gets installed: go full gaming setup, or strip out all the gaming components for a clean Fedora 44 KDE with automatic rollback.
+Ludora (*"Ludo"* - Latin: "I am playing" + *"dora"* from Fedora) is a Fedora-based distribution that automatically sets up bootable Btrfs snapshots during installation. The installer lets you pick exactly what gets installed: go full gaming setup, or strip out all the gaming components for a clean Fedora 44 KDE with automatic snapshots and one-click rollback.
 
 Break your system with a bad update? Just reboot, pick a snapshot from GRUB, and restore with one click.
 
@@ -77,13 +77,13 @@ Browse all files on **[SourceForge](https://sourceforge.net/projects/ludora/file
    - Etcher (cross-platform)
 3. Boot from the USB drive
 4. Install Ludora
-5. **Important**: Select Btrfs filesystem during installation to enable snapshot functionality
+5. **Important**: Keep the default Btrfs filesystem during installation. Snapshots only work on Btrfs
 
 ### Post-Installation
 Ludora is designed to work out of the box. After installation:
 - Log in to KDE Plasma
 - If you installed the Gaming Applications: launch Steam and start gaming
-- If you skipped the gaming components: enjoy a clean Fedora 44 KDE desktop with automatic rollback
+- If you skipped the gaming components: enjoy a clean Fedora 44 KDE desktop with automatic snapshots and one-click rollback
 
 ---
 
@@ -108,7 +108,7 @@ Snapshots are automatically created:
 1. Reboot your system
 2. In the GRUB menu, select the snapshot you want to boot
 3. The system boots into a read-only snapshot environment
-4. Use the automatic rollback script to restore permanently if needed
+4. Confirm the restore popup to make the snapshot permanent if needed
 
 ### Manual Snapshot Management
 ```bash

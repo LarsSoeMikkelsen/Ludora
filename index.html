@@ -3,10 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ludora — Fedora with built-in bootable snapshots</title>
-  <meta name="description" content="Fedora with openSUSE-style bootable Btrfs snapshots and a modular installer. Gaming-ready by default — or skip the gaming stack for a clean KDE desktop with automatic rollback." />
+  <title>Ludora — Gaming-ready Fedora with bootable snapshots</title>
+  <meta name="description" content="Gaming-ready Fedora KDE with openSUSE-style bootable Btrfs snapshots, set up for you at install time. Or skip the gaming stack for a clean KDE desktop. Automatic snapshots, one-click rollback." />
+  <link rel="canonical" href="https://ludora.org/" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ludora.org/" />
+  <meta property="og:title" content="Ludora — Gaming-ready Fedora with bootable snapshots" />
+  <meta property="og:description" content="Gaming-ready Fedora KDE with openSUSE-style bootable Btrfs snapshots, set up for you at install time. Or skip the gaming stack for a clean KDE desktop." />
+  <meta property="og:image" content="https://ludora.org/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Ludora",
+    "applicationCategory": "OperatingSystem",
+    "operatingSystem": "Linux",
+    "softwareVersion": "44.3",
+    "url": "https://ludora.org/",
+    "downloadUrl": "https://sourceforge.net/projects/ludora/files/ludora44/ludora44.3-x86_64.iso/download",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after {
       box-sizing: border-box;
@@ -18,18 +45,14 @@
       --amber: #F2C12E;
       --amber-dim: rgba(242,193,46,0.15);
       --amber-glow: rgba(242,193,46,0.06);
-      --blue: #3C75D9;
-      --blue-dim: rgba(60,117,217,0.15);
-      --blue-glow: rgba(60,117,217,0.06);
       --white: #EFEFEF;
-      --muted: #666;
-      --muted2: #444;
+      --muted: #9a9a9a;
+      --muted2: #777;
       --bg: #080808;
       --bg2: #0e0e0e;
       --bg3: #141414;
       --border: rgba(255,255,255,0.07);
       --border-amber: rgba(242,193,46,0.22);
-      --border-blue: rgba(60,117,217,0.22);
     }
 
     html { scroll-behavior: smooth; }
@@ -39,10 +62,28 @@
       color: var(--white);
       font-family: 'Inter', system-ui, sans-serif;
       -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
     }
 
     a { color: inherit; text-decoration: none; }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px; height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--white);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      padding: 1px 6px;
+      border-radius: 2px;
+      overflow-wrap: anywhere;
+    }
 
     /* ── NOISE TEXTURE ── */
     body::before {
@@ -65,17 +106,13 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 16px;
       padding: 0 40px;
       border-bottom: 1px solid var(--border);
       background: rgba(8,8,8,0.9);
       backdrop-filter: blur(20px) saturate(180%);
     }
 
-    .nav-logo img {
-      height: 44px;
-      display: block;
-      mix-blend-mode: screen;
-    }
 
     .nav-links {
       display: flex;
@@ -92,7 +129,7 @@
       transition: color 0.2s;
     }
 
-    .nav-links a:hover { color: var(--white); }
+    .nav-links a:hover, .nav-links a:focus-visible { color: var(--white); }
 
     .nav-status {
       display: flex;
@@ -103,6 +140,7 @@
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--amber);
+      white-space: nowrap;
     }
 
     .nav-status-dot {
@@ -128,7 +166,7 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 60px 24px;
+      padding: 100px 24px 60px;
       overflow: hidden;
     }
 
@@ -138,6 +176,7 @@
       left: 50%;
       transform: translate(-50%, -56%);
       width: 900px;
+      max-width: 100%;
       height: 600px;
       background: radial-gradient(ellipse at center, rgba(242,193,46,0.055) 0%, transparent 65%);
       pointer-events: none;
@@ -157,35 +196,22 @@
       opacity: 0.35;
     }
 
-    .hero-eyebrow {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--amber);
-      margin-bottom: 28px;
-      padding: 7px 16px;
-      border: 1px solid var(--border-amber);
-      background: var(--amber-dim);
-      border-radius: 2px;
-    }
-
-    .hero-eyebrow-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--amber);
-    }
-
     .hero-logo {
       position: relative;
       width: min(380px, 72vw);
+      height: auto;
       margin-bottom: 28px;
       mix-blend-mode: screen;
+    }
+
+    .hero-title {
+      position: relative;
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.3;
+      max-width: 700px;
+      margin: 0 auto 24px;
     }
 
     .hero-sub {
@@ -193,10 +219,21 @@
       font-size: 1.05rem;
       font-weight: 400;
       color: var(--muted);
-      max-width: 540px;
+      max-width: 560px;
       line-height: 1.7;
       margin-bottom: 44px;
     }
+
+    .text-link {
+      color: var(--white);
+      text-decoration: underline;
+      text-decoration-color: var(--muted2);
+      text-underline-offset: 3px;
+      transition: text-decoration-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .text-link:hover, .text-link:focus-visible { text-decoration-color: var(--white); }
 
     .hero-actions {
       position: relative;
@@ -227,30 +264,19 @@
       border: 1px solid var(--amber);
     }
 
-    .btn-fill:hover {
+    .btn-fill:hover, .btn-fill:focus-visible {
       background: transparent;
       color: var(--amber);
-    }
-
-    .btn-fill-blue {
-      background: var(--blue);
-      color: #fff;
-      border: 1px solid var(--blue);
-    }
-
-    .btn-fill-blue:hover {
-      background: transparent;
-      color: var(--blue);
     }
 
     .btn-outline {
       background: transparent;
       color: var(--muted);
-      border: 1px solid var(--border);
+      border: 1px solid rgba(255,255,255,0.15);
     }
 
-    .btn-outline:hover {
-      border-color: rgba(255,255,255,0.15);
+    .btn-outline:hover, .btn-outline:focus-visible {
+      border-color: rgba(255,255,255,0.3);
       color: var(--white);
     }
 
@@ -258,7 +284,7 @@
       position: relative;
       display: flex;
       align-items: center;
-      gap: 0;
+      gap: 8px 0;
       flex-wrap: wrap;
       justify-content: center;
     }
@@ -277,8 +303,16 @@
 
     .hero-meta-item span {
       color: var(--amber);
-      opacity: 0.7;
+      opacity: 0.8;
     }
+
+    a.hero-meta-item span {
+      text-decoration: underline;
+      text-decoration-color: var(--muted2);
+      text-underline-offset: 2px;
+    }
+
+    a.hero-meta-item:hover span, a.hero-meta-item:focus-visible span { opacity: 1; }
 
     /* ── MARQUEE ── */
     .marquee-wrap {
@@ -321,7 +355,7 @@
     }
 
     /* ── SECTION BASE ── */
-    section { padding: 100px 24px; position: relative; z-index: 1; }
+    section { padding: 100px 24px; position: relative; z-index: 1; scroll-margin-top: 60px; }
 
     .inner {
       max-width: 960px;
@@ -349,13 +383,165 @@
       font-size: 0.9rem;
       color: var(--muted);
       line-height: 1.7;
-      max-width: 500px;
+      max-width: 560px;
       margin-bottom: 52px;
+    }
+
+    /* ── SNAPSHOT STEPS ── */
+    .steps {
+      margin-top: 48px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+      gap: 32px;
+    }
+
+    .step img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .step h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .step p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── CALLOUT ── */
+    .callout {
+      margin-top: 48px;
+      padding: 32px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .callout h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .callout p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .callout p + p { margin-top: 16px; }
+
+    .callout-amber {
+      margin-top: 0;
+      padding: 24px 28px;
+      border-color: var(--border-amber);
+      background: var(--amber-glow);
+      border-radius: 0;
+    }
+
+    .callout-amber .callout-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 8px;
+    }
+
+    .callout-amber p { font-size: 0.88rem; }
+
+    /* ── INSTALLER ── */
+    #install { border-top: 1px solid var(--border); }
+
+    .installer-shots {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+
+    .installer-shots img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      margin-bottom: 12px;
+    }
+
+    .installer-shots p {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .installer-shots strong { color: var(--white); font-weight: 600; }
+
+    .component-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .component-row {
+      background: var(--bg2);
+      padding: 20px 28px;
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+    }
+
+    .component-check {
+      color: var(--amber);
+      opacity: 0.75;
+      flex-shrink: 0;
+      padding-top: 3px;
+    }
+
+    .component-body { flex: 1; }
+
+    .component-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+
+    .component-name { font-size: 0.93rem; font-weight: 600; }
+
+    .badge {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border: 1px solid var(--border-amber);
+      color: var(--amber);
+      border-radius: 1px;
+    }
+
+    .component-desc {
+      font-size: 0.83rem;
+      color: var(--muted);
+      line-height: 1.6;
     }
 
     /* ── FEATURES ── */
     #features {
-      scroll-margin-top: 80px;
       background: var(--bg2);
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
@@ -363,11 +549,13 @@
 
     .feature-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
       gap: 1px;
       background: var(--border);
       border: 1px solid var(--border);
     }
+
+    .feature-grid.spaced { margin-top: 48px; }
 
     .feature-card {
       background: var(--bg2);
@@ -400,7 +588,7 @@
       align-items: center;
       justify-content: center;
       color: var(--amber);
-      opacity: 0.7;
+      opacity: 0.8;
     }
 
     .feature-title {
@@ -419,12 +607,6 @@
     /* ── SCREENSHOT SECTION ── */
     #screenshots {
       border-top: 1px solid var(--border);
-    }
-
-    .screenshot-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 24px;
     }
 
     .screenshot-item {
@@ -453,12 +635,14 @@
       font-weight: 600;
     }
 
-    /* ── ABOUT ── */
-    #about {
+    /* ── ABOUT / HELP ── */
+    #about, #help {
       background: var(--bg2);
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
     }
+
+    #help { background: var(--bg); border-top: none; }
 
     .about-grid {
       display: grid;
@@ -473,6 +657,8 @@
       padding: 36px 36px;
     }
 
+    #help .about-cell { background: var(--bg); }
+
     .about-cell-label {
       font-size: 0.65rem;
       font-weight: 700;
@@ -482,11 +668,19 @@
       margin-bottom: 14px;
     }
 
+    .about-cell h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
     .about-cell p {
       font-size: 0.87rem;
       color: var(--muted);
       line-height: 1.8;
     }
+
+    .about-cell p + p { margin-top: 10px; }
 
     .about-cell p strong {
       color: var(--white);
@@ -501,7 +695,7 @@
       transition: text-decoration-color 0.2s;
     }
 
-    .about-cell p a:hover {
+    .about-cell p a:hover, .about-cell p a:focus-visible {
       text-decoration-color: var(--amber);
     }
 
@@ -521,6 +715,7 @@
       left: 50%;
       transform: translateX(-50%);
       width: 700px;
+      max-width: 100%;
       height: 400px;
       background: radial-gradient(ellipse at center, rgba(242,193,46,0.05) 0%, transparent 70%);
       pointer-events: none;
@@ -553,15 +748,17 @@
 
     .footer-logo img {
       height: 20px;
+      width: auto;
       display: block;
       mix-blend-mode: screen;
-      opacity: 0.5;
+      opacity: 0.6;
     }
 
     .footer-links {
       list-style: none;
       display: flex;
-      gap: 28px;
+      flex-wrap: wrap;
+      gap: 12px 28px;
     }
 
     .footer-links a {
@@ -572,19 +769,34 @@
       transition: color 0.2s;
     }
 
-    .footer-links a:hover { color: var(--muted); }
+    .footer-links a:hover, .footer-links a:focus-visible { color: var(--white); }
 
     .footer-legal {
       font-size: 0.68rem;
-      color: #2a2a2a;
+      color: var(--muted2);
     }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 720px) {
-      nav { padding: 0 20px; }
-      .nav-links { display: none; }
-      .about-grid, .feature-grid { grid-template-columns: 1fr; }
+      nav { padding: 0 16px; }
+      .nav-links { gap: 14px; }
+      .nav-links a { font-size: 0.66rem; letter-spacing: 0.06em; }
+      .nav-links .nav-optional { display: none; }
+      .nav-status { display: none; }
+      .about-grid { grid-template-columns: 1fr; }
+      .about-cell { padding: 28px 24px; }
+      .component-row { padding: 18px 20px; }
       footer { flex-direction: column; align-items: flex-start; padding: 24px 20px; }
+    }
+
+    @media (max-width: 440px) {
+      .nav-links .nav-optional-sm { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .marquee-track, .nav-status-dot { animation: none; }
+      *, *::before, *::after { transition: none !important; }
     }
   </style>
   <script data-goatcounter="https://predze.goatcounter.com/count"
@@ -593,13 +805,13 @@
 <body>
 
   <!-- NAV -->
-  <nav>
-    <a class="nav-logo" href="#"><img src="Ludora_logo.png" alt="Ludora" /></a>
+  <nav aria-label="Main">
     <ul class="nav-links">
       <li><a href="#snapshots">Snapshots</a></li>
-      <li><a href="#install">Install</a></li>
-      <li><a href="#features">Features</a></li>
-      <li><a href="#about">About</a></li>
+      <li class="nav-optional-sm"><a href="#install">Install</a></li>
+      <li class="nav-optional"><a href="#features">Features</a></li>
+      <li class="nav-optional"><a href="#help">Help</a></li>
+      <li><a href="#cta">Download</a></li>
     </ul>
     <div class="nav-status">
       <div class="nav-status-dot"></div>
@@ -607,88 +819,78 @@
     </div>
   </nav>
 
+  <main>
+
   <!-- HERO -->
   <section class="hero">
     <div class="hero-glow"></div>
     <div class="hero-scanlines"></div>
 
-    <div class="hero-eyebrow">
-      <div class="hero-eyebrow-dot"></div>
-      Ludora 44.3 Now Available
-    </div>
+    <img class="hero-logo" src="Ludora_logo.png" alt="" width="600" height="170" />
 
-    <img class="hero-logo" src="Ludora_logo.png" alt="Ludora" />
-
-    <h1 class="hero-title" style="font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.3; margin-bottom: 24px; max-width: 700px; margin-left: auto; margin-right: auto;">
-      Fedora with openSUSE-style bootable snapshots — not just for gamers
+    <h1 class="hero-title">
+      <span class="visually-hidden">Ludora: </span>Gaming-ready Fedora with openSUSE-style bootable snapshots
     </h1>
 
     <p class="hero-sub">
-      Full gaming setup out of the box, or strip it down to a clean KDE desktop with automatic rollback.
-      You choose what gets installed. Setting up bootable snapshots on Fedora manually takes hours — Ludora does it automatically.
-      <a href="#snapshots" style="color: var(--white); text-decoration: underline; text-decoration-color: var(--muted); text-underline-offset: 3px; transition: text-decoration-color 0.2s; white-space: nowrap;" onmouseover="this.style.textDecorationColor='var(--white)'" onmouseout="this.style.textDecorationColor='var(--muted)'">See how it works →</a>
+      A Fedora KDE spin where bootable Btrfs snapshots are set up for you at install time.
+      Keep the full gaming setup, or untick it for a clean KDE desktop. If an update breaks something,
+      boot a snapshot from GRUB and restore it with one click.
+      <a class="text-link" href="#snapshots">See how it works →</a>
     </p>
 
     <div class="hero-actions">
-      <a class="btn btn-fill" href="https://sourceforge.net/projects/ludora/files/ludora44/ludora44.3-x86_64.iso/download" target="_blank">
+      <a class="btn btn-fill" href="https://sourceforge.net/projects/ludora/files/ludora44/ludora44.3-x86_64.iso/download" target="_blank" rel="noopener">
         Download Ludora 44.3
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       </a>
-      <a class="btn btn-outline" href="https://github.com/LarsSoeMikkelsen/Ludora/releases" target="_blank">Release Notes</a>
+      <a class="btn btn-outline" href="https://github.com/LarsSoeMikkelsen/Ludora/releases" target="_blank" rel="noopener">Release Notes</a>
     </div>
 
     <div class="hero-meta">
       <div class="hero-meta-item">Base <span>Fedora 44</span></div>
       <div class="hero-meta-item">Desktop <span>KDE Plasma</span></div>
       <div class="hero-meta-item">Arch <span>x86_64</span></div>
-      <a class="hero-meta-item" href="https://github.com/LarsSoeMikkelsen/Ludora" target="_blank" style="cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">
-        GitHub <span style="text-decoration: underline; text-decoration-color: var(--muted); text-underline-offset: 2px;">View source</span>
-      </a>
+      <a class="hero-meta-item" href="https://github.com/LarsSoeMikkelsen/Ludora" target="_blank" rel="noopener">GitHub <span>View source</span></a>
     </div>
   </section>
 
   <!-- SNAPSHOTS FEATURE -->
-  <section id="snapshots" style="scroll-margin-top: 60px; padding-top: 80px;">
+  <section id="snapshots" style="padding-top: 80px;">
     <div class="inner">
       <p class="label" style="color: var(--white);">System Recovery</p>
       <h2 class="heading">Boot into any snapshot. Restore with one click.</h2>
       <p class="subheading">
-        Ludora automatically creates bootable Btrfs snapshots before and after every system update. 
-        If something breaks, just reboot, select a snapshot from GRUB, and restore your system to a working state.
+        Ludora creates bootable Btrfs snapshots before and after every DNF operation, so every <code>sudo dnf upgrade</code> is covered.
+        If something breaks, reboot, pick a snapshot in GRUB, and restore your system to a working state.
       </p>
 
-      <div style="margin-top: 48px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px;">
-        
-        <div>
-          <img src="Ludora_Snapshot_Boot.png" alt="Snapshot boot menu" style="width: 100%; height: 280px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 16px;" />
-          <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 8px;">1. Select snapshot from GRUB</h3>
-          <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.6;">
-            All snapshots appear in your boot menu. Choose any previous state of your system.
-          </p>
+      <div class="steps">
+        <div class="step">
+          <img src="Ludora_Snapshot_Boot.webp" alt="GRUB menu listing Ludora snapshots to boot into" width="1920" height="1147" loading="lazy" decoding="async" />
+          <h3>1. Select a snapshot in GRUB</h3>
+          <p>All snapshots appear in your boot menu. Pick any earlier state of your system.</p>
         </div>
 
-        <div>
-          <img src="Ludora_Snapshot_Recovery.png" alt="Recovery dialog" style="width: 100%; height: 280px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 16px;" />
-          <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 8px;">2. One-click restore</h3>
-          <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.6;">
-            A popup asks if you want to restore from this snapshot. Click yes, reboot, and you're back to a working system.
-          </p>
+        <div class="step">
+          <img src="Ludora_Snapshot_Recovery.webp" alt="Popup asking whether to restore the system from the booted snapshot" width="1920" height="1195" loading="lazy" decoding="async" />
+          <h3>2. One-click restore</h3>
+          <p>A popup asks if you want to restore from this snapshot. Click yes, reboot, and you're back to a working system.</p>
         </div>
-
       </div>
 
-      <div class="feature-grid" style="margin-top: 48px;">
+      <div class="feature-grid spaced">
         <div class="feature-card">
           <div class="feature-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           </div>
           <h3 class="feature-title">Automatic snapshots</h3>
-          <p class="feature-desc">Snapshots are created automatically before and after DNF package operations. No manual intervention needed.</p>
+          <p class="feature-desc">Snapshots are created before and after DNF package operations, plus hourly, daily and monthly timeline snapshots. Old ones are cleaned up automatically.</p>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
           </div>
           <h3 class="feature-title">Bootable from GRUB</h3>
           <p class="feature-desc">openSUSE-style integration with GRUB means every snapshot is bootable. No live USB needed for recovery.</p>
@@ -696,23 +898,22 @@
 
         <div class="feature-card">
           <div class="feature-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
           <h3 class="feature-title">Hard to break</h3>
-          <p class="feature-desc">Test new kernels, drivers, or updates with confidence. You're always one reboot away from a working system.</p>
+          <p class="feature-desc">Try new kernels, drivers or updates without worrying. You're always one reboot away from a working system.</p>
         </div>
-
       </div>
 
-      <div style="margin-top: 48px; padding: 32px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;">
-        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 12px;">Why this matters</h3>
-        <p style="font-size: 0.9rem; color: var(--muted); line-height: 1.7; margin-bottom: 16px;">
-          Setting up bootable Btrfs snapshots on Fedora manually is surprisingly complicated. The default Anaconda installer doesn't support 
-          the subvolume layout needed, so it requires manual post-install configuration before installing and setting up snapper, grub-btrfs, and DNF plugins.
+      <div class="callout">
+        <h3>Why this matters</h3>
+        <p>
+          Setting up bootable Btrfs snapshots on Fedora by hand is surprisingly complicated. The default Anaconda installer doesn't support
+          the subvolume layout needed, so it takes manual post-install work before you can even install and configure snapper, grub-btrfs and the DNF plugin.
         </p>
-        <p style="font-size: 0.9rem; color: var(--muted); line-height: 1.7;">
-          Ludora handles all of this automatically during installation using a custom Calamares configuration. You get openSUSE-style 
-          snapshot protection on Fedora's stable base, with zero manual setup required.
+        <p>
+          Ludora does all of this during installation with a custom Calamares configuration. You get openSUSE-style
+          snapshots on Fedora's stable base, with no manual setup.
         </p>
       </div>
 
@@ -720,226 +921,187 @@
   </section>
 
   <!-- COMPONENT CHOOSER -->
-  <section id="install" style="scroll-margin-top: 60px; border-top: 1px solid var(--border);">
+  <section id="install">
     <div class="inner">
       <p class="label">Modular Installer</p>
-      <h2 class="heading">Your install. Your way.</h2>
-      <p class="subheading">All five component groups are pre-selected for a full gaming setup. Deselect any of them during installation — Ludora installs exactly what you choose.</p>
+      <h2 class="heading">Choose what gets installed.</h2>
+      <p class="subheading">All five component groups are selected by default for a full gaming setup. Deselect any of them during installation, and Ludora leaves them out.</p>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 32px; margin-bottom: 48px;">
+      <div class="installer-shots">
         <div>
-          <img src="Ludora_Calamares_Components_All.png" alt="All components selected in the Ludora installer" style="width: 100%; height: auto; display: block; border: 1px solid var(--border); border-radius: 2px; margin-bottom: 12px;" />
-          <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.6;"><strong style="color: var(--white); font-weight: 600;">Full gaming setup.</strong> All five components selected — the default. Install and you're ready to game immediately.</p>
+          <img src="Ludora_Calamares_Components_All.webp" alt="All five components selected in the Ludora installer" width="1226" height="765" loading="lazy" decoding="async" />
+          <p><strong>Full gaming setup.</strong> All five components selected, which is the default. Install, and you're ready to game.</p>
         </div>
         <div>
-          <img src="Ludora_Calamares_Components_Selection.png" alt="Custom component selection in the Ludora installer" style="width: 100%; height: auto; display: block; border: 1px solid var(--border); border-radius: 2px; margin-bottom: 12px;" />
-          <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.6;"><strong style="color: var(--white); font-weight: 600;">Pick and choose.</strong> Deselect the gaming components you don't want. Each group is independent.</p>
+          <img src="Ludora_Calamares_Components_Selection.webp" alt="Only some components selected in the Ludora installer" width="1226" height="765" loading="lazy" decoding="async" />
+          <p><strong>Pick and choose.</strong> Deselect the components you don't want. Each group is independent.</p>
         </div>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 24px;">
+      <ul class="component-list">
+        <li class="component-row">
+          <div class="component-check"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="component-body">
+            <div class="component-head"><span class="component-name">Multimedia Codecs</span><span class="badge">on by default</span></div>
+            <p class="component-desc">ffmpeg and GStreamer plugins for video and audio playback</p>
+          </div>
+        </li>
+        <li class="component-row">
+          <div class="component-check"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="component-body">
+            <div class="component-head"><span class="component-name">Ludora Custom KDE</span><span class="badge">on by default</span></div>
+            <p class="component-desc">Ludora theme, Fastfetch system info, and custom KDE defaults</p>
+          </div>
+        </li>
+        <li class="component-row">
+          <div class="component-check"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="component-body">
+            <div class="component-head"><span class="component-name">Ludora Custom Kernel</span><span class="badge">on by default</span></div>
+            <p class="component-desc">Kernel with the BORE scheduler and CachyOS patches. Deselect it to use the standard Fedora kernel.</p>
+          </div>
+        </li>
+        <li class="component-row">
+          <div class="component-check"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="component-body">
+            <div class="component-head"><span class="component-name">Gaming Stack</span><span class="badge">on by default</span></div>
+            <p class="component-desc">Vulkan drivers, GameMode, Gamescope and VkBasalt</p>
+          </div>
+        </li>
+        <li class="component-row">
+          <div class="component-check"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="component-body">
+            <div class="component-head"><span class="component-name">Gaming Applications</span><span class="badge">on by default</span></div>
+            <p class="component-desc">Steam, Discord, ProtonPlus, LACT and GOverlay</p>
+          </div>
+        </li>
+      </ul>
 
-        <div style="background: var(--bg2); padding: 20px 28px; display: flex; align-items: flex-start; gap: 18px;">
-          <div style="color: var(--amber); opacity: 0.75; flex-shrink: 0; padding-top: 3px;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <div style="flex: 1;">
-            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
-              <span style="font-size: 0.93rem; font-weight: 600;">Multimedia Codecs</span>
-              <span style="font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--border-amber); color: var(--amber); opacity: 0.65; border-radius: 1px;">on by default</span>
-            </div>
-            <p style="font-size: 0.83rem; color: var(--muted); line-height: 1.6; margin: 0;">ffmpeg and GStreamer plugins for video and audio playback</p>
-          </div>
-        </div>
-
-        <div style="background: var(--bg2); padding: 20px 28px; display: flex; align-items: flex-start; gap: 18px;">
-          <div style="color: var(--amber); opacity: 0.75; flex-shrink: 0; padding-top: 3px;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <div style="flex: 1;">
-            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
-              <span style="font-size: 0.93rem; font-weight: 600;">Ludora Custom KDE</span>
-              <span style="font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--border-amber); color: var(--amber); opacity: 0.65; border-radius: 1px;">on by default</span>
-            </div>
-            <p style="font-size: 0.83rem; color: var(--muted); line-height: 1.6; margin: 0;">Ludora theme, Fastfetch system info, and custom KDE defaults</p>
-          </div>
-        </div>
-
-        <div style="background: var(--bg2); padding: 20px 28px; display: flex; align-items: flex-start; gap: 18px;">
-          <div style="color: var(--amber); opacity: 0.75; flex-shrink: 0; padding-top: 3px;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <div style="flex: 1;">
-            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
-              <span style="font-size: 0.93rem; font-weight: 600;">Ludora Custom Kernel</span>
-              <span style="font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--border-amber); color: var(--amber); opacity: 0.65; border-radius: 1px;">on by default</span>
-            </div>
-            <p style="font-size: 0.83rem; color: var(--muted); line-height: 1.6; margin: 0;">Gaming kernel with BORE scheduler and CachyOS performance patches. Deselect to use the standard Fedora kernel.</p>
-          </div>
-        </div>
-
-        <div style="background: var(--bg2); padding: 20px 28px; display: flex; align-items: flex-start; gap: 18px;">
-          <div style="color: var(--amber); opacity: 0.75; flex-shrink: 0; padding-top: 3px;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <div style="flex: 1;">
-            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
-              <span style="font-size: 0.93rem; font-weight: 600;">Gaming Stack</span>
-              <span style="font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--border-amber); color: var(--amber); opacity: 0.65; border-radius: 1px;">on by default</span>
-            </div>
-            <p style="font-size: 0.83rem; color: var(--muted); line-height: 1.6; margin: 0;">Vulkan drivers, GameMode, Gamescope, VkBasalt, and Vulkan tools</p>
-          </div>
-        </div>
-
-        <div style="background: var(--bg2); padding: 20px 28px; display: flex; align-items: flex-start; gap: 18px;">
-          <div style="color: var(--amber); opacity: 0.75; flex-shrink: 0; padding-top: 3px;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <div style="flex: 1;">
-            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
-              <span style="font-size: 0.93rem; font-weight: 600;">Gaming Applications</span>
-              <span style="font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--border-amber); color: var(--amber); opacity: 0.65; border-radius: 1px;">on by default</span>
-            </div>
-            <p style="font-size: 0.83rem; color: var(--muted); line-height: 1.6; margin: 0;">Steam, Discord, ProtonPlus, LACT, and GOverlay</p>
-          </div>
-        </div>
-
-      </div>
-
-      <div style="padding: 24px 28px; border: 1px solid var(--border-amber); background: var(--amber-glow);">
-        <p style="font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px;">Not a gamer?</p>
-        <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.7; margin: 0;">Deselect the Gaming Stack and Gaming Applications during installation and you get a clean Fedora 44 KDE desktop with bootable snapshots and multimedia codecs — no Steam, no gaming tools, just a stable base that's hard to break.</p>
+      <div class="callout callout-amber">
+        <p class="callout-label">Not a gamer?</p>
+        <p>Deselect the Gaming Stack and Gaming Applications during installation, and you get a clean Fedora 44 KDE desktop with bootable snapshots and multimedia codecs. No Steam, no gaming apps, just a stable base.</p>
       </div>
 
     </div>
   </section>
 
-<div class="marquee-wrap" aria-hidden="true">
+  <div class="marquee-wrap" aria-hidden="true">
     <div class="marquee-track">
       <div class="marquee-item">BORE Scheduler</div>
       <div class="marquee-item">CachyOS Patches</div>
       <div class="marquee-item">Btrfs Snapshots</div>
-      <div class="marquee-item">Auto Rollback</div>
+      <div class="marquee-item">One-Click Rollback</div>
       <div class="marquee-item">Modular Installer</div>
       <div class="marquee-item">Steam</div>
       <div class="marquee-item">Proton-GE</div>
       <div class="marquee-item">MangoHud</div>
-      <div class="marquee-item">VA-API</div>
+      <div class="marquee-item">Snapper</div>
       <div class="marquee-item">Vulkan</div>
       <div class="marquee-item">KDE Plasma</div>
-      <div class="marquee-item">Pick Your Stack</div>
+      <div class="marquee-item">Ludora Welcome</div>
       <div class="marquee-item">BORE Scheduler</div>
       <div class="marquee-item">CachyOS Patches</div>
       <div class="marquee-item">Btrfs Snapshots</div>
-      <div class="marquee-item">Auto Rollback</div>
+      <div class="marquee-item">One-Click Rollback</div>
       <div class="marquee-item">Modular Installer</div>
       <div class="marquee-item">Steam</div>
       <div class="marquee-item">Proton-GE</div>
       <div class="marquee-item">MangoHud</div>
-      <div class="marquee-item">VA-API</div>
+      <div class="marquee-item">Snapper</div>
       <div class="marquee-item">Vulkan</div>
       <div class="marquee-item">KDE Plasma</div>
-      <div class="marquee-item">Pick Your Stack</div>
+      <div class="marquee-item">Ludora Welcome</div>
     </div>
   </div>
 
   <!-- FEATURES -->
   <section id="features">
     <div class="inner">
-      <p class="label">What's included</p>
-      <h2 class="heading">Built for gaming. Works for everyone.</h2>
-      <p class="subheading">Everything a modern gaming system needs — or just the parts you want. Built on the stability and security of Fedora.</p>
+      <p class="label">Features</p>
+      <h2 class="heading">What's included.</h2>
+      <p class="subheading">The full gaming setup is installed by default, and every part of it is optional. Underneath, it's regular Fedora.</p>
 
       <div class="feature-grid">
-        
+
         <div class="feature-card">
           <div class="feature-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
           <h3 class="feature-title">Custom Kernel with BORE</h3>
-          <p class="feature-desc">Optimized for low-latency gaming with BORE scheduler and CachyOS performance patches. Responsive under load, smooth frame delivery.</p>
+          <p class="feature-desc">The BORE scheduler and CachyOS patches, aimed at keeping the desktop and games responsive under load. Deselect it in the installer to use the standard Fedora kernel.</p>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
           </div>
           <h3 class="feature-title">Bootable Btrfs Snapshots</h3>
-          <p class="feature-desc">openSUSE-style automatic snapshots before and after every system update. Boot into any previous state directly from GRUB. One-click rollback script included.</p>
+          <p class="feature-desc">openSUSE-style snapshots before and after every DNF operation. Boot into any earlier state directly from GRUB, then restore it from a popup.</p>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
           </div>
-          <h3 class="feature-title">Gaming Ready Out of Box</h3>
-          <p class="feature-desc">Steam, Proton-GE, MangoHud, and full codec support pre-installed. Launch Steam, download your library, play. No driver hunts.</p>
+          <h3 class="feature-title">Gaming Ready Out of the Box</h3>
+          <p class="feature-desc">Steam, Proton-GE, MangoHud and full codec support pre-installed. AMD and Intel graphics work right away. For NVIDIA, Ludora Welcome walks you through the driver install.</p>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <h3 class="feature-title">Ludora Welcome</h3>
+          <p class="feature-desc">Opens on first boot with the steps worth doing after an install: updating the system, installing NVIDIA drivers, and setting GE-Proton as the default in Steam. You can reopen it from the app menu.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
           </div>
           <h3 class="feature-title">Refined KDE Desktop</h3>
-          <p class="feature-desc">Custom Ludora theme with clean aesthetics and gaming-focused defaults. Fast, familiar, and stays out of your way.</p>
+          <p class="feature-desc">Custom Ludora theme and KDE defaults on top of Plasma. Deselect it in the installer if you prefer stock Fedora KDE.</p>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
-          <h3 class="feature-title">Fedora Stability</h3>
-          <p class="feature-desc">Built on Fedora 44 stable base. Proven package ecosystem, robust SELinux security, and predictable six-month release cycle.</p>
+          <h3 class="feature-title">Fedora Underneath</h3>
+          <p class="feature-desc">Built on Fedora 44, with Fedora's packages, SELinux and six-month release cycle. A new Ludora follows each Fedora release.</p>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="7.5 4.21 12 6.81 16.5 4.21"/><polyline points="7.5 19.79 7.5 14.6 3 12"/><polyline points="21 12 16.5 14.6 16.5 19.79"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="7.5 4.21 12 6.81 16.5 4.21"/><polyline points="7.5 19.79 7.5 14.6 3 12"/><polyline points="21 12 16.5 14.6 16.5 19.79"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
           </div>
-          <h3 class="feature-title">Active COPR Repository</h3>
-          <p class="feature-desc">All custom packages built and maintained in public COPR. Transparent build logs, automatic updates, reproducible from source.</p>
+          <h3 class="feature-title">Public COPR Repository</h3>
+          <p class="feature-desc">All custom packages are built in a public COPR repository, with logs for every build. It's enabled out of the box, so updates arrive with regular <code>dnf upgrade</code>.</p>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
           </div>
           <h3 class="feature-title">Modular Installation</h3>
-          <p class="feature-desc">Five independent component groups. Install the full gaming setup or strip it down to a clean KDE desktop with snapshots. You decide at install time.</p>
+          <p class="feature-desc">Five independent component groups. Install the full gaming setup or a clean KDE desktop with snapshots. You decide at install time.</p>
         </div>
 
       </div>
     </div>
   </section>
 
-  <!-- SCREENSHOTS -->
+  <!-- SCREENSHOT -->
   <section id="screenshots">
     <div class="inner">
-      <p class="label">See it in action</p>
-      <h2 class="heading">Snapshots and desktop.</h2>
-      <p class="subheading">A look at the snapshot boot menu and the default desktop environment.</p>
+      <p class="label">Screenshot</p>
+      <h2 class="heading">The default desktop.</h2>
+      <p class="subheading">What you get after a full install with all components selected.</p>
 
-      <div class="screenshot-grid">
       <div class="screenshot-item">
-          <img src="Ludora_KDE_Desktop.png" alt="Ludora KDE desktop" />
-          <div class="screenshot-caption">
-          <strong>Clean KDE Plasma desktop.</strong> Custom Ludora theme with amber accents. Fastfetch pre-configured to show system specs. Steam, Discord, and gaming tools pinned and ready.
-          </div>
+        <img src="Ludora_KDE_Desktop.webp" alt="Ludora KDE Plasma desktop with the amber Ludora theme, Fastfetch in a terminal, and Steam and Discord in the taskbar" width="1920" height="1187" loading="lazy" decoding="async" />
+        <div class="screenshot-caption">
+          <strong>KDE Plasma with the Ludora theme.</strong> Fastfetch is set up to show your system specs, and Steam, Discord and the gaming tools are pinned and ready.
         </div>
-
-        <div class="screenshot-item">
-          <img src="Ludora_Snapshot_Boot.png" alt="GRUB snapshot boot menu" />
-          <div class="screenshot-caption">
-          <strong>Bootable snapshots in GRUB.</strong> Every system update creates a pre/post snapshot pair. Boot into any previous state if an update breaks something. No manual configuration required.
-          </div>
-        </div>
-          <div class="screenshot-item">
-          <img src="Ludora_Snapshot_Recovery.png" alt="One-click snapshot restore" />
-          <div class="screenshot-caption">
-          <strong>One-click snapshot restore.</strong> The system detects when booted into a snapshot. Restore is only a single click away.
-          </div>
-        </div>
-
       </div>
     </div>
   </section>
@@ -947,40 +1109,68 @@
   <!-- ABOUT -->
   <section id="about">
     <div class="inner">
-      <p class="label">Transparency</p>
-      <h2 class="heading">What this actually is.</h2>
-      <p class="subheading">No marketing fluff. Just the facts.</p>
+      <p class="label">About</p>
+      <h2 class="heading">What this is.</h2>
+      <p class="subheading">A few honest facts about the project.</p>
 
       <div class="about-grid">
         <div class="about-cell">
           <div class="about-cell-label">Status</div>
           <p>
-            Ludora 44.3 is available now. Automatic snapshots work, the custom kernel is stable, and gaming works out of the box.
-            This is a personal project, not a commercial product.
+            Ludora 44.3 is the current release. Ludora 45 will follow very soon after Fedora 45 is released.
+            Ludora is a personal project that I build in my spare time, not a commercial product.
           </p>
         </div>
         <div class="about-cell">
-          <div class="about-cell-label">Target audience</div>
+          <div class="about-cell-label">Who it's for</div>
           <p>
-            Anyone comfortable with <strong>Fedora</strong> or <strong>Linux in general</strong> who wants automatic rollback built in.
+            Anyone comfortable with <strong>Fedora</strong> or <strong>Linux in general</strong> who wants bootable snapshots without setting them up by hand.
             That includes gamers who want a ready-to-go gaming system, and non-gamers who just want a
-            <strong>stable KDE desktop</strong> that's hard to break.
+            <strong>stable KDE desktop</strong> with a way back when something goes wrong.
           </p>
         </div>
         <div class="about-cell">
           <div class="about-cell-label">The name</div>
           <p>
             <strong>Ludo</strong> is Latin for "I am playing." The second half nods to <strong>Fedora</strong>,
-            the distribution it's built on. Simple etymology.
+            the distribution it's built on.
           </p>
         </div>
         <div class="about-cell">
-          <div class="about-cell-label">Source & builds</div>
+          <div class="about-cell-label">Source &amp; builds</div>
           <p>
-            All source is on <strong><a href="https://github.com/LarsSoeMikkelsen/Ludora" target="_blank">GitHub</a></strong>.
-            All packages build in <strong><a href="https://copr.fedorainfracloud.org/coprs/predze/ludora" target="_blank">COPR</a></strong>.
-            Nothing hidden.
+            All source is on <strong><a href="https://github.com/LarsSoeMikkelsen/Ludora" target="_blank" rel="noopener">GitHub</a></strong>,
+            and all packages build in <strong><a href="https://copr.fedorainfracloud.org/coprs/predze/ludora" target="_blank" rel="noopener">COPR</a></strong>.
           </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HELP -->
+  <section id="help">
+    <div class="inner">
+      <p class="label">Help</p>
+      <h2 class="heading">Questions.</h2>
+      <p class="subheading">The things people usually ask.</p>
+
+      <div class="about-grid">
+        <div class="about-cell">
+          <h3>When is Ludora 45 coming?</h3>
+          <p>Very soon after Fedora 45 is released. The packages are already being built and tested for Fedora 45.</p>
+        </div>
+        <div class="about-cell">
+          <h3>Can I upgrade from Ludora 44 to 45?</h3>
+          <p>Yes. The Ludora COPR repository builds for both, so the normal Fedora system upgrade works without extra steps.</p>
+          <p>Take a snapshot first with <code>sudo snapper create -d "pre-F45"</code>, so you can go back from the GRUB snapshot menu if needed.</p>
+        </div>
+        <div class="about-cell">
+          <h3>Should I update with Discover or dnf?</h3>
+          <p>Use <code>sudo dnf upgrade</code> in a terminal for system updates. Snapshots are created around dnf operations, and Discover doesn't trigger them.</p>
+        </div>
+        <div class="about-cell">
+          <h3>Found a bug or have a question?</h3>
+          <p>Please open an issue on <a href="https://github.com/LarsSoeMikkelsen/Ludora/issues" target="_blank" rel="noopener">GitHub Issues</a>, or ask in <a href="https://github.com/LarsSoeMikkelsen/Ludora/discussions" target="_blank" rel="noopener">GitHub Discussions</a>.</p>
         </div>
       </div>
     </div>
@@ -991,25 +1181,28 @@
     <div class="inner">
       <p class="label">Get started</p>
       <h2 class="heading">Download and install.</h2>
-      <p class="subheading">ISO hosted on SourceForge. Write to USB with Fedora Media Writer or Balena Etcher. Boot and install.</p>
+      <p class="subheading">The ISO is hosted on SourceForge. Write it to a USB stick with Fedora Media Writer, Etcher, or Rufus in DD mode, then boot and install.</p>
       <div class="cta-buttons">
-        <a class="btn btn-fill" href="https://sourceforge.net/projects/ludora/files/ludora44/ludora44.3-x86_64.iso/download" target="_blank">
+        <a class="btn btn-fill" href="https://sourceforge.net/projects/ludora/files/ludora44/ludora44.3-x86_64.iso/download" target="_blank" rel="noopener">
           Download Ludora 44.3
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         </a>
-        <a class="btn btn-outline" href="https://github.com/LarsSoeMikkelsen/Ludora/releases" target="_blank">Release Notes</a>
+        <a class="btn btn-outline" href="https://github.com/LarsSoeMikkelsen/Ludora/releases" target="_blank" rel="noopener">Release Notes</a>
       </div>
     </div>
   </section>
 
+  </main>
+
   <!-- FOOTER -->
   <footer>
-    <a class="footer-logo" href="#"><img src="Ludora_logo.png" alt="Ludora" /></a>
+    <a class="footer-logo" href="#"><img src="Ludora_logo.png" alt="Ludora home" width="71" height="20" /></a>
     <ul class="footer-links">
-      <li><a href="https://github.com/LarsSoeMikkelsen/Ludora" target="_blank">GitHub</a></li>
-      <li><a href="https://sourceforge.net/projects/ludora/" target="_blank">Download</a></li>
-      <li><a href="https://copr.fedorainfracloud.org/coprs/predze/ludora" target="_blank">COPR</a></li>
-      <li><a href="https://distrowatch.com/table.php?distribution=ludora" target="_blank">DistroWatch</a></li>
+      <li><a href="https://github.com/LarsSoeMikkelsen/Ludora" target="_blank" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/LarsSoeMikkelsen/Ludora/issues" target="_blank" rel="noopener">Issues</a></li>
+      <li><a href="https://sourceforge.net/projects/ludora/" target="_blank" rel="noopener">Download</a></li>
+      <li><a href="https://copr.fedorainfracloud.org/coprs/predze/ludora" target="_blank" rel="noopener">COPR</a></li>
+      <li><a href="https://distrowatch.com/table.php?distribution=ludora" target="_blank" rel="noopener">DistroWatch</a></li>
     </ul>
     <span class="footer-legal">Not affiliated with the Fedora Project or Red Hat.</span>
   </footer>
