@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        19%{?dist}
+Release:        20%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -82,6 +82,11 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Sat Oct 17 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-20
+- shellprocess: remove the live-only ludora-live-theme.desktop autostart entry
+  from installed user homes (installed users get ludora-theme-apply.desktop
+  from apply-ludora-theme-to-users.sh instead)
+
 * Fri Oct 16 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-19
 - add shellprocess@relabel after removeuser: restorecon the installed system
   (excluding /.snapshots). users/removeuser left /etc/passwd, shadow, group
