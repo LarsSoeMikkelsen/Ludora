@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        18%{?dist}
+Release:        19%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -41,6 +41,7 @@ install -Dm644 modules/netinstall.conf      %{buildroot}%{_sysconfdir}/calamares
 install -Dm644 modules/partition.conf       %{buildroot}%{_sysconfdir}/calamares/modules/partition.conf
 install -Dm644 modules/removeuser.conf      %{buildroot}%{_sysconfdir}/calamares/modules/removeuser.conf
 install -Dm644 modules/shellprocess.conf    %{buildroot}%{_sysconfdir}/calamares/modules/shellprocess.conf
+install -Dm644 modules/shellprocess_relabel.conf %{buildroot}%{_sysconfdir}/calamares/modules/shellprocess_relabel.conf
 install -Dm644 modules/users.conf          %{buildroot}%{_sysconfdir}/calamares/modules/users.conf
 
 # ludora_selections Python module (must be in libdir, not sysconfdir — Calamares
@@ -70,6 +71,7 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/modules/partition.conf
 %{_sysconfdir}/calamares/modules/removeuser.conf
 %{_sysconfdir}/calamares/modules/shellprocess.conf
+%{_sysconfdir}/calamares/modules/shellprocess_relabel.conf
 %{_sysconfdir}/calamares/modules/users.conf
 %{_libdir}/calamares/modules/ludora_selections/module.desc
 %{_libdir}/calamares/modules/ludora_selections/main.py
@@ -80,6 +82,12 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Fri Oct 16 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-19
+- add shellprocess@relabel after removeuser: restorecon the installed system
+  (excluding /.snapshots). users/removeuser left /etc/passwd, shadow, group
+  and gshadow labelled etc_t, so passwd failed even as root; installer-created
+  subvolume roots were unlabeled_t
+
 * Thu Oct 15 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-18
 - partition: keep /boot unencrypted (noEncrypt) on encrypted installs; fixes
   double LUKS prompt and slow GRUB unlock (#7, #5)
