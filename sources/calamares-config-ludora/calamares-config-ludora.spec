@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        20%{?dist}
+Release:        21%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -82,6 +82,11 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Sat Oct 17 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-21
+- shellprocess@relabel: mount selinuxfs in the chroot before restorecon; without
+  it restorecon saw SELinux as disabled and silently relabelled nothing (1.8-19
+  fix was a no-op, found in the beta3 VM test)
+
 * Sat Oct 17 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-20
 - shellprocess: remove the live-only ludora-live-theme.desktop autostart entry
   from installed user homes (installed users get ludora-theme-apply.desktop
