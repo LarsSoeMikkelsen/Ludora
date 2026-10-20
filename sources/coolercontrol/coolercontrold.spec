@@ -1,8 +1,10 @@
 %bcond check 1
 %global project coolercontrol
-
-# prevent library files from being installed
-%global cargo_install_lib 0
+# Fedora's default of one codegen unit compiles the daemon crate on a single core. 6 matches the
+# Cargo release profile.
+%global rustflags_codegen_units 6
+# Full debuginfo drives rustc past the 8 GB of a Copr builder. 1 keeps the line tables.
+%global rustflags_debuginfo 1
 
 # brp-mangle-shebangs misidentifies Rust inner attributes (e.g. the brotli
 # crate's `#![allow(unknown_lints)]`) copied into the debug source tree as
@@ -10,19 +12,18 @@
 %undefine __brp_mangle_shebangs
 
 Name:           %{project}d
-Version:        5.0.1
+Version:        5.1.1
 Release:        %{?autorelease}%{!?autorelease:0%{?dist}}
 Summary:        Powerful cooling control and monitoring
 Obsoletes:      coolercontrol-liqctld <= 2.2.2
 ExclusiveArch:  x86_64 aarch64
-License:        GPL-3.0-or-later
+License:        GPL-3.0-or-later AND OFL-1.1
 URL:            https://gitlab.com/%{project}/%{project}
 
 BuildRequires:  systemd-rpm-macros
 BuildRequires:  rpm_macro(cargo_build)
 BuildRequires:  pkgconfig(libdrm_amdgpu)
 BuildRequires:  pkgconfig(libdrm)
-BuildRequires:  pkgconfig(protobuf)
 Recommends:     python3-liquidctl
 Recommends:     lm_sensors
 
@@ -51,9 +52,8 @@ tar -xzf %{SOURCE1}
 %install
 install -Dpm 644 systemd/%{name}.service -t %{buildroot}%{_unitdir}
 install -Dpm 644 man/%{name}.8 -t %{buildroot}%{_mandir}/man8
-pushd daemon
-%cargo_install
-popd
+# Not %%cargo_install: it ignores Cargo.lock, so it resolves the crates afresh and rebuilds the daemon.
+install -Dpm 755 target/rpm/%{name} -t %{buildroot}%{_bindir}
 
 %if %{with check}
 %check
@@ -83,6 +83,9 @@ popd
 %systemd_postun_with_restart %{name}.service
 
 %changelog
+* Tue Oct 20 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 5.1.1-1
+- 5.1.1 Release
+
 * Fri Oct 09 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 5.0.1-1
 - 5.0.1 Release
 
