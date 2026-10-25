@@ -10,8 +10,8 @@
 %undefine _include_frame_pointers
 
 # Linux Kernel Versions
-%define _basekver 7.1
-%define _stablekver 4
+%define _basekver 7.2
+%define _stablekver 12
 %define _releasekver 200
 %define _rpmver %{version}-%{release}
 %define _kver %{_rpmver}.%{_arch}
@@ -65,6 +65,7 @@ Source0:        https://cdn.kernel.org/pub/linux/kernel/v7.x/linux-%{version}.ta
 Source1:        config
 
 Patch0:         0001-bore.patch
+Patch1:         0001-hid-usbhid-sanitize-uniq-against-control-chars.patch
 
 %description
 The meta package for %{name}.
@@ -90,19 +91,29 @@ The meta package for %{name}.
             scripts/config -e HZ_1000 --set-val HZ 1000;;
     esac
 
-    %if %{_x86_64_lvl} < 5 && %{_x86_64_lvl} > 0
-        scripts/config --set-val X86_64_VERSION %{_x86_64_lvl}
+    # Mainline has no X86_64_VERSION Kconfig (that is a CachyOS patch), so set
+    # the ISA level directly where arch/x86/Makefile picks the generic -march
+    %if %{_x86_64_lvl} < 5 && %{_x86_64_lvl} > 1
+        _march=x86-64-v%{_x86_64_lvl}
+    %elif %{_x86_64_lvl} == 1
+        _march=x86-64
     %else
         echo "Invalid x86_64 ISA Level. Using x86_64_v3"
-        scripts/config --set-val X86_64_VERSION 3
+        _march=x86-64-v3
     %endif
+    sed -i -e "s/-march=x86-64 -mtune=generic/-march=${_march} -mtune=generic/" \
+           -e "s/-Ctarget-cpu=x86-64 -Ztune-cpu=generic/-Ctarget-cpu=${_march} -Ztune-cpu=generic/" \
+           arch/x86/Makefile
+    grep -q -- "-march=${_march} -mtune=generic" arch/x86/Makefile
+    scripts/config -d X86_NATIVE_CPU
 
     # Gaming tuning
     # Full static preemption — lower latency than Fedora's PREEMPT_DYNAMIC/LAZY default
     scripts/config -d PREEMPT_NONE -d PREEMPT_VOLUNTARY -d PREEMPT_LAZY -d PREEMPT_DYNAMIC -e PREEMPT
 
     # BBR built-in and default — better latency under load than cubic
-    scripts/config -e TCP_CONG_BBR --set-str DEFAULT_TCP_CONG bbr
+    # DEFAULT_TCP_CONG is derived from the DEFAULT_* choice, so select that
+    scripts/config -e TCP_CONG_BBR -d DEFAULT_CUBIC -e DEFAULT_BBR --set-str DEFAULT_TCP_CONG bbr
 
     # FQ built-in — pairs with BBR for per-flow pacing
     scripts/config -e NET_SCH_FQ
@@ -220,6 +231,15 @@ Kernel modules for %{name}-core.
 %files
 
 %changelog
+* Sun Oct 25 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.2.12-200.ludora
+- Update to kernel 7.2.12
+- BORE patch re-fetched from CachyOS 7.2 branch
+- Actually build for x86-64-v3: X86_64_VERSION does not exist in mainline,
+  so previous builds were generic x86-64; set -march in arch/x86/Makefile
+- Actually default to BBR: select DEFAULT_BBR (DEFAULT_TCP_CONG alone was
+  reset to cubic by Kconfig)
+- Apply usbhid uniq control-char patch (rebased onto 7.2.12)
+
 * Wed Jul 22 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.1.4-200.ludora
 - Update to kernel 7.1.4
 - BORE patch verified against current CachyOS 7.1 branch (Piotr Gorski variant, unchanged since 7.1.3)
