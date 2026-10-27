@@ -1,46 +1,69 @@
-%global debug_package %{nil}
+%global commit 30dc182391e2c002f6f7c988e76aa477a4772aa2
 
 Name:           lact
 Version:        0.10.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        GPU control utility
 License:        MIT
 URL:            https://github.com/ilya-zlobintsev/LACT
-# Repackages upstream's own signed Fedora 44 build instead of compiling from
-# source: COPR has no network during %%build (cargo needs it to fetch crates
-# without a pre-made vendor tarball), and no Rust toolchain is available
-# locally to regenerate one. Upstream publishes a Fedora-44-specific binary
-# for every release, signed with the key at https://github.com/ilya-zlobintsev/LACT/releases/download/v%{version}/lact.pubkey
-Source0:        %{url}/releases/download/v%{version}/lact-%{version}-0.x86_64.fedora-44.rpm
-Source1:        https://raw.githubusercontent.com/ilya-zlobintsev/LACT/v%{version}/LICENSE
+Source0:        %{url}/archive/refs/tags/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
+# Linux x86_64 crates only, generated from the tag's Cargo.lock with:
+#   cargo vendor-filterer --platform=x86_64-unknown-linux-gnu --all-features \
+#     --versioned-dirs vendor > vendor-config.toml
+#   tar -cJf lact-vendor-%%{version}.tar.xz vendor vendor-config.toml
+Source1:        lact-vendor-%{version}.tar.xz
 
 ExclusiveArch:  x86_64
-Requires:       gtk4 libdrm libadwaita libdisplay-info hwdata vulkan-tools clinfo
+
+BuildRequires:  rpm_macro(cargo_build)
+BuildRequires:  clang-devel
+BuildRequires:  pkgconfig(gtk4)
+BuildRequires:  pkgconfig(libadwaita-1)
+BuildRequires:  pkgconfig(libdrm)
+BuildRequires:  pkgconfig(libdrm_amdgpu)
+BuildRequires:  pkgconfig(libdisplay-info)
+BuildRequires:  systemd-rpm-macros
+Requires:       hwdata vulkan-tools clinfo
 
 %description
 GPU control utility
 
 %prep
-rpm2cpio %{SOURCE0} | cpio -idm
-cp %{SOURCE1} .
+%autosetup -n LACT-%{version} -a 1
+%cargo_prep -v vendor
+# Git dependencies (nvml-wrapper, zbus_polkit) need their own source
+# replacements, which %%cargo_prep does not write.
+sed -n '/^\[source\."git+/,/^replace-with/p' vendor-config.toml >> .cargo/config.toml
 
 %build
-# nothing to build - repackaging upstream's prebuilt binary
+export VERGEN_GIT_SHA=%{sub %{commit} 1 7}
+cd lact
+%cargo_build
 
 %install
-cp -a usr %{buildroot}/
+install -Dm755 target/rpm/lact -t %{buildroot}%{_bindir}
+install -Dm644 res/lactd.service -t %{buildroot}%{_unitdir}
+install -Dm644 res/io.github.ilya_zlobintsev.LACT.desktop -t %{buildroot}%{_datadir}/applications
+install -Dm644 res/io.github.ilya_zlobintsev.LACT.png -t %{buildroot}%{_datadir}/icons/hicolor/512x512/apps
+install -Dm644 res/io.github.ilya_zlobintsev.LACT.svg -t %{buildroot}%{_datadir}/icons/hicolor/scalable/apps
+install -Dm644 res/io.github.ilya_zlobintsev.LACT.metainfo.xml -t %{buildroot}%{_metainfodir}
+install -Dm644 res/io.github.ilya_zlobintsev.LACT.policy -t %{buildroot}%{_datadir}/polkit-1/actions
 
 %files
 %license LICENSE
-/usr/bin/lact
-/usr/lib/systemd/system/lactd.service
-/usr/share/applications/io.github.ilya_zlobintsev.LACT.desktop
-/usr/share/icons/hicolor/512x512/apps/io.github.ilya_zlobintsev.LACT.png
-/usr/share/icons/hicolor/scalable/apps/io.github.ilya_zlobintsev.LACT.svg
-/usr/share/metainfo/io.github.ilya_zlobintsev.LACT.metainfo.xml
-/usr/share/polkit-1/actions/io.github.ilya_zlobintsev.LACT.policy
+%doc README.md
+%{_bindir}/lact
+%{_unitdir}/lactd.service
+%{_datadir}/applications/io.github.ilya_zlobintsev.LACT.desktop
+%{_datadir}/icons/hicolor/512x512/apps/io.github.ilya_zlobintsev.LACT.png
+%{_datadir}/icons/hicolor/scalable/apps/io.github.ilya_zlobintsev.LACT.svg
+%{_metainfodir}/io.github.ilya_zlobintsev.LACT.metainfo.xml
+%{_datadir}/polkit-1/actions/io.github.ilya_zlobintsev.LACT.policy
 
 %changelog
+* Tue Oct 20 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 0.10.1-2
+- Build from source again (vendored crates) instead of repackaging
+  upstream's prebuilt binary
 * Mon Sep 07 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 0.10.1-1
 - Update to v0.10.1
 * Thu Aug 20 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 0.10.0-1
