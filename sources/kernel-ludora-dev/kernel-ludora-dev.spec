@@ -133,11 +133,17 @@ The meta package for %{name}.
     # RCU_BOOST is only visible with RCU_EXPERT
     scripts/config -e RCU_EXPERT -e RCU_BOOST
 
+    # Compress modules at install time, after Kbuild signs them. Fedora's
+    # config leaves them as plain .ko, and brp-strip then strips every ELF
+    # file, dropping the appended signature; Secure Boot refuses the module
+    scripts/config -d MODULE_COMPRESS_XZ -e MODULE_COMPRESS_ZSTD -e MODULE_COMPRESS_ALL
+
     # Kconfig silently drops options whose dependencies aren't met, so check
     # that the tuning survived
     make olddefconfig
     for opt in SCHED_BORE HZ_1000 PREEMPT DEFAULT_BBR NET_SCH_FQ \
-               TRANSPARENT_HUGEPAGE_ALWAYS RCU_BOOST; do
+               TRANSPARENT_HUGEPAGE_ALWAYS RCU_BOOST \
+               MODULE_SIG_ALL MODULE_COMPRESS_ZSTD MODULE_COMPRESS_ALL; do
         grep -qx "CONFIG_${opt}=y" .config || { echo "CONFIG_${opt} not set"; exit 1; }
     done
 
@@ -251,6 +257,8 @@ Kernel modules for %{name}-core.
 * Thu Oct 29 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.2.11-1.ludora
 - Build on 7.2.11 to match the last CachyOS 7.2 release (cachyos-7.2.11-1),
   so kernel-ludora and kernel-ludora-dev can be benchmarked on the same base
+- Compress modules with zstd at install time so brp-strip no longer strips
+  their signatures (unsigned modules are refused under Secure Boot)
 
 * Thu Oct 29 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.2.13-1.ludora
 - Update to kernel 7.2.13
