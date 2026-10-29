@@ -11,7 +11,7 @@
 
 # Linux Kernel Versions
 %define _basekver 7.2
-%define _stablekver 13
+%define _stablekver 11
 %define _releasekver 1
 %define _rpmver %{version}-%{release}
 %define _kver %{_rpmver}.%{_arch}
@@ -248,6 +248,10 @@ Kernel modules for %{name}-core.
 %files
 
 %changelog
+* Thu Oct 29 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.2.11-1.ludora
+- Build on 7.2.11 to match the last CachyOS 7.2 release (cachyos-7.2.11-1),
+  so kernel-ludora and kernel-ludora-dev can be benchmarked on the same base
+
 * Thu Oct 29 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.2.13-1.ludora
 - Update to kernel 7.2.13
 - Release restarts at 1 (production kernel-ludora stays at 100)
