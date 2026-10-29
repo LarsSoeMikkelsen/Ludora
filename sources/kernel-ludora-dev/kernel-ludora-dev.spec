@@ -11,8 +11,8 @@
 
 # Linux Kernel Versions
 %define _basekver 7.2
-%define _stablekver 12
-%define _releasekver 200
+%define _stablekver 13
+%define _releasekver 1
 %define _rpmver %{version}-%{release}
 %define _kver %{_rpmver}.%{_arch}
 
@@ -66,6 +66,8 @@ Source1:        config
 
 Patch0:         0001-bore.patch
 Patch1:         0001-hid-usbhid-sanitize-uniq-against-control-chars.patch
+Patch2:         0001-usb-core-truncate-string-descriptors-at-first-C0-con.patch
+Patch3:         0001-cachyos-default-tunables.patch
 
 %description
 The meta package for %{name}.
@@ -123,6 +125,21 @@ The meta package for %{name}.
 
     # NUMA auto-balancing adds latency jitter on single-socket systems
     scripts/config -d NUMA_BALANCING_DEFAULT_ENABLED
+
+    # THP always (CachyOS default) — games and Proton rarely madvise
+    scripts/config -d TRANSPARENT_HUGEPAGE_MADVISE -e TRANSPARENT_HUGEPAGE_ALWAYS
+
+    # Boost preempted RCU readers so they can't stall grace periods under load
+    # RCU_BOOST is only visible with RCU_EXPERT
+    scripts/config -e RCU_EXPERT -e RCU_BOOST
+
+    # Kconfig silently drops options whose dependencies aren't met, so check
+    # that the tuning survived
+    make olddefconfig
+    for opt in SCHED_BORE HZ_1000 PREEMPT DEFAULT_BBR NET_SCH_FQ \
+               TRANSPARENT_HUGEPAGE_ALWAYS RCU_BOOST; do
+        grep -qx "CONFIG_${opt}=y" .config || { echo "CONFIG_${opt} not set"; exit 1; }
+    done
 
 %build
     %make_build EXTRAVERSION=-%{release}.%{_arch} all
@@ -231,6 +248,19 @@ Kernel modules for %{name}-core.
 %files
 
 %changelog
+* Thu Oct 29 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.2.13-1.ludora
+- Update to kernel 7.2.13
+- Release restarts at 1 (production kernel-ludora stays at 100)
+- BORE patch checked against CachyOS 7.2 branch (unchanged)
+- Apply usb-core C0 control-char string descriptor patch (was in the
+  source tree but never applied)
+- Port CachyOS's compiled-in CONFIG_CACHY defaults (swappiness, page-cluster,
+  watermark boost, compaction, THP defrag, lru_gen min_ttl, readahead,
+  split lock mitigation, bfq/mq-deadline, AMD bm_check_disable)
+- Default transparent hugepages to always
+- Enable RCU priority boosting
+- Fail the build if any tuning option is dropped by Kconfig
+
 * Sun Oct 25 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.2.12-200.ludora
 - Update to kernel 7.2.12
 - BORE patch re-fetched from CachyOS 7.2 branch
