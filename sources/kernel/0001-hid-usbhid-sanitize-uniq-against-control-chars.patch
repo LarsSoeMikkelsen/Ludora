@@ -19,18 +19,19 @@ ASCII control characters or DEL (0x7f).
 Fixes: https://bugzilla.redhat.com/show_bug.cgi?id=2448678
 Ref: https://github.com/systemd/systemd/issues/41296
 ---
- drivers/hid/usbhid/hid-core.c | 18 +++++++++++++++++-
- 1 file changed, 17 insertions(+), 1 deletion(-)
+ drivers/hid/usbhid/hid-core.c | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
 
 --- a/drivers/hid/usbhid/hid-core.c
 +++ b/drivers/hid/usbhid/hid-core.c
-@@ -1429,8 +1429,24 @@
+@@ -1427,7 +1427,23 @@ static int usbhid_probe(struct usb_interface *intf, const struct usb_device_id *
  		snprintf(hid->phys + len, sizeof(hid->phys) - len,
  			 "%d", intf->altsetting[0].desc.bInterfaceNumber);
- 
+
 -	if (usb_string(dev, dev->descriptor.iSerialNumber, hid->uniq, 64) <= 0)
+-		hid->uniq[0] = 0;
 +	if (usb_string(dev, dev->descriptor.iSerialNumber, hid->uniq, 64) <= 0) {
- 		hid->uniq[0] = 0;
++		hid->uniq[0] = 0;
 +	} else {
 +		const unsigned char *s;
 +
@@ -48,5 +49,4 @@ Ref: https://github.com/systemd/systemd/issues/41296
 +		}
 +	}
  
- 	usbhid = kzalloc_obj(*usbhid);
- 	if (usbhid == NULL) {
+ 	usbhid = kzalloc(sizeof(*usbhid), GFP_KERNEL);

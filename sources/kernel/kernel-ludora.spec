@@ -11,13 +11,11 @@
 
 # Linux Kernel Versions
 %define _basekver 7.2
-%define _stablekver 13
+%define _stablekver 11
 %define _rpmver %{version}-%{release}
 %define _kver %{_rpmver}.%{_arch}
 
-# CachyOS stopped tagging 7.2 at 7.2.11 (moved to 7.3), so build their last
-# 7.2 tag and bring it to %{version} with kernel.org stable increments
-%define _tarkver 7.2.11
+%define _tarkver %{version}
 %define _tag cachyos-%{_tarkver}-1
 %define _releasekver 100
 
@@ -83,13 +81,10 @@ BuildRequires:  llvm
 
 # Indexes 0-9 are reserved for the kernel. 10-19 will be reserved for NVIDIA
 Source0:        https://github.com/CachyOS/linux/archive/refs/tags/%{_tag}.tar.gz
-# Pinned to the 7.2.11-1 commit; master now carries the 7.3 config
-Source1:        https://raw.githubusercontent.com/CachyOS/linux-cachyos/4a8d2ec8509d0da7d5fd5293f42251ea99d5ea3c/linux-cachyos/config
+Source1:        https://raw.githubusercontent.com/CachyOS/linux-cachyos/master/linux-cachyos/config
 
-Patch0:         https://cdn.kernel.org/pub/linux/kernel/v7.x/incr/patch-7.2.11-12.xz
-Patch1:         https://cdn.kernel.org/pub/linux/kernel/v7.x/incr/patch-7.2.12-13.xz
-Patch2:         %{_patch_src}/sched/0001-bore-cachy.patch
-Patch3:         0001-hid-usbhid-sanitize-uniq-against-control-chars.patch
+Patch0:         %{_patch_src}/sched/0001-bore-cachy.patch
+Patch1:         0001-hid-usbhid-sanitize-uniq-against-control-chars.patch
 
 %description
     The meta package for %{name}.
