@@ -12,7 +12,7 @@
 # Linux Kernel Versions
 %define _basekver 7.2
 %define _stablekver 11
-%define _releasekver 1
+%define _releasekver 2
 %define _rpmver %{version}-%{release}
 %define _kver %{_rpmver}.%{_arch}
 
@@ -138,13 +138,25 @@ The meta package for %{name}.
     # file, dropping the appended signature; Secure Boot refuses the module
     scripts/config -d MODULE_COMPRESS_XZ -e MODULE_COMPRESS_ZSTD -e MODULE_COMPRESS_ALL
 
+    # Drop Fedora's debug/hardening options that kernel-ludora (Cachy config)
+    # also leaves off: UBSAN instruments every array access and shift,
+    # DEBUG_LIST checks every list op (BUG_ON_DATA_CORRUPTION selects it;
+    # LIST_HARDENED stays), and partitioned kmalloc caches plus no slab
+    # merging spread allocations over more caches
+    scripts/config -d UBSAN -d BUG_ON_DATA_CORRUPTION -d DEBUG_LIST \
+                   -d KMALLOC_PARTITION_CACHES -e SLAB_MERGE_DEFAULT
+
     # Kconfig silently drops options whose dependencies aren't met, so check
     # that the tuning survived
     make olddefconfig
     for opt in SCHED_BORE HZ_1000 PREEMPT DEFAULT_BBR NET_SCH_FQ \
                TRANSPARENT_HUGEPAGE_ALWAYS RCU_BOOST \
-               MODULE_SIG_ALL MODULE_COMPRESS_ZSTD MODULE_COMPRESS_ALL; do
+               MODULE_SIG_ALL MODULE_COMPRESS_ZSTD MODULE_COMPRESS_ALL \
+               SLAB_MERGE_DEFAULT LIST_HARDENED; do
         grep -qx "CONFIG_${opt}=y" .config || { echo "CONFIG_${opt} not set"; exit 1; }
+    done
+    for opt in UBSAN DEBUG_LIST KMALLOC_PARTITION_CACHES; do
+        grep -qx "# CONFIG_${opt} is not set" .config || { echo "CONFIG_${opt} still set"; exit 1; }
     done
 
 %build
@@ -254,6 +266,11 @@ Kernel modules for %{name}-core.
 %files
 
 %changelog
+* Fri Oct 30 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.2.11-2.ludora
+- Disable UBSAN, DEBUG_LIST/BUG_ON_DATA_CORRUPTION and partitioned kmalloc
+  caches, enable slab merging, matching kernel-ludora; candidate cause of
+  the 1.6-2.7% CPU-side gap to kernel-ludora 7.2.11-100
+
 * Thu Oct 29 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.2.11-1.ludora
 - Build on 7.2.11 to match the last CachyOS 7.2 release (cachyos-7.2.11-1),
   so kernel-ludora and kernel-ludora-dev can be benchmarked on the same base
