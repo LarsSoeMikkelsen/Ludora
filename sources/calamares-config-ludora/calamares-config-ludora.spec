@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        21%{?dist}
+Release:        22%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -53,6 +53,7 @@ install -Dm644 modules/ludora_selections/main.py \
 
 # Scripts
 install -Dm755 scripts/packagechooser-cleanup.sh %{buildroot}%{_sysconfdir}/calamares/scripts/packagechooser-cleanup.sh
+install -Dm755 scripts/ludora-grub-install %{buildroot}%{_sysconfdir}/calamares/scripts/ludora-grub-install
 
 # Branding
 install -Dm644 branding/branding.desc    %{buildroot}%{_sysconfdir}/calamares/branding/ludora/branding.desc
@@ -76,12 +77,21 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_libdir}/calamares/modules/ludora_selections/module.desc
 %{_libdir}/calamares/modules/ludora_selections/main.py
 %{_sysconfdir}/calamares/scripts/packagechooser-cleanup.sh
+%{_sysconfdir}/calamares/scripts/ludora-grub-install
 %{_sysconfdir}/calamares/branding/ludora/branding.desc
 %{_sysconfdir}/calamares/branding/ludora/show.qml
 %{_sysconfdir}/calamares/branding/ludora/logo.png
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Sat Oct 31 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-22
+- bootloader: boot through Fedora's signed shim instead of grub2-install on
+  EFI (ludora-grub-install wrapper). grub2-install put an unsigned GRUB in
+  \EFI\Ludora and pointed the boot entry at it, bypassing shim, so Secure
+  Boot could never work. The "Ludora" entry now points at
+  \EFI\fedora\shimx64.efi, with a grub.cfg stub for /boot/grub2/grub.cfg.
+  BIOS installs still use grub2-install
+
 * Sat Oct 17 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-21
 - shellprocess@relabel: mount selinuxfs in the chroot before restorecon; without
   it restorecon saw SELinux as disabled and silently relabelled nothing (1.8-19

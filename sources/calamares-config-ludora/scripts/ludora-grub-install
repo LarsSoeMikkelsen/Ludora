@@ -1,0 +1,61 @@
+#!/usr/bin/bash
+# grubInstall for the Calamares bootloader module (runs in the target chroot).
+#
+# BIOS: plain grub2-install.
+# EFI:  do NOT run grub2-install. It writes an unsigned GRUB core image to
+#       \EFI\<id>\ and points the boot entry at it, which bypasses shim, so
+#       the system cannot boot with Secure Boot on. Instead use Fedora's signed
+#       shim + GRUB, which the shim-x64 and grub2-efi-x64 RPMs already put in
+#       \EFI\fedora\, write the grub.cfg stub that sends that GRUB to
+#       /boot/grub2/grub.cfg, and point the boot entry at shimx64.efi.
+#       Calamares runs grub2-mkconfig for /boot/grub2/grub.cfg afterwards.
+set -euo pipefail
+
+efi=0 esp="" label=""
+for arg in "$@"; do
+    case $arg in
+        --target=*-efi)    efi=1 ;;
+        --efi-directory=*) esp=${arg#*=} ;;
+        --bootloader-id=*) label=${arg#*=} ;;
+    esac
+done
+
+(( efi )) || exec grub2-install "$@"
+
+die() { echo "ludora-grub-install: $*" >&2; exit 1; }
+[[ -n $esp && -n $label ]] || die "missing --efi-directory or --bootloader-id"
+command -v efibootmgr >/dev/null || die "efibootmgr not installed"
+
+dir=$esp/EFI/fedora
+for f in shimx64.efi grubx64.efi mmx64.efi; do
+    [[ -f $dir/$f ]] || die "$dir/$f missing (shim-x64 / grub2-efi-x64 not installed?)"
+done
+
+# grub.cfg stub (same form Fedora uses). The image ships one from the live
+# build, so it points at the wrong filesystem until rewritten here.
+mkdir -p /boot/grub2
+uuid=$(grub2-probe --target=fs_uuid /boot/grub2)
+prefix=$(grub2-mkrelpath /boot/grub2)
+cat > "$dir/grub.cfg" <<EOF
+search --no-floppy --fs-uuid --set=dev $uuid
+set prefix=(\$dev)$prefix
+export \$prefix
+configfile \$prefix/grub.cfg
+EOF
+
+# Disk and partition number of the ESP, from sysfs (no udev in the chroot)
+src=$(readlink -f "$(findmnt -no SOURCE "$esp")")
+part=$(basename "$src")
+[[ -r /sys/class/block/$part/partition ]] || die "$src is not a partition"
+partnum=$(</sys/class/block/$part/partition)
+disk=/dev/$(basename "$(dirname "$(readlink -f "/sys/class/block/$part")")")
+
+# Replace earlier entries with the same label, like grub2-install does
+efibootmgr | sed -nE "s/^Boot([0-9A-Fa-f]{4})\*? ${label}(\t| |$).*/\1/p" |
+while read -r num; do
+    efibootmgr -q -b "$num" -B
+done
+
+# New entries go first in BootOrder
+efibootmgr -q -c -d "$disk" -p "$partnum" -L "$label" -l '\EFI\fedora\shimx64.efi'
+echo "ludora-grub-install: boot entry '$label' -> $disk part $partnum \\EFI\\fedora\\shimx64.efi"
