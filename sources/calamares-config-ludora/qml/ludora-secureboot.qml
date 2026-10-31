@@ -16,12 +16,19 @@
  * that is what the blue screen shows.
  */
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
+// Basic, not plain QtQuick.Controls: the live launcher runs Calamares with
+// QT_STYLE_OVERRIDE=breeze, which makes the plain import look for a "breeze"
+// Qt Quick Controls style that is not installed, and the page fails to load
+import QtQuick.Controls.Basic
 import QtCore
 
-Item {
+Rectangle {
     id: page
+
+    // Look like the native (widget) pages: window background, system font
+    // and text colour, no page title (the sidebar already names the page)
+    SystemPalette { id: pal; colorGroup: SystemPalette.Active }
+    color: pal.window
 
     Settings {
         id: sbIni
@@ -50,12 +57,12 @@ Item {
 
     function html(t) {
         if (!sbEnabled)
-            return "<h2>" + t.offTitle + "</h2>" + t.offBody
+            return "<p><b>" + t.offTitle + "</b></p>" + t.offBody
         var steps = "<ol>"
         for (var i = 0; i < t.steps.length; i++)
             steps += "<li>" + t.steps[i] + "</li>"
         steps += "</ol>"
-        return "<h2>" + t.onTitle + "</h2>" + t.intro + t.lead + steps + t.keyboard + t.missed
+        return "<p><b>" + t.onTitle + "</b></p>" + t.intro + t.lead + steps + t.keyboard + t.missed
     }
 
     readonly property var texts: ({
@@ -318,14 +325,14 @@ Item {
 
     ScrollView {
         anchors.fill: parent
-        anchors.margins: 12
+        anchors.margins: 8
         contentWidth: availableWidth
 
         Label {
             width: parent.width
             wrapMode: Text.WordWrap
             textFormat: Text.RichText
-            font.pointSize: 12
+            color: pal.windowText
             text: page.html(page.texts[page.lang])
         }
     }

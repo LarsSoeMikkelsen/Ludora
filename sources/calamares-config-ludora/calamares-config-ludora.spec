@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        24%{?dist}
+Release:        25%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -96,6 +96,14 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Sat Oct 31 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-25
+- Secure Boot page: import QtQuick.Controls.Basic. With the launcher's
+  QT_STYLE_OVERRIDE=breeze the plain import wanted a "breeze" Qt Quick
+  Controls style that is not installed, so the page failed to load (beta7)
+- Secure Boot page: match the native pages (window background instead of
+  white, system font and text colour, bold first line instead of a large
+  heading)
+
 * Sat Oct 31 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-24
 - notesqml_secureboot.conf: the sidebar label key must be "notes". With
   "secureboot", notesqml left its label pointer uninitialised and Calamares
