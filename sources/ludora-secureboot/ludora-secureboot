@@ -1,0 +1,268 @@
+#!/usr/bin/bash
+# ludora-secureboot: per-machine MOK key + kernel signing for Ludora kernels.
+#
+# kernel-ludora is built on COPR, which cannot hold a signing key, so each
+# machine gets its own key. setup creates it, enrolls it with shim's
+# MokManager, makes it the akmods key (so akmod modules such as NVIDIA are
+# signed with it too) and points the "Ludora" boot entry at Fedora's signed
+# shim. The kernel-install hook (99-ludora-sign.install) then signs every
+# new /boot/vmlinuz-*. Kernel modules are already signed at build time.
+#
+# Usage: ludora-secureboot {setup [--password-stdin]|sign [VERSION]|status|revert}
+
+set -euo pipefail
+
+KEYDIR=/etc/pki/ludora-secureboot
+KEY=$KEYDIR/MOK.key
+CERT=$KEYDIR/MOK.pem
+DER=$KEYDIR/MOK.der
+AKMODS_DIR=/etc/pki/akmods
+ESP=/boot/efi
+SHIM_DIR=$ESP/EFI/fedora
+BOOT_LABEL=Ludora
+LEGACY_HOOK=/etc/kernel/install.d/99-ludora-sign.install
+
+die()  { echo "ludora-secureboot: $*" >&2; exit 1; }
+warn() { echo "ludora-secureboot: WARNING: $*" >&2; }
+need_root() { [[ $EUID -eq 0 ]] || die "must run as root"; }
+relabel() { command -v restorecon &>/dev/null && restorecon -R "$@" || true; }
+
+# 0 = signed with our key, 1 = unsigned, 2 = signed by someone else (vendor)
+sig_state() {
+    sbverify --cert "$CERT" "$1" &>/dev/null && return 0
+    sbverify --list "$1" 2>/dev/null | grep -q '^signature' && return 2
+    return 1
+}
+
+sign_one() {
+    local img=$1 rc=0
+    [[ -f $img ]] || return 0
+    sig_state "$img" || rc=$?
+    case $rc in
+        0) echo "  ok       $img"; return 0 ;;
+        2) echo "  vendor   $img (already signed by another key, left alone)"; return 0 ;;
+    esac
+    sbsign --key "$KEY" --cert "$CERT" --output "$img.signing" "$img" >/dev/null \
+        || { rm -f "$img.signing"; warn "sbsign failed for $img"; return 1; }
+    mv -f "$img.signing" "$img"
+    relabel "$img"
+    sbverify --cert "$CERT" "$img" &>/dev/null || { warn "verify failed for $img"; return 1; }
+    echo "  signed   $img"
+}
+
+cmd_sign() {
+    need_root
+    [[ -r $KEY && -r $CERT ]] || die "no key in $KEYDIR, run 'ludora-secureboot setup' first"
+    local fail=0 img
+    local imgs=(/boot/vmlinuz-*)
+    # With a version, sign that kernel plus any rescue image dracut may just have created.
+    [[ -n ${1:-} ]] && imgs=("/boot/vmlinuz-$1" /boot/vmlinuz-0-rescue-*)
+    for img in "${imgs[@]}"; do
+        [[ $img == *.signing ]] && continue
+        sign_one "$img" || fail=1
+    done
+    return $fail
+}
+
+mok_state() {
+    # prints: enrolled | pending | absent
+    local fp enrolled new
+    fp=$(openssl x509 -in "$CERT" -noout -fingerprint -sha1 | cut -d= -f2 | tr A-F a-f)
+    # capture first: mokutil exits non-zero in normal cases and grep -q can
+    # SIGPIPE it, either of which fails the pipeline under pipefail
+    enrolled=$(mokutil --list-enrolled 2>/dev/null | tr A-F a-f || true)
+    new=$(mokutil --list-new 2>/dev/null | tr A-F a-f || true)
+    if grep -qF "$fp" <<<"$enrolled"; then echo enrolled
+    elif grep -qF "$fp" <<<"$new"; then echo pending
+    else echo absent; fi
+}
+
+gen_key() {
+    if [[ -f $KEY ]]; then
+        echo "Using existing key in $KEYDIR"
+        return
+    fi
+    echo "Generating machine key in $KEYDIR"
+    install -d -m 0700 "$KEYDIR"
+    ( umask 077
+      openssl req -new -x509 -newkey rsa:2048 -nodes -sha256 -days 36500 \
+          -subj "/CN=Ludora Secure Boot MOK ($(hostname -s)) $(date +%F)/" \
+          -addext "basicConstraints=critical,CA:FALSE" \
+          -addext "keyUsage=digitalSignature" \
+          -addext "extendedKeyUsage=codeSigning" \
+          -keyout "$KEY" -out "$CERT" 2>/dev/null )
+    openssl x509 -in "$CERT" -outform DER -out "$DER"
+    chmod 0600 "$KEY"; chmod 0644 "$CERT" "$DER"
+    relabel "$KEYDIR"
+}
+
+# Make our key the akmods signing key, so akmod-built modules (NVIDIA etc.)
+# load under Secure Boot with the same single MOK enrollment. akmods builds
+# as the unprivileged akmods user, hence a group-readable copy. akmods only
+# generates its own key when these links are missing. Also run from the
+# RPM trigger when akmods is installed after setup.
+cmd_akmods_key() {
+    need_root
+    [[ -r $KEY && -r $DER ]] || return 0
+    [[ -d $AKMODS_DIR/private && -d $AKMODS_DIR/certs ]] || return 0
+    getent group akmods >/dev/null || { warn "akmods group missing, akmods key not set"; return 0; }
+    install -m 0640 -o root -g akmods "$KEY" "$AKMODS_DIR/private/ludora-mok.priv"
+    install -m 0644 -o root -g akmods "$DER" "$AKMODS_DIR/certs/ludora-mok.der"
+    ln -nsf "$AKMODS_DIR/private/ludora-mok.priv" "$AKMODS_DIR/private/private_key.priv"
+    ln -nsf "$AKMODS_DIR/certs/ludora-mok.der" "$AKMODS_DIR/certs/public_key.der"
+    chown -h root:akmods "$AKMODS_DIR/private/private_key.priv" "$AKMODS_DIR/certs/public_key.der"
+    relabel "$AKMODS_DIR"
+    echo "akmods will sign modules with the Ludora key."
+}
+
+# Prints: shim (entry boots Fedora's signed shim) | unsigned | none
+boot_entry_state() {
+    local out
+    out=$(efibootmgr 2>/dev/null || true)
+    if grep -qiE "^Boot[0-9a-f]{4}\*? ${BOOT_LABEL}[[:space:]].*\\\\EFI\\\\fedora\\\\shimx64\.efi" <<<"$out"; then
+        echo shim
+    elif grep -qiE "^Boot[0-9a-f]{4}\*? ${BOOT_LABEL}[[:space:]]" <<<"$out"; then
+        echo unsigned
+    else
+        echo none
+    fi
+}
+
+# Installs from before calamares-config-ludora 1.8-22 boot an unsigned GRUB
+# from \EFI\Ludora via grub2-install, bypassing shim. Point the "Ludora"
+# entry at Fedora's signed shim instead (same as Calamares now does).
+fix_boot_entry() {
+    [[ $(boot_entry_state) == shim ]] && { echo "Boot entry '$BOOT_LABEL' already uses shim."; return 0; }
+    local f
+    for f in shimx64.efi grubx64.efi mmx64.efi; do
+        [[ -f $SHIM_DIR/$f ]] || { warn "$SHIM_DIR/$f missing (shim-x64 / grub2-efi-x64), boot entry left as is"; return 1; }
+    done
+
+    local uuid prefix
+    uuid=$(grub2-probe --target=fs_uuid /boot/grub2)
+    prefix=$(grub2-mkrelpath /boot/grub2)
+    cat > "$SHIM_DIR/grub.cfg" <<EOF
+search --no-floppy --fs-uuid --set=dev $uuid
+set prefix=(\$dev)$prefix
+export \$prefix
+configfile \$prefix/grub.cfg
+EOF
+
+    local src part partnum disk num
+    src=$(readlink -f "$(findmnt -no SOURCE "$ESP")")
+    part=$(basename "$src")
+    [[ -r /sys/class/block/$part/partition ]] || { warn "$src is not a partition, boot entry left as is"; return 1; }
+    partnum=$(</sys/class/block/$part/partition)
+    disk=/dev/$(basename "$(dirname "$(readlink -f "/sys/class/block/$part")")")
+
+    efibootmgr | sed -nE "s/^Boot([0-9A-Fa-f]{4})\*? ${BOOT_LABEL}([[:space:]]|$).*/\1/p" |
+    while read -r num; do efibootmgr -q -b "$num" -B; done
+    efibootmgr -q -c -d "$disk" -p "$partnum" -L "$BOOT_LABEL" -l '\EFI\fedora\shimx64.efi'
+    echo "Boot entry '$BOOT_LABEL' now boots \\EFI\\fedora\\shimx64.efi (Secure Boot capable)."
+}
+
+# Enroll with shim's MokManager on next boot. With --password-stdin the
+# one-time MokManager password is read from stdin (installer use);
+# otherwise mokutil asks for it.
+enroll() {
+    local pw_stdin=$1
+    case $(mok_state) in
+        enrolled) echo "MOK key already enrolled."; return ;;
+        pending)  echo "MOK enrollment already pending - reboot to finish it."; return ;;
+    esac
+    if (( pw_stdin )); then
+        local pw hash
+        IFS= read -r pw || true
+        [[ -n $pw ]] || die "empty password on stdin"
+        hash=$(mktemp)
+        if ! { mokutil --generate-hash="$pw" > "$hash" && mokutil --import "$DER" --hash-file "$hash"; }; then
+            rm -f "$hash"; die "MOK import failed"
+        fi
+        rm -f "$hash"
+    else
+        echo
+        echo "Requesting MOK enrollment. Choose a one-time password; you will"
+        echo "type it ONCE in the blue MokManager screen on next boot."
+        mokutil --import "$DER"
+    fi
+    echo "MOK enrollment queued."
+}
+
+cmd_setup() {
+    need_root
+    local pw_stdin=0
+    [[ ${1:-} == --password-stdin ]] && pw_stdin=1
+    [[ -d /sys/firmware/efi ]] || die "not booted in UEFI mode"
+
+    # The pre-package prototype wrote its hook to /etc, which masks ours
+    if [[ -f $LEGACY_HOOK ]] && grep -q "Installed by ludora-secureboot" "$LEGACY_HOOK"; then
+        rm -f "$LEGACY_HOOK"
+        echo "Removed prototype hook $LEGACY_HOOK"
+    fi
+    local legacy
+    for legacy in /usr/local/bin/ludora-secureboot /usr/local/sbin/ludora-secureboot; do
+        [[ -e $legacy ]] && warn "prototype copy $legacy shadows the packaged one; remove it"
+    done
+
+    gen_key
+    cmd_akmods_key
+    fix_boot_entry || warn "could not update the boot entry"
+
+    echo "Signing kernels in /boot:"
+    cmd_sign || warn "some kernels failed to sign"
+
+    enroll "$pw_stdin"
+
+    (( pw_stdin )) && return
+    cat <<MSG
+
+Next:
+  1. Reboot. In the blue MokManager screen: Enroll MOK -> Continue -> Yes ->
+     password -> Reboot. (If you miss the 10 s prompt, rerun setup.)
+  2. Back in Ludora, run: sudo ludora-secureboot status
+  3. If it says 'enrolled' and kernels are 'ok', you can enable Secure Boot
+     in firmware. Do NOT touch firmware key management (clear keys / custom
+     / setup mode).
+  If a kernel is refused: disable Secure Boot in firmware and boot normally.
+MSG
+}
+
+cmd_status() {
+    need_root   # $KEYDIR is 0700, so a non-root -r check would wrongly report "no key"
+    echo "Secure Boot:  $(mokutil --sb-state 2>&1 | head -1)"
+    echo "Boot entry:   $(boot_entry_state)"
+    if [[ ! -r $CERT ]]; then echo "Key:          none (run setup)"; return; fi
+    echo "Key:          $(openssl x509 -in "$CERT" -noout -subject | sed 's/^subject=//')"
+    echo "MOK:          $(mok_state)"
+    if [[ -L $AKMODS_DIR/certs/public_key.der ]]; then
+        [[ $(readlink "$AKMODS_DIR/certs/public_key.der") == */ludora-mok.der ]] \
+            && echo "akmods:       uses Ludora key" || echo "akmods:       own key (not Ludora's)"
+    fi
+    echo "Kernels:"
+    local rc img s
+    for img in /boot/vmlinuz-*; do
+        rc=0; sig_state "$img" || rc=$?
+        case $rc in 0) s=ok ;; 1) s=UNSIGNED ;; 2) s=vendor ;; esac
+        printf '  %-9s %s\n' "$s" "$img"
+    done
+}
+
+cmd_revert() {
+    need_root
+    if [[ -r $DER && $(mok_state) == enrolled ]]; then
+        echo "Requesting MOK deletion (confirm in MokManager on next boot):"
+        mokutil --delete "$DER"
+    fi
+    echo "Key left in $KEYDIR; new kernels keep being signed (harmless with"
+    echo "Secure Boot off). Remove the ludora-secureboot package and the key"
+    echo "to stop that."
+}
+
+case ${1:-} in
+    setup)      shift; cmd_setup "${1:-}" ;;
+    sign)       shift; cmd_sign "${1:-}" ;;
+    status)     cmd_status ;;
+    revert)     cmd_revert ;;
+    akmods-key) cmd_akmods_key ;;
+    *) echo "Usage: $0 {setup [--password-stdin]|sign [VERSION]|status|revert}" >&2; exit 2 ;;
+esac

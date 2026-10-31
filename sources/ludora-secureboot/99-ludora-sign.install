@@ -1,0 +1,9 @@
+#!/usr/bin/bash
+# ludora-secureboot: sign /boot/vmlinuz-<version> after 20-grub.install has
+# copied it there. Does nothing until 'ludora-secureboot setup' has created
+# the machine key.
+[[ $1 == add ]] || exit 0
+[[ -e /etc/pki/ludora-secureboot/MOK.key ]] || exit 0
+/usr/sbin/ludora-secureboot sign "$2" || \
+    echo "ludora-secureboot: signing $2 FAILED - this kernel will not boot with Secure Boot on" >&2
+exit 0
