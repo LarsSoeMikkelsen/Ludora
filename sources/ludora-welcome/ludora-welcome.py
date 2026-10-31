@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import getpass
 import sys
+import time
 from pathlib import Path
 
 try:
@@ -17,6 +18,26 @@ except ImportError:
     from PySide6.QtGui import QIcon
 
 FLAG_FILE = Path.home() / ".config" / "ludora" / "welcome-shown"
+
+# First login: ludora-apply-theme.sh (desktop-defaults-ludora) applies the
+# Ludora look-and-feel from its own autostart entry, in parallel with this
+# one. Qt reads the colour scheme once at startup, so wait for the theme
+# instead of opening with Breeze's colours. No autostart entry = no
+# Ludora theme selected at install = no wait.
+THEME_AUTOSTART = Path.home() / ".config" / "autostart" / "ludora-theme-apply.desktop"
+THEME_APPLIED = Path.home() / ".ludora-theme-applied"
+THEME_WAIT_SECONDS = 90
+
+
+def wait_for_theme():
+    if not THEME_AUTOSTART.exists() or THEME_APPLIED.exists():
+        return
+    deadline = time.monotonic() + THEME_WAIT_SECONDS
+    while time.monotonic() < deadline:
+        if THEME_APPLIED.exists():
+            time.sleep(1)  # let Plasma finish writing the colour scheme
+            return
+        time.sleep(1)
 
 _CODE = (
     "background:#1e1e2e; color:#cdd6f4; "
@@ -218,6 +239,9 @@ def main():
 
     FLAG_FILE.parent.mkdir(parents=True, exist_ok=True)
     FLAG_FILE.touch()
+
+    if not force:
+        wait_for_theme()
 
     app = QApplication(sys.argv)
     app.setApplicationName("Ludora Welcome")
