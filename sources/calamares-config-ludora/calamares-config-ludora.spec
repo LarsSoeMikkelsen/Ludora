@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        23%{?dist}
+Release:        24%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -96,6 +96,11 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Sat Oct 31 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-24
+- notesqml_secureboot.conf: the sidebar label key must be "notes". With
+  "secureboot", notesqml left its label pointer uninitialised and Calamares
+  crashed on startup (beta6)
+
 * Sat Oct 31 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-23
 - Secure Boot page (notesqml@secureboot, after Users), in the same 14
   languages as netinstall: with Secure Boot on, explains the one-time
