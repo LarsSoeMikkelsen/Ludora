@@ -1,6 +1,6 @@
 Name:           desktop-defaults-ludora
 Version:        1.1
-Release:        0%{?dist}
+Release:        1%{?dist}
 Summary:        KDE desktop defaults and system configuration for Ludora
 License:        GPLv3+
 URL:            https://ludora.org
@@ -40,3 +40,9 @@ install -Dm755 apply-ludora-theme-to-users.sh \
 /usr/local/bin/apply-ludora-theme-to-users.sh
 
 %changelog
+* Sat Oct 31 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.1-1
+- ludora-apply-theme.sh: remove empty panels for 30 s after applying the
+  theme. On first login plasmashell could still be creating its default
+  layout, leaving an empty, screenless panel ("+ Add Widgets..." strip)
+  next to the Ludora panel (Ludora 45 beta8)
+
