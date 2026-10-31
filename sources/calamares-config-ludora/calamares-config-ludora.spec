@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        25%{?dist}
+Release:        26%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -96,6 +96,13 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Sat Oct 31 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-26
+- shellprocess: run kernel-install add-all before dracut --regenerate-all.
+  The ISO no longer has kernel-ludora's /boot/vmlinuz (so the live ISO boots
+  Fedora's signed kernel); without it dracut picked the systemd-boot layout
+  /boot/efi/<machine-id>/<kver>/ on UEFI installs and the install failed
+  (beta8)
+
 * Sat Oct 31 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-25
 - Secure Boot page: import QtQuick.Controls.Basic. With the launcher's
   QT_STYLE_OVERRIDE=breeze the plain import wanted a "breeze" Qt Quick
