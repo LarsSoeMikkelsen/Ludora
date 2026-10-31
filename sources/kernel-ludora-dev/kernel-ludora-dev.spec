@@ -12,7 +12,7 @@
 # Linux Kernel Versions
 %define _basekver 7.2
 %define _stablekver 11
-%define _releasekver 4
+%define _releasekver 5
 %define _rpmver %{version}-%{release}
 %define _kver %{_rpmver}.%{_arch}
 
@@ -178,7 +178,104 @@ The meta package for %{name}.
     cp .config %{buildroot}%{_kernel_dir}/config
     cp System.map %{buildroot}%{_kernel_dir}/System.map
 
+    # Development files (headers, Makefiles, built host tools) for building
+    # out-of-tree modules (akmods/DKMS, e.g. NVIDIA). Same file list as
+    # kernel-ludora, which follows Fedora's kernel.spec; bpftool vmlinux.h is
+    # left out (not needed for modules, would need clang)
+    install -Dt %{buildroot}%{_devel_dir} -m644 .config Makefile Module.symvers System.map
+    cp --parents `find  -type f -name "Makefile*" -o -name "Kconfig*"` %{buildroot}%{_devel_dir}
+    rm -rf %{buildroot}%{_devel_dir}/scripts
+    rm -rf %{buildroot}%{_devel_dir}/include
+    cp -a scripts %{buildroot}%{_devel_dir}
+    rm -rf %{buildroot}%{_devel_dir}/scripts/tracing
+    rm -f %{buildroot}%{_devel_dir}/scripts/spdxcheck.py
+
+    # Needed for `make scripts`
+    cp -a --parents security/selinux/include/classmap.h %{buildroot}%{_devel_dir}
+    cp -a --parents security/selinux/include/initial_sid_to_string.h %{buildroot}%{_devel_dir}
+    cp -a --parents tools/include/tools/be_byteshift.h %{buildroot}%{_devel_dir}
+    cp -a --parents tools/include/tools/le_byteshift.h %{buildroot}%{_devel_dir}
+
+    # Needed for `make prepare` -- generic
+    cp -a --parents tools/include/linux/compiler* %{buildroot}%{_devel_dir}
+    cp -a --parents tools/include/linux/types.h %{buildroot}%{_devel_dir}
+    cp -a --parents tools/build/Build.include %{buildroot}%{_devel_dir}
+    cp --parents tools/build/fixdep.c %{buildroot}%{_devel_dir}
+    cp --parents tools/objtool/sync-check.sh %{buildroot}%{_devel_dir}
+    cp -a --parents tools/bpf/resolve_btfids %{buildroot}%{_devel_dir}
+
+    cp --parents security/selinux/include/policycap_names.h %{buildroot}%{_devel_dir}
+    cp --parents security/selinux/include/policycap.h %{buildroot}%{_devel_dir}
+
+    cp -a --parents tools/include/asm %{buildroot}%{_devel_dir}
+    cp -a --parents tools/include/asm-generic %{buildroot}%{_devel_dir}
+    cp -a --parents tools/include/linux %{buildroot}%{_devel_dir}
+    cp -a --parents tools/include/uapi/asm %{buildroot}%{_devel_dir}
+    cp -a --parents tools/include/uapi/asm-generic %{buildroot}%{_devel_dir}
+    cp -a --parents tools/include/uapi/linux %{buildroot}%{_devel_dir}
+    cp -a --parents tools/include/vdso %{buildroot}%{_devel_dir}
+    cp --parents tools/scripts/utilities.mak %{buildroot}%{_devel_dir}
+    cp -a --parents tools/lib/subcmd %{buildroot}%{_devel_dir}
+    cp --parents tools/lib/*.c %{buildroot}%{_devel_dir}
+    cp --parents tools/objtool/*.[ch] %{buildroot}%{_devel_dir}
+    cp --parents tools/objtool/Build %{buildroot}%{_devel_dir}
+    cp --parents tools/objtool/include/objtool/*.h %{buildroot}%{_devel_dir}
+    cp -a --parents tools/lib/bpf %{buildroot}%{_devel_dir}
+    cp --parents tools/lib/bpf/Build %{buildroot}%{_devel_dir}
+
+    # Misc headers
+    cp -a --parents arch/x86/include %{buildroot}%{_devel_dir}
+    cp -a --parents tools/arch/x86/include %{buildroot}%{_devel_dir}
+    cp -a include %{buildroot}%{_devel_dir}/include
+    cp -a sound/soc/sof/sof-audio.h %{buildroot}%{_devel_dir}/sound/soc/sof
+    cp -a tools/objtool/objtool %{buildroot}%{_devel_dir}/tools/objtool/
+    cp -a tools/objtool/fixdep %{buildroot}%{_devel_dir}/tools/objtool/
+
+    # Needed for `make prepare` -- x86_64
+    cp -a --parents arch/x86/entry/syscalls/syscall_32.tbl %{buildroot}%{_devel_dir}
+    cp -a --parents arch/x86/entry/syscalls/syscall_64.tbl %{buildroot}%{_devel_dir}
+    cp -a --parents arch/x86/tools/relocs_32.c %{buildroot}%{_devel_dir}
+    cp -a --parents arch/x86/tools/relocs_64.c %{buildroot}%{_devel_dir}
+    cp -a --parents arch/x86/tools/relocs.c %{buildroot}%{_devel_dir}
+    cp -a --parents arch/x86/tools/relocs_common.c %{buildroot}%{_devel_dir}
+    cp -a --parents arch/x86/tools/relocs.h %{buildroot}%{_devel_dir}
+    cp -a --parents arch/x86/purgatory/purgatory.c %{buildroot}%{_devel_dir}
+    cp -a --parents arch/x86/purgatory/stack.S %{buildroot}%{_devel_dir}
+    cp -a --parents arch/x86/purgatory/setup-x86_64.S %{buildroot}%{_devel_dir}
+    cp -a --parents arch/x86/purgatory/entry64.S %{buildroot}%{_devel_dir}
+    cp -a --parents arch/x86/boot/string.h %{buildroot}%{_devel_dir}
+    cp -a --parents arch/x86/boot/string.c %{buildroot}%{_devel_dir}
+    cp -a --parents arch/x86/boot/ctype.h %{buildroot}%{_devel_dir}
+
+    cp -a --parents scripts/syscalltbl.sh %{buildroot}%{_devel_dir}
+    cp -a --parents scripts/syscallhdr.sh %{buildroot}%{_devel_dir}
+
+    cp -a --parents tools/arch/x86/include/asm %{buildroot}%{_devel_dir}
+    cp -a --parents tools/arch/x86/include/uapi/asm %{buildroot}%{_devel_dir}
+    cp -a --parents tools/objtool/arch/x86/lib %{buildroot}%{_devel_dir}
+    cp -a --parents tools/arch/x86/lib/ %{buildroot}%{_devel_dir}
+    cp -a --parents tools/arch/x86/tools/gen-insn-attr-x86.awk %{buildroot}%{_devel_dir}
+    cp -a --parents tools/objtool/arch/x86/ %{buildroot}%{_devel_dir}
+
+    find %{buildroot}%{_devel_dir}/scripts \( -iname "*.o" -o -iname "*.cmd" \) -exec rm -f {} +
+    find %{buildroot}%{_devel_dir}/tools \( -iname "*.o" -o -iname "*.cmd" \) -exec rm -f {} +
+    touch -r %{buildroot}%{_devel_dir}/Makefile \
+        %{buildroot}%{_devel_dir}/include/generated/uapi/linux/version.h \
+        %{buildroot}%{_devel_dir}/include/config/auto.conf
+
+    # The build-time module signing key (certs/signing_key.pem) must never
+    # ship: anyone holding it could sign modules this kernel trusts
+    if grep -rlq -- "-----BEGIN .*PRIVATE KEY-----" %{buildroot}%{_devel_dir}; then
+        echo "private key found in devel files:"
+        grep -rl -- "-----BEGIN .*PRIVATE KEY-----" %{buildroot}%{_devel_dir}
+        exit 1
+    fi
+
+    # build/source links live in -devel, so they only exist when the
+    # headers they point at are installed
     rm -f %{buildroot}%{_kernel_dir}/build
+    ln -s %{_devel_dir} %{buildroot}%{_kernel_dir}/build
+    ln -s %{_kernel_dir}/build %{buildroot}%{_kernel_dir}/source
 
     install -dm755 %{buildroot}/boot
     dd if=/dev/zero of=%{buildroot}/boot/initramfs-%{_kver}.img bs=1M count=90
@@ -272,9 +369,61 @@ Kernel modules for %{name}-core.
     %{_kernel_dir}/modules.order
     %{_kernel_dir}/kernel
 
+%package devel
+Summary:        Development package for building kernel modules to match %{name}
+Provides:       kernel-devel = %{_rpmver}
+Provides:       kernel-devel-uname-r = %{_kver}
+Provides:       installonlypkg(kernel)
+AutoReqProv:    no
+Requires(pre):  findutils
+Requires:       findutils
+Requires:       perl-interpreter
+Requires:       openssl-devel
+Requires:       elfutils-libelf-devel
+Requires:       bison
+Requires:       flex
+Requires:       make
+
+%description devel
+Kernel headers and makefiles sufficient to build modules against %{name}.
+
+%post devel
+    if [ -f /etc/sysconfig/kernel ]; then
+        . /etc/sysconfig/kernel || exit $?
+    fi
+    if [ "$HARDLINK" != "no" -a -x /usr/bin/hardlink -a ! -e /run/ostree-booted ]; then
+        (cd /usr/src/kernels/%{_kver} &&
+        /usr/bin/find . -type f | while read f; do
+            hardlink -c /usr/src/kernels/*%{?dist}.*/$f $f > /dev/null
+        done;
+        )
+    fi
+
+%files devel
+    %{_devel_dir}
+    %{_kernel_dir}/build
+    %{_kernel_dir}/source
+
+%package devel-matched
+Summary:        Meta package to install matching core and devel packages for %{name}
+Provides:       kernel-devel-matched = %{_rpmver}
+Requires:       %{name}-core = %{_rpmver}
+Requires:       %{name}-devel = %{_rpmver}
+
+%description devel-matched
+Installs matching core and devel packages for %{name}.
+
+%files devel-matched
+
 %files
 
 %changelog
+* Sat Oct 31 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.2.11-5.ludora
+- Add -devel and -devel-matched subpackages (headers for akmods/DKMS,
+  e.g. NVIDIA), same file list as kernel-ludora; build/source links
+  owned by -devel; fail the build if a private key lands in -devel
+- No kernel changes vs 7.2.11-4
+
 * Sat Oct 31 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.2.11-4.ludora
 - Take BORE and POC directly from firelzrd instead of CachyOS
 - BORE 6.8.0-rc1 (CachyOS rebase) -> 7.0.0; adds wakeup sleep credit
