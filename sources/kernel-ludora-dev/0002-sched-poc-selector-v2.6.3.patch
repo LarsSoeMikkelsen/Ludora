@@ -1,0 +1,63 @@
+From 5c28b6663fbb6d258da53c39d2c8abb30abaafe1 Mon Sep 17 00:00:00 2001
+From: Piotr Gorski <lucjan.lucjanov@gmail.com>
+Date: Tue, 28 Jul 2026 20:52:52 +0200
+Subject: [PATCH] POC 2.6.3
+
+Signed-off-by: Piotr Gorski <lucjan.lucjanov@gmail.com>
+---
+ kernel/sched/poc_selector.c |  4 +++-
+ kernel/sched/sched.h        | 14 ++++++++++----
+ 2 files changed, 13 insertions(+), 5 deletions(-)
+
+diff --git a/kernel/sched/poc_selector.c b/kernel/sched/poc_selector.c
+index 901c9dcaefb290..d0f1a4532fb6fb 100644
+--- a/kernel/sched/poc_selector.c
++++ b/kernel/sched/poc_selector.c
+@@ -50,7 +50,7 @@
+ #define SCHED_POC_SELECTOR_AUTHOR   "Masahito Suzuki"
+ #define SCHED_POC_SELECTOR_PROGNAME "Piece-Of-Cake (POC) CPU Selector"
+ 
+-#define SCHED_POC_SELECTOR_VERSION  "2.6.2"
++#define SCHED_POC_SELECTOR_VERSION  "2.6.3"
+ 
+ /**************************************************************
+  * Static keys:
+@@ -837,6 +837,8 @@ static __always_inline u64 poc_smt_sibling_mask(int bit,
+ 		u8 shift = sd_share->poc_smt_shift;
+ 		int sib = (sd_share->poc_primary_mask & (1ULL << bit))
+ 				? bit + shift : bit - shift;
++		if (unlikely(sib < 0 || sib >= 64))
++			return 1ULL << bit;
+ 		return (1ULL << bit) | (1ULL << sib);
+ 	}
+ 
+diff --git a/kernel/sched/sched.h b/kernel/sched/sched.h
+index 1a750ea8e7c8b1..f614878e0b8a43 100644
+--- a/kernel/sched/sched.h
++++ b/kernel/sched/sched.h
+@@ -2468,15 +2468,21 @@ static __always_inline u64 poc_cpumask_to_u64(const struct cpumask *mask,
+ {
+ 	int base = sd_share->poc_cpu_base;
+ 	int base_word = base >> 6;
++	int shift = sd_share->poc_affinity_shift;
+ 
+-	if (static_branch_likely(&sched_poc_aligned)) {
+-		/* Fast path: no shift needed (base is 64-aligned) */
++	if (likely(shift == 0)) {
++		/*
++		 * Fast path: this LLC's own base is 64-aligned, so no
++		 * cross-word shift is needed here even if some other LLC
++		 * in the system is misaligned (sched_poc_aligned is a
++		 * single system-wide flag and must not gate this branch).
++		 */
+ 		return cpumask_bits(mask)[base_word];
+ 	} else {
+ 		/* Slow path: shift required (e.g., Threadripper) */
+-		int shift = sd_share->poc_affinity_shift;
+ 		u64 lo = cpumask_bits(mask)[base_word];
+-		u64 hi = cpumask_bits(mask)[base_word + 1];
++		u64 hi = (base_word + 1 < BITS_TO_LONGS(nr_cpumask_bits)) ?
++			 cpumask_bits(mask)[base_word + 1] : 0;
+ 		return (lo >> shift) | (hi << (64 - shift));
+ 	}
+ }

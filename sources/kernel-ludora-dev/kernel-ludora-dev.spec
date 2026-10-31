@@ -12,7 +12,7 @@
 # Linux Kernel Versions
 %define _basekver 7.2
 %define _stablekver 11
-%define _releasekver 2
+%define _releasekver 3
 %define _rpmver %{version}-%{release}
 %define _kver %{_rpmver}.%{_arch}
 
@@ -68,6 +68,10 @@ Patch0:         0001-bore.patch
 Patch1:         0001-hid-usbhid-sanitize-uniq-against-control-chars.patch
 Patch2:         0001-usb-core-truncate-string-descriptors-at-first-C0-con.patch
 Patch3:         0001-cachyos-default-tunables.patch
+# Piece-Of-Cake idle CPU selector, from CachyOS/linux 7.2/cachy
+# (85777b42e511 + 5c28b6663fbb, both in cachyos-7.2.11-1); re-check each bump
+Patch4:         0001-sched-poc-selector-v2.6.2.patch
+Patch5:         0002-sched-poc-selector-v2.6.3.patch
 
 %description
 The meta package for %{name}.
@@ -146,13 +150,16 @@ The meta package for %{name}.
     scripts/config -d UBSAN -d BUG_ON_DATA_CORRUPTION -d DEBUG_LIST \
                    -d KMALLOC_PARTITION_CACHES -e SLAB_MERGE_DEFAULT
 
+    # Faster idle CPU search on wakeup (CachyOS POC selector, Patch4/5)
+    scripts/config -e SCHED_POC_SELECTOR
+
     # Kconfig silently drops options whose dependencies aren't met, so check
     # that the tuning survived
     make olddefconfig
     for opt in SCHED_BORE HZ_1000 PREEMPT DEFAULT_BBR NET_SCH_FQ \
                TRANSPARENT_HUGEPAGE_ALWAYS RCU_BOOST \
                MODULE_SIG_ALL MODULE_COMPRESS_ZSTD MODULE_COMPRESS_ALL \
-               SLAB_MERGE_DEFAULT LIST_HARDENED; do
+               SLAB_MERGE_DEFAULT LIST_HARDENED SCHED_POC_SELECTOR; do
         grep -qx "CONFIG_${opt}=y" .config || { echo "CONFIG_${opt} not set"; exit 1; }
     done
     for opt in UBSAN DEBUG_LIST KMALLOC_PARTITION_CACHES; do
@@ -266,6 +273,10 @@ Kernel modules for %{name}-core.
 %files
 
 %changelog
+* Sat Oct 31 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.2.11-3.ludora
+- Add the CachyOS POC (Piece-Of-Cake) idle CPU selector v2.6.3, as in
+  kernel-ludora 7.2.11-100; next candidate for the remaining ~1.6% gap
+
 * Fri Oct 30 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.2.11-2.ludora
 - Disable UBSAN, DEBUG_LIST/BUG_ON_DATA_CORRUPTION and partitioned kmalloc
   caches, enable slab merging, matching kernel-ludora; candidate cause of
