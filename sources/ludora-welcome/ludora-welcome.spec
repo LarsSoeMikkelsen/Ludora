@@ -1,5 +1,5 @@
 Name:           ludora-welcome
-Version:        1.7
+Version:        1.8
 Release:        0%{?dist}
 Summary:        First-boot welcome application for Ludora
 License:        GPLv3+
@@ -12,7 +12,8 @@ Requires:       kde-ludora
 %description
 A simple welcome application that runs on first boot, introducing the user
 to Ludora, explaining how to upgrade the system with dnf instead of KDE Discover,
-and guiding NVIDIA driver installation using the pre-enabled RPM Fusion repositories.
+guiding NVIDIA driver installation using the pre-enabled RPM Fusion repositories,
+and explaining how to set up Secure Boot signing with ludora-secureboot.
 
 %define debug_package %{nil}
 
@@ -38,6 +39,11 @@ install -Dm644 ludora-welcome-app.desktop \
 %{_datadir}/applications/ludora-welcome.desktop
 
 %changelog
+* Sat Oct 31 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-0
+- Add Secure Boot tab: how to turn on Secure Boot after installing with it off
+  (ludora-secureboot setup, MokManager enrollment, status check, then firmware)
+- Welcome tab: point to the Secure Boot tab
+
 * Thu Oct 15 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 1.7-0
 - NVIDIA tab: install kernel-ludora-devel-matched alongside akmod-nvidia so the
   module can be built (#9); add black-screen recovery steps

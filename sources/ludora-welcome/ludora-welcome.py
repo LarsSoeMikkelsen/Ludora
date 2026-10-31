@@ -38,6 +38,10 @@ WELCOME_HTML = """
 <p>If you installed Steam, GE-Proton is already included. To set it as the default compatibility tool,
 open Steam and go to <b>Settings &rarr; Compatibility &rarr; Default compatibility tool</b> and select GE-Proton.</p>
 
+<h3>4. Secure Boot (optional)</h3>
+<p>If you want to turn on Secure Boot later, see the <b>Secure Boot</b> tab first &mdash;
+turning it on without the setup step stops Ludora from starting.</p>
+
 <p>You can reopen this window any time from <b>System &rarr; Ludora Welcome</b>
 in the application menu.</p>
 """
@@ -121,6 +125,49 @@ sudo reboot</pre>
 <a href="https://rpmfusion.org/Howto/NVIDIA">RPM Fusion NVIDIA Howto</a>.</small></p>
 """
 
+SECUREBOOT_HTML = f"""
+<h2>Turning On Secure Boot</h2>
+
+<p>Ludora's gaming kernel is not signed by Microsoft, so with Secure Boot on your PC
+refuses to start it &mdash; unless you give your PC a signing key of its own first.
+If you installed Ludora with Secure Boot already on, this was done during installation
+and there is nothing to do here.</p>
+
+<p><b>Do these steps before you turn Secure Boot on in your firmware.</b></p>
+
+<h3>Step 1 &mdash; Create and sign with your key</h3>
+<pre style="{_CODE}">sudo dnf install ludora-secureboot
+sudo ludora-secureboot setup</pre>
+<p>The first line is only needed on installs made before Ludora 45 (it does nothing
+if the package is already there). The second creates a key for this PC, signs your kernels with it (new kernels are signed
+automatically from now on) and asks you to choose a <b>one-time password</b>.
+You only need that password once, in Step 2.</p>
+
+<h3>Step 2 &mdash; Reboot and approve the key</h3>
+<p>Reboot. A <b>blue screen</b> appears:</p>
+<ol>
+  <li>When it says <i>Press any key to perform MOK management</i>, press a key
+      <b>within 10 seconds</b>.</li>
+  <li>Choose <b>Enroll MOK</b>.</li>
+  <li>Choose <b>Continue</b>.</li>
+  <li>Choose <b>Yes</b>.</li>
+  <li>Type the password you chose in Step 1 and press Enter.
+      Nothing is shown while you type. The blue screen uses a US keyboard layout.</li>
+  <li>Choose <b>Reboot</b>.</li>
+</ol>
+<p>Missed the 10 seconds? Run <code>sudo ludora-secureboot setup</code> again and reboot.</p>
+
+<h3>Step 3 &mdash; Check</h3>
+<pre style="{_CODE}">sudo ludora-secureboot status</pre>
+<p>It should say <b>MOK: enrolled</b> and list every kernel as <b>ok</b>.</p>
+
+<h3>Step 4 &mdash; Turn on Secure Boot</h3>
+<p>Now enable Secure Boot in your firmware (BIOS/UEFI) settings.
+Do <b>not</b> touch the firmware's key management (clear keys, custom keys, setup mode).</p>
+<p>If Ludora does not start afterwards, turn Secure Boot off again, start Ludora and check
+<code>sudo ludora-secureboot status</code>.</p>
+"""
+
 
 class WelcomeWindow(QMainWindow):
     def __init__(self):
@@ -134,6 +181,7 @@ class WelcomeWindow(QMainWindow):
         tabs.addTab(self._tab(WELCOME_HTML), "Welcome")
         tabs.addTab(self._tab(UPGRADE_HTML), "Upgrading")
         tabs.addTab(self._tab(NVIDIA_HTML), "NVIDIA Drivers")
+        tabs.addTab(self._tab(SECUREBOOT_HTML), "Secure Boot")
 
         close_btn = QPushButton("Close")
         close_btn.setFixedWidth(100)
