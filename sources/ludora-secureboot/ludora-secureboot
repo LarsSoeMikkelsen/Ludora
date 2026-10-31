@@ -83,10 +83,15 @@ gen_key() {
         return
     fi
     echo "Generating machine key in $KEYDIR"
+    # Read /etc/hostname: in the installer chroot `hostname` still reports
+    # the live system ("localhost-live")
+    local host
+    host=$(cut -d. -f1 /etc/hostname 2>/dev/null)
+    [[ -n $host ]] || host=$(hostname -s)
     install -d -m 0700 "$KEYDIR"
     ( umask 077
       openssl req -new -x509 -newkey rsa:2048 -nodes -sha256 -days 36500 \
-          -subj "/CN=Ludora Secure Boot MOK ($(hostname -s)) $(date +%F)/" \
+          -subj "/CN=Ludora Secure Boot MOK (${host}) $(date +%F)/" \
           -addext "basicConstraints=critical,CA:FALSE" \
           -addext "keyUsage=digitalSignature" \
           -addext "extendedKeyUsage=codeSigning" \

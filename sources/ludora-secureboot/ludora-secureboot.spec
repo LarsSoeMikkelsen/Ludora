@@ -1,6 +1,6 @@
 Name:           ludora-secureboot
 Version:        1.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Per-machine Secure Boot signing for Ludora kernels
 License:        GPL-3.0-or-later
 URL:            https://github.com/LarsSoeMikkelsen/Ludora
@@ -45,6 +45,10 @@ install -Dm0755 %{SOURCE1} %{buildroot}%{_prefix}/lib/kernel/install.d/99-ludora
 %{_prefix}/lib/kernel/install.d/99-ludora-sign.install
 
 %changelog
+* Sat Oct 31 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-2
+- Name the key after /etc/hostname: in the installer `hostname` still
+  reported the live system, giving keys called "(localhost-live)"
+
 * Sat Oct 31 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-1
 - Initial package of the ludora-secureboot prototype
 - kernel-install hook shipped in /usr/lib/kernel/install.d (no-op without a key)
