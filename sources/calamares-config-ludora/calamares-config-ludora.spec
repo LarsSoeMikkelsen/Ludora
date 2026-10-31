@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        22%{?dist}
+Release:        23%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -43,6 +43,8 @@ install -Dm644 modules/removeuser.conf      %{buildroot}%{_sysconfdir}/calamares
 install -Dm644 modules/shellprocess.conf    %{buildroot}%{_sysconfdir}/calamares/modules/shellprocess.conf
 install -Dm644 modules/shellprocess_relabel.conf %{buildroot}%{_sysconfdir}/calamares/modules/shellprocess_relabel.conf
 install -Dm644 modules/users.conf          %{buildroot}%{_sysconfdir}/calamares/modules/users.conf
+install -Dm644 modules/notesqml_secureboot.conf %{buildroot}%{_sysconfdir}/calamares/modules/notesqml_secureboot.conf
+install -Dm644 qml/ludora-secureboot.qml    %{buildroot}%{_sysconfdir}/calamares/qml/ludora-secureboot.qml
 
 # ludora_selections Python module (must be in libdir, not sysconfdir — Calamares
 # only loads Python module code from /usr/lib64/calamares/modules/ on Fedora)
@@ -50,10 +52,15 @@ install -Dm644 modules/ludora_selections/module.desc \
     %{buildroot}%{_libdir}/calamares/modules/ludora_selections/module.desc
 install -Dm644 modules/ludora_selections/main.py \
     %{buildroot}%{_libdir}/calamares/modules/ludora_selections/main.py
+install -Dm644 modules/ludora_secureboot/module.desc \
+    %{buildroot}%{_libdir}/calamares/modules/ludora_secureboot/module.desc
+install -Dm644 modules/ludora_secureboot/main.py \
+    %{buildroot}%{_libdir}/calamares/modules/ludora_secureboot/main.py
 
 # Scripts
 install -Dm755 scripts/packagechooser-cleanup.sh %{buildroot}%{_sysconfdir}/calamares/scripts/packagechooser-cleanup.sh
 install -Dm755 scripts/ludora-grub-install %{buildroot}%{_sysconfdir}/calamares/scripts/ludora-grub-install
+install -Dm755 scripts/ludora-sb-state %{buildroot}%{_sysconfdir}/calamares/scripts/ludora-sb-state
 
 # Branding
 install -Dm644 branding/branding.desc    %{buildroot}%{_sysconfdir}/calamares/branding/ludora/branding.desc
@@ -74,16 +81,32 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/modules/shellprocess.conf
 %{_sysconfdir}/calamares/modules/shellprocess_relabel.conf
 %{_sysconfdir}/calamares/modules/users.conf
+%{_sysconfdir}/calamares/modules/notesqml_secureboot.conf
+%{_sysconfdir}/calamares/qml/ludora-secureboot.qml
 %{_libdir}/calamares/modules/ludora_selections/module.desc
 %{_libdir}/calamares/modules/ludora_selections/main.py
+%{_libdir}/calamares/modules/ludora_secureboot/module.desc
+%{_libdir}/calamares/modules/ludora_secureboot/main.py
 %{_sysconfdir}/calamares/scripts/packagechooser-cleanup.sh
 %{_sysconfdir}/calamares/scripts/ludora-grub-install
+%{_sysconfdir}/calamares/scripts/ludora-sb-state
 %{_sysconfdir}/calamares/branding/ludora/branding.desc
 %{_sysconfdir}/calamares/branding/ludora/show.qml
 %{_sysconfdir}/calamares/branding/ludora/logo.png
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Sat Oct 31 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-23
+- Secure Boot page (notesqml@secureboot, after Users), in the same 14
+  languages as netinstall: with Secure Boot on, explains the one-time
+  MokManager enrollment on first start step by step (password: ludora);
+  with it off, says there is nothing to do
+- ludora_secureboot job (after shellprocess): with Secure Boot on and a
+  Ludora kernel installed, runs 'ludora-secureboot setup --password-stdin'
+  in the target with the password "ludora". Never fails the installation
+- ludora-sb-state: records the live Secure Boot state for the page (QML
+  cannot run commands); called by the live session's calamares-launcher
+
 * Sat Oct 31 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-22
 - bootloader: boot through Fedora's signed shim instead of grub2-install on
   EFI (ludora-grub-install wrapper). grub2-install put an unsigned GRUB in

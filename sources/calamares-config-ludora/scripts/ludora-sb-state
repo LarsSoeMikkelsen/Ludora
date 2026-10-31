@@ -1,0 +1,7 @@
+#!/usr/bin/bash
+# Record the live system's Secure Boot state for the installer's Secure
+# Boot page (ludora-secureboot.qml), which cannot run commands itself.
+# Called by the live session's calamares-launcher before Calamares starts.
+sb=false
+mokutil --sb-state 2>/dev/null | grep -q "SecureBoot enabled" && sb=true
+printf '[secureboot]\nenabled=%s\n' "$sb" > /tmp/ludora-secureboot.ini

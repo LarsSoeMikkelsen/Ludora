@@ -30,7 +30,7 @@ srpm:
 		cd $(CURDIR) && \
 		tar czf /tmp/calamares-config-ludora-1.8.tar.gz \
 			--transform 's|^|calamares-config-ludora-1.8/|' \
-			settings.conf modules branding scripts && \
+			settings.conf modules branding scripts qml && \
 		rpmbuild -bs \
 			--define "_sourcedir /tmp" \
 			--define "_srcrpmdir $(outdir)" \
@@ -65,9 +65,9 @@ srpm:
 			$(spec); \
 	elif echo "$(spec)" | grep -q "ludora-welcome"; then \
 		_dir=$$(dirname $(spec)) && \
-		tar czf /tmp/ludora-welcome-1.7.tar.gz \
+		tar czf /tmp/ludora-welcome-1.8.tar.gz \
 			-C $$_dir \
-			--transform 's|^|ludora-welcome-1.7/|' \
+			--transform 's|^|ludora-welcome-1.8/|' \
 			ludora-welcome.py \
 			ludora-welcome.desktop \
 			ludora-welcome-app.desktop && \
