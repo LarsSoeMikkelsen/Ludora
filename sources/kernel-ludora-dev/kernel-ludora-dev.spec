@@ -10,9 +10,11 @@
 %undefine _include_frame_pointers
 
 # Linux Kernel Versions
-%define _basekver 7.2
-%define _stablekver 11
-%define _releasekver 5
+%define _basekver 7.3
+%define _stablekver 1
+# Development copy of sources/kernel-ludora under its own package name, so
+# test builds in COPR never reach kernel-ludora users. Keep the two in sync.
+%define _releasekver 1
 %define _rpmver %{version}-%{release}
 %define _kver %{_rpmver}.%{_arch}
 
@@ -67,12 +69,14 @@ Source1:        config
 # BORE and POC come straight from their author (firelzrd / Masahito Suzuki),
 # not from CachyOS. Pinned commits; re-fetch for each kernel series:
 # https://github.com/firelzrd/bore-scheduler 1e2f57ad74e8 patches/stable/
-Patch0:         0001-linux7.2-rc1-bore-7.0.0.patch
+Patch0:         0001-linux7.3-rc2-bore-7.0.0.patch
 Patch1:         0001-hid-usbhid-sanitize-uniq-against-control-chars.patch
 Patch2:         0001-usb-core-truncate-string-descriptors-at-first-C0-con.patch
 Patch3:         0001-cachyos-default-tunables.patch
 # Piece-Of-Cake idle CPU selector
 # https://github.com/firelzrd/poc-selector 5c5a0c897208 patches/stable/
+# v2.6.3 is only published for 7.2 but applies to 7.3; the 7.3 patch is
+# v3.0.0, still marked testing upstream (not benchmarked or reviewed)
 Patch4:         0001-7.2-rc1-poc-selector-v2.6.3.patch
 
 %description
@@ -144,7 +148,7 @@ The meta package for %{name}.
     # file, dropping the appended signature; Secure Boot refuses the module
     scripts/config -d MODULE_COMPRESS_XZ -e MODULE_COMPRESS_ZSTD -e MODULE_COMPRESS_ALL
 
-    # Drop Fedora's debug/hardening options that kernel-ludora (Cachy config)
+    # Drop Fedora's debug/hardening options that the old CachyOS-based kernel
     # also leaves off: UBSAN instruments every array access and shift,
     # DEBUG_LIST checks every list op (BUG_ON_DATA_CORRUPTION selects it;
     # LIST_HARDENED stays), and partitioned kmalloc caches plus no slab
@@ -180,7 +184,7 @@ The meta package for %{name}.
 
     # Development files (headers, Makefiles, built host tools) for building
     # out-of-tree modules (akmods/DKMS, e.g. NVIDIA). Same file list as
-    # kernel-ludora, which follows Fedora's kernel.spec; bpftool vmlinux.h is
+    # the old CachyOS-based kernel-ludora, which follows Fedora's kernel.spec; bpftool vmlinux.h is
     # left out (not needed for modules, would need clang)
     install -Dt %{buildroot}%{_devel_dir} -m644 .config Makefile Module.symvers System.map
     cp --parents `find  -type f -name "Makefile*" -o -name "Kconfig*"` %{buildroot}%{_devel_dir}
@@ -418,6 +422,15 @@ Installs matching core and devel packages for %{name}.
 %files
 
 %changelog
+* Sat Oct 31 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.3.1-1.ludora
+- Test build of the next kernel-ludora (sources/kernel-ludora) under the
+  kernel-ludora-dev name
+- Update to kernel 7.3.1
+- BORE 7.0.0: firelzrd stable patch for 7.3 (same commit 1e2f57ad74e8)
+- POC selector v2.6.3 kept (7.2 patch, applies to 7.3)
+- Tunables patch rebased: page_cluster moved to mm/swap_state.c, split lock
+  hunk has new context; values unchanged
+
 * Sat Oct 31 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.2.11-5.ludora
 - Add -devel and -devel-matched subpackages (headers for akmods/DKMS,
   e.g. NVIDIA), same file list as kernel-ludora; build/source links

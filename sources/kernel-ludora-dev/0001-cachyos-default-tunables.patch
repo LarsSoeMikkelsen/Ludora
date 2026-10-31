@@ -1,12 +1,16 @@
 From: Lars Soe Mikkelsen <larssoemikkelsen@gmail.com>
-Date: Thu, 29 Oct 2026 00:00:00 +0100
+Date: Sat, 31 Oct 2026 00:00:00 +0100
 Subject: [PATCH] Apply CachyOS default tunables
 
 Port the compiled-in defaults that CONFIG_CACHY sets in the CachyOS kernel
-(CachyOS/linux 7.2/cachy branch), so kernel-ludora-dev can be compared with
-the CachyOS kernel on the same userspace. Skipped on purpose: the EEVDF
-base_slice/migration_cost tweaks (BORE overrides them) and the
-unprivileged_userns_clone sysctl (defaults to 1, no change in behaviour).
+(originally from the CachyOS/linux 7.2/cachy branch), as Ludora kernel
+defaults. Skipped on purpose: the EEVDF base_slice/migration_cost tweaks
+(BORE overrides them) and the unprivileged_userns_clone sysctl (defaults
+to 1, no change in behaviour).
+
+Rebased on 7.3.1: page_cluster moved from mm/swap.c swap_setup() to
+mm/swap_state.c swap_readahead_setup(); split lock hunk re-applied with
+new context. Values unchanged.
 
 - vm.swappiness 60 -> 100
 - vm.page-cluster 3 -> 0 (no swap-in readahead)
@@ -19,19 +23,19 @@ unprivileged_userns_clone sysctl (defaults to 1, no change in behaviour).
 - bfq for single queue devices, mq-deadline for multiqueue devices
 - processor.bm_check_disable on AMD
 ---
- arch/x86/kernel/cpu/bus_lock.c |  2 +-
- block/elevator.c               | 24 ++++++++++++++----------
- drivers/acpi/processor_idle.c  | 13 +++++++++++++
- include/linux/pagemap.h        |  2 +-
- mm/compaction.c                |  2 +-
- mm/huge_memory.c               |  2 +-
- mm/page_alloc.c                |  2 +-
- mm/swap.c                      | 13 ++-----------
- mm/vmscan.c                    |  4 ++--
- 9 files changed, 36 insertions(+), 28 deletions(-)
+  arch/x86/kernel/cpu/bus_lock.c |  2 +-
+  block/elevator.c               | 24 ++++++++++++++----------
+  drivers/acpi/processor_idle.c  | 13 +++++++++++++
+  include/linux/pagemap.h        |  2 +-
+  mm/compaction.c                |  2 +-
+  mm/huge_memory.c               |  2 +-
+  mm/page_alloc.c                |  2 +-
+  mm/swap_state.c                | 13 ++-----------
+  mm/vmscan.c                    |  4 ++--
+  9 files changed, 36 insertions(+), 28 deletions(-)
 
 diff --git a/arch/x86/kernel/cpu/bus_lock.c b/arch/x86/kernel/cpu/bus_lock.c
-index bba2860..c75bada 100644
+index 177f964d4..6a386fbc5 100644
 --- a/arch/x86/kernel/cpu/bus_lock.c
 +++ b/arch/x86/kernel/cpu/bus_lock.c
 @@ -47,7 +47,7 @@ static const struct {
@@ -42,9 +46,9 @@ index bba2860..c75bada 100644
 +static unsigned int sysctl_sld_mitigate = 0;
  static DEFINE_SEMAPHORE(buslock_sem, 1);
  
- #ifdef CONFIG_PROC_SYSCTL
+ #ifdef CONFIG_SYSCTL
 diff --git a/block/elevator.c b/block/elevator.c
-index 2161b6e..58c7f45 100644
+index 2161b6eea..58c7f454c 100644
 --- a/block/elevator.c
 +++ b/block/elevator.c
 @@ -740,22 +740,26 @@ void elevator_set_default(struct request_queue *q)
@@ -85,10 +89,10 @@ index 2161b6e..58c7f45 100644
  }
  
 diff --git a/drivers/acpi/processor_idle.c b/drivers/acpi/processor_idle.c
-index d573f20..2b7a511 100644
+index e113bcbbb..854349418 100644
 --- a/drivers/acpi/processor_idle.c
 +++ b/drivers/acpi/processor_idle.c
-@@ -1441,6 +1441,19 @@ void acpi_processor_power_init(struct acpi_processor *pr)
+@@ -1162,6 +1162,19 @@ void acpi_processor_power_init(struct acpi_processor *pr)
  	if (disabled_by_idle_boot_param())
  		return;
  
@@ -109,10 +113,10 @@ index d573f20..2b7a511 100644
  		pr->flags.power_setup_done = 1;
  
 diff --git a/include/linux/pagemap.h b/include/linux/pagemap.h
-index 2c3718d..42dba9e 100644
+index 0adfa6605..5fac5f378 100644
 --- a/include/linux/pagemap.h
 +++ b/include/linux/pagemap.h
-@@ -1363,7 +1363,7 @@ struct readahead_control {
+@@ -1426,7 +1426,7 @@ struct readahead_control {
  		._index = i,						\
  	}
  
@@ -122,10 +126,10 @@ index 2c3718d..42dba9e 100644
  void page_cache_ra_unbounded(struct readahead_control *,
  		unsigned long nr_to_read, unsigned long lookahead_count);
 diff --git a/mm/compaction.c b/mm/compaction.c
-index 65fd08a..c41ebd6 100644
+index a04941551..8adef99a4 100644
 --- a/mm/compaction.c
 +++ b/mm/compaction.c
-@@ -1935,7 +1935,7 @@ static int sysctl_compact_unevictable_allowed __read_mostly = CONFIG_COMPACT_UNE
+@@ -1933,7 +1933,7 @@ static int sysctl_compact_unevictable_allowed __read_mostly = CONFIG_COMPACT_UNE
   * aggressively the kernel should compact memory in the
   * background. It takes values in the range [0, 100].
   */
@@ -135,7 +139,7 @@ index 65fd08a..c41ebd6 100644
  static int __read_mostly sysctl_compact_memory;
  
 diff --git a/mm/huge_memory.c b/mm/huge_memory.c
-index a2ad4a9..d1fecfe 100644
+index 1e5d68acf..df3a728b4 100644
 --- a/mm/huge_memory.c
 +++ b/mm/huge_memory.c
 @@ -65,7 +65,7 @@ unsigned long transparent_hugepage_flags __read_mostly =
@@ -148,10 +152,10 @@ index a2ad4a9..d1fecfe 100644
  	(1<<TRANSPARENT_HUGEPAGE_USE_ZERO_PAGE_FLAG);
  
 diff --git a/mm/page_alloc.c b/mm/page_alloc.c
-index 73645d2..5fab776 100644
+index 12fac9084..1b5a931e6 100644
 --- a/mm/page_alloc.c
 +++ b/mm/page_alloc.c
-@@ -270,7 +270,7 @@ const char * const migratetype_names[MIGRATE_TYPES] = {
+@@ -274,7 +274,7 @@ const char * const migratetype_names[MIGRATE_TYPES] = {
  
  int min_free_kbytes = 1024;
  int user_min_free_kbytes = -1;
@@ -160,13 +164,13 @@ index 73645d2..5fab776 100644
  static int watermark_scale_factor = 10;
  int defrag_mode;
  
-diff --git a/mm/swap.c b/mm/swap.c
-index 1a87e56..132deea 100644
---- a/mm/swap.c
-+++ b/mm/swap.c
-@@ -1198,17 +1198,8 @@ static const struct ctl_table swap_sysctl_table[] = {
-  */
- void __init swap_setup(void)
+diff --git a/mm/swap_state.c b/mm/swap_state.c
+index f3961fdd8..578624d19 100644
+--- a/mm/swap_state.c
++++ b/mm/swap_state.c
+@@ -1014,17 +1014,8 @@ static const struct ctl_table swap_readahead_sysctl_table[] = {
+ 
+ static void __init swap_readahead_setup(void)
  {
 -	unsigned long megs = PAGES_TO_MB(totalram_pages());
 -
@@ -182,13 +186,13 @@ index 1a87e56..132deea 100644
 +	/* Only swap-in pages requested, avoid readahead */
 +	page_cluster = 0;
  
- 	register_sysctl_init("vm", swap_sysctl_table);
+ 	register_sysctl_init("vm", swap_readahead_sysctl_table);
  }
 diff --git a/mm/vmscan.c b/mm/vmscan.c
-index 8781dbc..9eacaab 100644
+index f11491ee9..9a33b2167 100644
 --- a/mm/vmscan.c
 +++ b/mm/vmscan.c
-@@ -196,7 +196,7 @@ struct scan_control {
+@@ -198,7 +198,7 @@ struct scan_control {
  /*
   * From 0 .. MAX_SWAPPINESS.  Higher means more swappy.
   */
@@ -197,7 +201,7 @@ index 8781dbc..9eacaab 100644
  
  static int sc_swappiness(struct scan_control *sc, struct mem_cgroup *memcg)
  {
-@@ -4123,7 +4123,7 @@ static bool lruvec_is_reclaimable(struct lruvec *lruvec, struct scan_control *sc
+@@ -4204,7 +4204,7 @@ static bool lruvec_is_reclaimable(struct lruvec *lruvec, struct scan_control *sc
  }
  
  /* to protect the working set of the last N jiffies */
