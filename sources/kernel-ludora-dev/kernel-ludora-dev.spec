@@ -70,7 +70,9 @@ Source1:        config
 # not from CachyOS. Pinned commits; re-fetch for each kernel series:
 # https://github.com/firelzrd/bore-scheduler 1e2f57ad74e8 patches/stable/
 Patch0:         0001-linux7.3-rc2-bore-7.0.0.patch
-Patch1:         0001-hid-usbhid-sanitize-uniq-against-control-chars.patch
+# USB serials with control characters (ASUS ROG Azoth 0b05:1a85) break
+# systemd/Wayland input; not fixed upstream as of 7.3.1. Supersedes our
+# older usbhid-only patch (dropped)
 Patch2:         0001-usb-core-truncate-string-descriptors-at-first-C0-con.patch
 Patch3:         0001-cachyos-default-tunables.patch
 # Piece-Of-Cake idle CPU selector
@@ -430,6 +432,8 @@ Installs matching core and devel packages for %{name}.
 - POC selector v2.6.3 kept (7.2 patch, applies to 7.3)
 - Tunables patch rebased: page_cluster moved to mm/swap_state.c, split lock
   hunk has new context; values unchanged
+- Drop the usbhid uniq patch: the usb-core string patch already strips the
+  control characters for every usb_string() caller, so it never triggered
 
 * Sat Oct 31 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.2.11-5.ludora
 - Add -devel and -devel-matched subpackages (headers for akmods/DKMS,
