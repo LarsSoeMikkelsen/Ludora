@@ -1,7 +1,7 @@
-From 85777b42e511494042fb1bb2689de41b75eefd44 Mon Sep 17 00:00:00 2001
+From a0d957df286c60e26c8387da5e6082476d61702f Mon Sep 17 00:00:00 2001
 From: Masahito S <firelzrd@gmail.com>
-Date: Sun, 17 May 2026 11:45:54 +0900
-Subject: [PATCH] 7.2-rc1-poc-selector-v2.6.2
+Date: Wed, 29 Jul 2026 02:52:30 +0900
+Subject: [PATCH] 7.2-rc1-poc-selector-v2.6.3
 
 ---
  include/linux/sched/topology.h |   46 +
@@ -9,14 +9,14 @@ Subject: [PATCH] 7.2-rc1-poc-selector-v2.6.2
  kernel/sched/ext/ext.c         |    7 +
  kernel/sched/fair.c            |  159 ++-
  kernel/sched/idle.c            |   10 +
- kernel/sched/poc_selector.c    | 2036 ++++++++++++++++++++++++++++++++
- kernel/sched/sched.h           |  112 ++
+ kernel/sched/poc_selector.c    | 2038 ++++++++++++++++++++++++++++++++
+ kernel/sched/sched.h           |  118 ++
  kernel/sched/topology.c        |    3 +
- 8 files changed, 2350 insertions(+), 36 deletions(-)
+ 8 files changed, 2358 insertions(+), 36 deletions(-)
  create mode 100644 kernel/sched/poc_selector.c
 
 diff --git a/include/linux/sched/topology.h b/include/linux/sched/topology.h
-index b5d9d7c2b8add7..2d939fa46e1e9f 100644
+index b5d9d7c2b8..2d939fa46e 100644
 --- a/include/linux/sched/topology.h
 +++ b/include/linux/sched/topology.h
 @@ -86,6 +86,52 @@ struct sched_domain_shared {
@@ -73,10 +73,10 @@ index b5d9d7c2b8add7..2d939fa46e1e9f 100644
  
  struct sched_domain {
 diff --git a/init/Kconfig b/init/Kconfig
-index 39e153f9a03d0a..c682cb5b587977 100644
+index 5230d4879b..a4e1f7a39a 100644
 --- a/init/Kconfig
 +++ b/init/Kconfig
-@@ -1493,6 +1493,19 @@ config SCHED_AUTOGROUP
+@@ -1489,6 +1489,19 @@ config SCHED_AUTOGROUP
  	  desktop applications.  Task group autogeneration is currently based
  	  upon task session.
  
@@ -97,7 +97,7 @@ index 39e153f9a03d0a..c682cb5b587977 100644
  	bool "Kernel->user space relay support (formerly relayfs)"
  	select IRQ_WORK
 diff --git a/kernel/sched/ext/ext.c b/kernel/sched/ext/ext.c
-index 691d53fe0f6488..e32c5a3661ea2f 100644
+index 691d53fe0f..e32c5a3661 100644
 --- a/kernel/sched/ext/ext.c
 +++ b/kernel/sched/ext/ext.c
 @@ -6147,6 +6147,9 @@ static void scx_root_disable(struct scx_sched *sch)
@@ -122,7 +122,7 @@ index 691d53fe0f6488..e32c5a3661ea2f 100644
  		sch->ops.name, scx_switched_all() ? "" : " (partial)");
  	kobject_uevent(&sch->kobj, KOBJ_ADD);
 diff --git a/kernel/sched/fair.c b/kernel/sched/fair.c
-index 80ecdcc0a2636e..bbde3bf9baf562 100644
+index d78467ec6e..dcbb7ea1d4 100644
 --- a/kernel/sched/fair.c
 +++ b/kernel/sched/fair.c
 @@ -49,6 +49,7 @@
@@ -133,7 +133,7 @@ index 80ecdcc0a2636e..bbde3bf9baf562 100644
  
  #include <asm/switch_to.h>
  
-@@ -1271,7 +1272,7 @@ static bool update_deadline(struct cfs_rq *cfs_rq, struct sched_entity *se)
+@@ -1262,7 +1263,7 @@ static bool update_deadline(struct cfs_rq *cfs_rq, struct sched_entity *se)
  
  #include "pelt.h"
  
@@ -142,7 +142,7 @@ index 80ecdcc0a2636e..bbde3bf9baf562 100644
  static unsigned long task_h_load(struct task_struct *p);
  static unsigned long capacity_of(int cpu);
  
-@@ -8476,6 +8477,20 @@ void __update_idle_core(struct rq *rq)
+@@ -8467,6 +8468,20 @@ void __update_idle_core(struct rq *rq)
  	rcu_read_unlock();
  }
  
@@ -163,7 +163,7 @@ index 80ecdcc0a2636e..bbde3bf9baf562 100644
  /*
   * Scan the entire LLC domain for idle cores; this dynamically switches off if
   * there are no idle cores left in the system; tracked through
-@@ -8803,16 +8818,38 @@ static inline bool asym_fits_cpu(unsigned long util,
+@@ -8794,16 +8809,38 @@ static inline bool asym_fits_cpu(unsigned long util,
  	return true;
  }
  
@@ -203,7 +203,7 @@ index 80ecdcc0a2636e..bbde3bf9baf562 100644
  	/*
  	 * On asymmetric system, update task utilization because we will check
  	 * that the task fits with CPU's capacity.
-@@ -8829,23 +8866,13 @@ static int select_idle_sibling(struct task_struct *p, int prev, int target)
+@@ -8820,23 +8857,13 @@ static int select_idle_sibling(struct task_struct *p, int prev, int target)
  	 */
  	lockdep_assert_irqs_disabled();
  
@@ -232,7 +232,7 @@ index 80ecdcc0a2636e..bbde3bf9baf562 100644
  
  	/*
  	 * Allow a per-cpu kthread to stack with the wakee if the
-@@ -8863,24 +8890,6 @@ static int select_idle_sibling(struct task_struct *p, int prev, int target)
+@@ -8854,24 +8881,6 @@ static int select_idle_sibling(struct task_struct *p, int prev, int target)
  		return prev;
  	}
  
@@ -257,7 +257,7 @@ index 80ecdcc0a2636e..bbde3bf9baf562 100644
  	/*
  	 * For asymmetric CPU capacity systems, our domain of interest is
  	 * sd_asym_cpucapacity rather than sd_llc.
-@@ -8905,6 +8914,74 @@ static int select_idle_sibling(struct task_struct *p, int prev, int target)
+@@ -8896,6 +8905,74 @@ static int select_idle_sibling(struct task_struct *p, int prev, int target)
  	if (!sd)
  		return target;
  
@@ -332,7 +332,7 @@ index 80ecdcc0a2636e..bbde3bf9baf562 100644
  	if (sched_smt_active()) {
  		has_idle_core = test_idle_cores(target);
  
-@@ -8919,6 +8996,9 @@ static int select_idle_sibling(struct task_struct *p, int prev, int target)
+@@ -8910,6 +8987,9 @@ static int select_idle_sibling(struct task_struct *p, int prev, int target)
  	if ((unsigned)i < nr_cpumask_bits)
  		return i;
  
@@ -342,7 +342,7 @@ index 80ecdcc0a2636e..bbde3bf9baf562 100644
  	/*
  	 * For cluster machines which have lower sharing cache like L2 or
  	 * LLC Tag, we tend to find an idle CPU in the target's cluster
-@@ -8930,6 +9010,13 @@ static int select_idle_sibling(struct task_struct *p, int prev, int target)
+@@ -8921,6 +9001,13 @@ static int select_idle_sibling(struct task_struct *p, int prev, int target)
  	if ((unsigned int)recent_used_cpu < nr_cpumask_bits)
  		return recent_used_cpu;
  
@@ -356,7 +356,7 @@ index 80ecdcc0a2636e..bbde3bf9baf562 100644
  	return target;
  }
  
-@@ -9612,7 +9699,7 @@ select_task_rq_fair(struct task_struct *p, int prev_cpu, int wake_flags)
+@@ -9603,7 +9690,7 @@ select_task_rq_fair(struct task_struct *p, int prev_cpu, int wake_flags)
  
  	/* Fast path */
  	if (wake_flags & WF_TTWU)
@@ -366,7 +366,7 @@ index 80ecdcc0a2636e..bbde3bf9baf562 100644
  	return new_cpu;
  }
 diff --git a/kernel/sched/idle.c b/kernel/sched/idle.c
-index 052435f4d3e3c5..d4d77f2815e55f 100644
+index 052435f4d3..d4d77f2815 100644
 --- a/kernel/sched/idle.c
 +++ b/kernel/sched/idle.c
 @@ -305,6 +305,11 @@ static void do_idle(void)
@@ -395,10 +395,10 @@ index 052435f4d3e3c5..d4d77f2815e55f 100644
  	 * be set, propagate it into PREEMPT_NEED_RESCHED.
 diff --git a/kernel/sched/poc_selector.c b/kernel/sched/poc_selector.c
 new file mode 100644
-index 00000000000000..901c9dcaefb290
+index 0000000000..d0f1a4532f
 --- /dev/null
 +++ b/kernel/sched/poc_selector.c
-@@ -0,0 +1,2036 @@
+@@ -0,0 +1,2038 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * Piece-Of-Cake (POC) CPU Selector
@@ -451,7 +451,7 @@ index 00000000000000..901c9dcaefb290
 +#define SCHED_POC_SELECTOR_AUTHOR   "Masahito Suzuki"
 +#define SCHED_POC_SELECTOR_PROGNAME "Piece-Of-Cake (POC) CPU Selector"
 +
-+#define SCHED_POC_SELECTOR_VERSION  "2.6.2"
++#define SCHED_POC_SELECTOR_VERSION  "2.6.3"
 +
 +/**************************************************************
 + * Static keys:
@@ -1238,6 +1238,8 @@ index 00000000000000..901c9dcaefb290
 +		u8 shift = sd_share->poc_smt_shift;
 +		int sib = (sd_share->poc_primary_mask & (1ULL << bit))
 +				? bit + shift : bit - shift;
++		if (unlikely(sib < 0 || sib >= 64))
++			return 1ULL << bit;
 +		return (1ULL << bit) | (1ULL << sib);
 +	}
 +
@@ -2436,7 +2438,7 @@ index 00000000000000..901c9dcaefb290
 +#endif /* CONFIG_SYSFS */
 +#endif /* CONFIG_SCHED_POC_SELECTOR */
 diff --git a/kernel/sched/sched.h b/kernel/sched/sched.h
-index 5fac34a2f67b31..1a750ea8e7c8b1 100644
+index 56acf502ba..9edd0ba79b 100644
 --- a/kernel/sched/sched.h
 +++ b/kernel/sched/sched.h
 @@ -1177,6 +1177,10 @@ struct rq {
@@ -2450,7 +2452,7 @@ index 5fac34a2f67b31..1a750ea8e7c8b1 100644
  #ifdef CONFIG_UCLAMP_TASK
  	/* Utilization clamp values based on CPU's RUNNABLE tasks */
  	struct uclamp_rq	uclamp[UCLAMP_CNT] ____cacheline_aligned;
-@@ -2371,6 +2375,113 @@ static inline struct task_group *task_group(struct task_struct *p)
+@@ -2371,6 +2375,119 @@ static inline struct task_group *task_group(struct task_struct *p)
  
  #endif /* !CONFIG_CGROUP_SCHED */
  
@@ -2547,15 +2549,21 @@ index 5fac34a2f67b31..1a750ea8e7c8b1 100644
 +{
 +	int base = sd_share->poc_cpu_base;
 +	int base_word = base >> 6;
++	int shift = sd_share->poc_affinity_shift;
 +
-+	if (static_branch_likely(&sched_poc_aligned)) {
-+		/* Fast path: no shift needed (base is 64-aligned) */
++	if (likely(shift == 0)) {
++		/*
++		 * Fast path: this LLC's own base is 64-aligned, so no
++		 * cross-word shift is needed here even if some other LLC
++		 * in the system is misaligned (sched_poc_aligned is a
++		 * single system-wide flag and must not gate this branch).
++		 */
 +		return cpumask_bits(mask)[base_word];
 +	} else {
 +		/* Slow path: shift required (e.g., Threadripper) */
-+		int shift = sd_share->poc_affinity_shift;
 +		u64 lo = cpumask_bits(mask)[base_word];
-+		u64 hi = cpumask_bits(mask)[base_word + 1];
++		u64 hi = (base_word + 1 < BITS_TO_LONGS(nr_cpumask_bits)) ?
++			 cpumask_bits(mask)[base_word + 1] : 0;
 +		return (lo >> shift) | (hi << (64 - shift));
 +	}
 +}
@@ -2564,7 +2572,7 @@ index 5fac34a2f67b31..1a750ea8e7c8b1 100644
  static inline void __set_task_cpu(struct task_struct *p, unsigned int cpu)
  {
  	set_task_rq(p, cpu);
-@@ -3449,6 +3560,7 @@ extern void nohz_run_idle_balance(int cpu);
+@@ -3449,6 +3566,7 @@ extern void nohz_run_idle_balance(int cpu);
  static inline void nohz_run_idle_balance(int cpu) { }
  #endif
  
@@ -2573,7 +2581,7 @@ index 5fac34a2f67b31..1a750ea8e7c8b1 100644
  
  #if defined(CONFIG_SCHED_CORE) && defined(CONFIG_SCHEDSTATS)
 diff --git a/kernel/sched/topology.c b/kernel/sched/topology.c
-index 622e2e01974c4b..339d505c8f6d11 100644
+index 622e2e0197..339d505c8f 100644
 --- a/kernel/sched/topology.c
 +++ b/kernel/sched/topology.c
 @@ -3170,6 +3170,9 @@ build_sched_domains(const struct cpumask *cpu_map, struct sched_domain_attr *att
@@ -2586,3 +2594,6 @@ index 622e2e01974c4b..339d505c8f6d11 100644
  
  			/*
  			 * In presence of higher domains, adjust the
+-- 
+2.34.1
+

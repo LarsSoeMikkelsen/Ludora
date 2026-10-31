@@ -12,7 +12,7 @@
 # Linux Kernel Versions
 %define _basekver 7.2
 %define _stablekver 11
-%define _releasekver 3
+%define _releasekver 4
 %define _rpmver %{version}-%{release}
 %define _kver %{_rpmver}.%{_arch}
 
@@ -64,14 +64,16 @@ BuildRequires:  python-srpm-macros
 Source0:        https://cdn.kernel.org/pub/linux/kernel/v7.x/linux-%{version}.tar.xz
 Source1:        config
 
-Patch0:         0001-bore.patch
+# BORE and POC come straight from their author (firelzrd / Masahito Suzuki),
+# not from CachyOS. Pinned commits; re-fetch for each kernel series:
+# https://github.com/firelzrd/bore-scheduler 1e2f57ad74e8 patches/stable/
+Patch0:         0001-linux7.2-rc1-bore-7.0.0.patch
 Patch1:         0001-hid-usbhid-sanitize-uniq-against-control-chars.patch
 Patch2:         0001-usb-core-truncate-string-descriptors-at-first-C0-con.patch
 Patch3:         0001-cachyos-default-tunables.patch
-# Piece-Of-Cake idle CPU selector, from CachyOS/linux 7.2/cachy
-# (85777b42e511 + 5c28b6663fbb, both in cachyos-7.2.11-1); re-check each bump
-Patch4:         0001-sched-poc-selector-v2.6.2.patch
-Patch5:         0002-sched-poc-selector-v2.6.3.patch
+# Piece-Of-Cake idle CPU selector
+# https://github.com/firelzrd/poc-selector 5c5a0c897208 patches/stable/
+Patch4:         0001-7.2-rc1-poc-selector-v2.6.3.patch
 
 %description
 The meta package for %{name}.
@@ -150,7 +152,7 @@ The meta package for %{name}.
     scripts/config -d UBSAN -d BUG_ON_DATA_CORRUPTION -d DEBUG_LIST \
                    -d KMALLOC_PARTITION_CACHES -e SLAB_MERGE_DEFAULT
 
-    # Faster idle CPU search on wakeup (CachyOS POC selector, Patch4/5)
+    # Faster idle CPU search on wakeup (POC selector, Patch4)
     scripts/config -e SCHED_POC_SELECTOR
 
     # Kconfig silently drops options whose dependencies aren't met, so check
@@ -273,6 +275,12 @@ Kernel modules for %{name}-core.
 %files
 
 %changelog
+* Sat Oct 31 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.2.11-4.ludora
+- Take BORE and POC directly from firelzrd instead of CachyOS
+- BORE 6.8.0-rc1 (CachyOS rebase) -> 7.0.0; adds wakeup sleep credit
+  (kernel.sched_credit_cap_us, default 16000)
+- POC selector v2.6.3 unchanged (same code as the CachyOS commits)
+
 * Sat Oct 31 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.2.11-3.ludora
 - Add the CachyOS POC (Piece-Of-Cake) idle CPU selector v2.6.3, as in
   kernel-ludora 7.2.11-100; next candidate for the remaining ~1.6% gap
