@@ -1,0 +1,64 @@
+Some USB devices report string descriptors with a declared length
+greater than the actual string, leaving uninitialized firmware memory
+- often including C0 control characters such as 0x18 - appended to
+the returned string. This has been observed on the ASUS ROG Azoth
+2.4GHz dongle (USB ID 0b05:1a85), where the trailing bytes make their
+way into hid->uniq and then /sys/class/input/inputN/uniq.
+
+Downstream userspace components then reject the device. systemd's
+sd-device property_is_valid() treats any string property containing
+control characters as invalid and refuses to set ID_SERIAL_SHORT,
+which in turn prevents the device from being tagged with seat. On
+GNOME Wayland, mutter silently declines to open input devices that
+are missing this tagging, leaving the keyboard visible and producing
+keycodes at the kernel layer but dead to the user in a graphical
+session.
+
+Truncate the returned UTF-8 string at the first C0 control character
+(0x00..0x1F) or DEL (0x7F). Printable Unicode beyond ASCII is left
+intact, so legitimate non-ASCII serials (e.g. European manufacturers)
+continue to work. Callers that previously received a string with
+trailing garbage now receive the clean leading portion, which is
+well-formed UTF-8 and safe for all downstream consumers.
+
+Signed-off-by: Taylor Hewetson <taylor@exponent.digital>
+---
+
+Changes since v1:
+ - Move the sanitization from drivers/hid/usbhid/hid-core.c to
+   drivers/usb/core/message.c so that all usb_string() callers
+   benefit, not just usbhid. (Greg KH)
+ - Broaden the scope from "ASUS Azoth workaround" to "well-formed
+   string guarantee for usb_string()"; update commit message
+   accordingly.
+
+v1: https://lore.kernel.org/all/20260418025823.21767-1-taylor@exponent.digital/
+
+--- a/drivers/usb/core/message.c
++++ b/drivers/usb/core/message.c
+@@ -1052,6 +1052,25 @@
+ 			UTF16_LITTLE_ENDIAN, buf, size);
+ 	buf[err] = 0;
+ 
++	/*
++	 * Some devices report string descriptors with a declared length
++	 * greater than the actual serial, leaving uninitialized firmware
++	 * memory (often including C0 control characters) appended to the
++	 * returned string. Truncate at the first control character so
++	 * callers get a clean, well-formed string.
++	 */
++	{
++		int i;
++		for (i = 0; i < err; i++) {
++			unsigned char c = buf[i];
++			if (c < 0x20 || c == 0x7f) {
++				buf[i] = 0;
++				err = i;
++				break;
++			}
++		}
++	}
++
+ 	if (tbuf[1] != USB_DT_STRING)
+ 		dev_dbg(&dev->dev,
+ 			"wrong descriptor type %02x for string %d (\"%s\")\n",
