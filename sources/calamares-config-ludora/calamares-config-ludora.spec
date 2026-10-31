@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        26%{?dist}
+Release:        27%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -61,6 +61,7 @@ install -Dm644 modules/ludora_secureboot/main.py \
 install -Dm755 scripts/packagechooser-cleanup.sh %{buildroot}%{_sysconfdir}/calamares/scripts/packagechooser-cleanup.sh
 install -Dm755 scripts/ludora-grub-install %{buildroot}%{_sysconfdir}/calamares/scripts/ludora-grub-install
 install -Dm755 scripts/ludora-sb-state %{buildroot}%{_sysconfdir}/calamares/scripts/ludora-sb-state
+install -Dm755 scripts/remove-stale-rescue.sh %{buildroot}%{_sysconfdir}/calamares/scripts/remove-stale-rescue.sh
 
 # Branding
 install -Dm644 branding/branding.desc    %{buildroot}%{_sysconfdir}/calamares/branding/ludora/branding.desc
@@ -90,12 +91,17 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/scripts/packagechooser-cleanup.sh
 %{_sysconfdir}/calamares/scripts/ludora-grub-install
 %{_sysconfdir}/calamares/scripts/ludora-sb-state
+%{_sysconfdir}/calamares/scripts/remove-stale-rescue.sh
 %{_sysconfdir}/calamares/branding/ludora/branding.desc
 %{_sysconfdir}/calamares/branding/ludora/show.qml
 %{_sysconfdir}/calamares/branding/ludora/logo.png
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Sat Oct 31 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-27
+- shellprocess: remove the rescue image copied from the live image build
+  (old machine-id, never booted on the installed system)
+
 * Sat Oct 31 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-26
 - shellprocess: run kernel-install add-all before dracut --regenerate-all.
   The ISO no longer has kernel-ludora's /boot/vmlinuz (so the live ISO boots
