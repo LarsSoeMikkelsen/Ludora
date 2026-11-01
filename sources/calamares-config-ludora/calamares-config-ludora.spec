@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        28%{?dist}
+Release:        29%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -56,6 +56,10 @@ install -Dm644 modules/ludora_secureboot/module.desc \
     %{buildroot}%{_libdir}/calamares/modules/ludora_secureboot/module.desc
 install -Dm644 modules/ludora_secureboot/main.py \
     %{buildroot}%{_libdir}/calamares/modules/ludora_secureboot/main.py
+install -Dm644 modules/ludora_autologin/module.desc \
+    %{buildroot}%{_libdir}/calamares/modules/ludora_autologin/module.desc
+install -Dm644 modules/ludora_autologin/main.py \
+    %{buildroot}%{_libdir}/calamares/modules/ludora_autologin/main.py
 
 # Scripts
 install -Dm755 scripts/packagechooser-cleanup.sh %{buildroot}%{_sysconfdir}/calamares/scripts/packagechooser-cleanup.sh
@@ -88,6 +92,8 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_libdir}/calamares/modules/ludora_selections/main.py
 %{_libdir}/calamares/modules/ludora_secureboot/module.desc
 %{_libdir}/calamares/modules/ludora_secureboot/main.py
+%{_libdir}/calamares/modules/ludora_autologin/module.desc
+%{_libdir}/calamares/modules/ludora_autologin/main.py
 %{_sysconfdir}/calamares/scripts/packagechooser-cleanup.sh
 %{_sysconfdir}/calamares/scripts/ludora-grub-install
 %{_sysconfdir}/calamares/scripts/ludora-sb-state
@@ -98,6 +104,11 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Sun Nov 01 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-29
+- ludora_autologin job: write the users page's autologin choice to
+  /etc/plasmalogin.conf.d (Calamares' displaymanager module only knows sddm
+  and friends, so the checkbox had no effect under Plasma Login Manager)
+
 * Sun Nov 01 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-28
 - packagechooser-cleanup: protect plasma-login-manager instead of sddm
   (Plasma Login Manager replaced sddm in F44; sddm is no longer installed)
