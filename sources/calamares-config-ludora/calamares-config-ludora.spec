@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        29%{?dist}
+Release:        30%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -104,6 +104,11 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Sun Nov 01 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-30
+- shellprocess: stop enabling rpmfusion-nonfree-steam-source (Steam's
+  source-package repo; nothing installs from it, it only added a metadata
+  download on every refresh)
+
 * Sun Nov 01 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-29
 - ludora_autologin job: write the users page's autologin choice to
   /etc/plasmalogin.conf.d (Calamares' displaymanager module only knows sddm
