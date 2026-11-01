@@ -1,6 +1,6 @@
 Name:           desktop-defaults-ludora
 Version:        1.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        KDE desktop defaults and system configuration for Ludora
 License:        GPLv3+
 URL:            https://ludora.org
@@ -40,6 +40,12 @@ install -Dm755 apply-ludora-theme-to-users.sh \
 /usr/local/bin/apply-ludora-theme-to-users.sh
 
 %changelog
+* Sun Nov 01 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.1-3
+- ludora-apply-theme.sh: drop the plasmashell restart from 1.1-2. Plasma
+  6.8.2's plasmashell hangs on shutdown (WaylandClipboard thread join), so
+  systemd aborted it after the stop timeout: ~40 s black screen and a crash
+  report on first login (Ludora 45 beta10). Empty-panel cleanup stays
+
 * Sat Oct 31 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.1-2
 - ludora-apply-theme.sh: restart plasmashell once after applying the theme.
   Applied while plasmashell was still starting, the panel kept the light
