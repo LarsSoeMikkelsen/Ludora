@@ -27,10 +27,23 @@ if [ $RESULT -eq 0 ]; then
     # without a screen, showing as a "+ Add Widgets..." strip. Remove empty
     # panels for a while after the reset; the Ludora panel always has
     # applets, so it is never touched.
+    #
+    # Also: if plasmashell already loaded the (light) default palette, it
+    # does not notice the new colour scheme and the panel stays light
+    # (Ludora 45 beta9/beta11). Broadcast KGlobalSettings "palette changed"
+    # (type 0) so it repaints; repeat in the loop in case plasmashell was
+    # still starting. Restarting plasmashell instead hangs and gets it
+    # aborted by systemd (1.1-2).
+    notify_palette() {
+        dbus-send --session --type=signal /KGlobalSettings \
+            org.kde.KGlobalSettings.notifyChange int32:0 int32:0 || true
+    }
+    notify_palette
     QDBUS=$(command -v qdbus6 || command -v qdbus-qt6 || command -v qdbus)
     if [ -n "$QDBUS" ]; then
         for i in 1 2 3 4 5 6; do
             sleep 5
+            notify_palette
             "$QDBUS" org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript \
                 'panels().forEach(function (p) { if (p.widgets().length == 0) { print("removing empty panel " + p.id); p.remove(); } })'
         done
