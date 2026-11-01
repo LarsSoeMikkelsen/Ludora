@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        27%{?dist}
+Release:        28%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -98,6 +98,10 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Sun Nov 01 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-28
+- packagechooser-cleanup: protect plasma-login-manager instead of sddm
+  (Plasma Login Manager replaced sddm in F44; sddm is no longer installed)
+
 * Sat Oct 31 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-27
 - shellprocess: remove the rescue image copied from the live image build
   (old machine-id, never booted on the installed system)

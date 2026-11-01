@@ -5,12 +5,13 @@
 # All packages are present in the squashfs; this just prunes unselected ones.
 
 # Protect packages that must never be autoremoved, regardless of user selections.
-# gstreamer1-plugins-base: sddm → sddm-wayland-generic → weston → weston-libs
+# gstreamer1-plugins-base: qt6-qtmultimedia (used across Plasma and KDE apps)
 # depends on it; if it gets orphaned (install_reason=dep, all codec parents removed),
-# DNF5 may clean it even with --noautoremove, cascading to remove sddm entirely.
+# DNF5 may clean it even with --noautoremove, cascading through qt6-qtmultimedia.
+# plasma-login-manager: the login manager since F44 (sddm is no longer installed).
 # vulkan-tools: kinfocenter hard-depends on it; removing it forces kinfocenter out.
 # Mark these before any removal so they are treated as user-installed.
-dnf mark install gstreamer1-plugins-base sddm plasma-workspace vulkan-tools || true
+dnf mark install gstreamer1-plugins-base plasma-login-manager plasma-workspace vulkan-tools || true
 
 # If the file doesn't exist the module never ran — keep everything as-is
 if [ ! -f /tmp/ludora-selections ]; then
@@ -40,8 +41,8 @@ remove_if_missing() {
 }
 
 # Codecs
-# gstreamer1-plugins-base is intentionally excluded: sddm depends on it, so
-# removing it would force sddm out as a reverse dependency.
+# gstreamer1-plugins-base is intentionally excluded: qt6-qtmultimedia depends
+# on it, so removing it would force Qt Multimedia and its users out.
 remove_if_missing \
     ffmpeg \
     gstreamer1-plugins-good \
@@ -88,10 +89,10 @@ remove_if_missing \
 
 # Ludora Desktop Customization: all-or-nothing — only kde-ludora is listed in
 # netinstall so the group is toggled as a unit.
-# Mark sddm and plasma-workspace as explicitly installed first so they are
-# never removed as orphaned dependencies of kde-ludora.
+# Mark plasma-login-manager and plasma-workspace as explicitly installed first
+# so they are never removed as orphaned dependencies of kde-ludora.
 if ! selected "kde-ludora"; then
-    dnf mark install sddm plasma-workspace || true
+    dnf mark install plasma-login-manager plasma-workspace || true
     dnf remove -y --noautoremove \
         fastfetch fastfetch-settings kde-ludora desktop-defaults-ludora || true
 fi
