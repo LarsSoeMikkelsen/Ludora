@@ -24,9 +24,9 @@
     "name": "Ludora",
     "applicationCategory": "OperatingSystem",
     "operatingSystem": "Linux",
-    "softwareVersion": "44.3",
+    "softwareVersion": "45.0",
     "url": "https://ludora.org/",
-    "downloadUrl": "https://sourceforge.net/projects/ludora/files/ludora44/ludora44.3-x86_64.iso/download",
+    "downloadUrl": "https://sourceforge.net/projects/ludora/files/ludora45/ludora45.0-x86_64.iso/download",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
   }
   </script>
@@ -194,6 +194,30 @@
       );
       pointer-events: none;
       opacity: 0.35;
+    }
+
+    .hero-eyebrow {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 28px;
+      padding: 7px 16px;
+      border: 1px solid var(--border-amber);
+      background: var(--amber-dim);
+      border-radius: 2px;
+    }
+
+    .hero-eyebrow-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--amber);
     }
 
     .hero-logo {
@@ -815,7 +839,7 @@
     </ul>
     <div class="nav-status">
       <div class="nav-status-dot"></div>
-      Ludora 44.3
+      Ludora 45
     </div>
   </nav>
 
@@ -825,6 +849,11 @@
   <section class="hero">
     <div class="hero-glow"></div>
     <div class="hero-scanlines"></div>
+
+    <div class="hero-eyebrow">
+      <div class="hero-eyebrow-dot"></div>
+      Ludora 45 Now Available
+    </div>
 
     <img class="hero-logo" src="Ludora_logo.png" alt="" width="600" height="170" />
 
@@ -840,15 +869,15 @@
     </p>
 
     <div class="hero-actions">
-      <a class="btn btn-fill" href="https://sourceforge.net/projects/ludora/files/ludora44/ludora44.3-x86_64.iso/download" target="_blank" rel="noopener">
-        Download Ludora 44.3
+      <a class="btn btn-fill" href="https://sourceforge.net/projects/ludora/files/ludora45/ludora45.0-x86_64.iso/download" target="_blank" rel="noopener">
+        Download Ludora 45
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       </a>
       <a class="btn btn-outline" href="https://github.com/LarsSoeMikkelsen/Ludora/releases" target="_blank" rel="noopener">Release Notes</a>
     </div>
 
     <div class="hero-meta">
-      <div class="hero-meta-item">Base <span>Fedora 44</span></div>
+      <div class="hero-meta-item">Base <span>Fedora 45</span></div>
       <div class="hero-meta-item">Desktop <span>KDE Plasma</span></div>
       <div class="hero-meta-item">Arch <span>x86_64</span></div>
       <a class="hero-meta-item" href="https://github.com/LarsSoeMikkelsen/Ludora" target="_blank" rel="noopener">GitHub <span>View source</span></a>
@@ -957,7 +986,7 @@
           <div class="component-check"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></div>
           <div class="component-body">
             <div class="component-head"><span class="component-name">Ludora Custom Kernel</span><span class="badge">on by default</span></div>
-            <p class="component-desc">Kernel with the BORE scheduler and CachyOS patches. Deselect it to use the standard Fedora kernel.</p>
+            <p class="component-desc">kernel.org kernel with the BORE scheduler and POC idle-CPU selector. Needs an x86-64-v3 (AVX2) CPU. Deselect it to use the standard Fedora kernel.</p>
           </div>
         </li>
         <li class="component-row">
@@ -978,7 +1007,7 @@
 
       <div class="callout callout-amber">
         <p class="callout-label">Not a gamer?</p>
-        <p>Deselect the Gaming Stack and Gaming Applications during installation, and you get a clean Fedora 44 KDE desktop with bootable snapshots and multimedia codecs. No Steam, no gaming apps, just a stable base.</p>
+        <p>Deselect the Gaming Stack and Gaming Applications during installation, and you get a clean Fedora 45 KDE desktop with bootable snapshots and multimedia codecs. No Steam, no gaming apps, just a stable base.</p>
       </div>
 
     </div>
@@ -987,7 +1016,7 @@
   <div class="marquee-wrap" aria-hidden="true">
     <div class="marquee-track">
       <div class="marquee-item">BORE Scheduler</div>
-      <div class="marquee-item">CachyOS Patches</div>
+      <div class="marquee-item">Secure Boot</div>
       <div class="marquee-item">Btrfs Snapshots</div>
       <div class="marquee-item">One-Click Rollback</div>
       <div class="marquee-item">Modular Installer</div>
@@ -999,7 +1028,7 @@
       <div class="marquee-item">KDE Plasma</div>
       <div class="marquee-item">Ludora Welcome</div>
       <div class="marquee-item">BORE Scheduler</div>
-      <div class="marquee-item">CachyOS Patches</div>
+      <div class="marquee-item">Secure Boot</div>
       <div class="marquee-item">Btrfs Snapshots</div>
       <div class="marquee-item">One-Click Rollback</div>
       <div class="marquee-item">Modular Installer</div>
@@ -1027,7 +1056,7 @@
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
           <h3 class="feature-title">Custom Kernel with BORE</h3>
-          <p class="feature-desc">The BORE scheduler and CachyOS patches, aimed at keeping the desktop and games responsive under load. Deselect it in the installer to use the standard Fedora kernel.</p>
+          <p class="feature-desc">Built from the official kernel.org source with the BORE scheduler and POC idle-CPU selector, aimed at keeping the desktop and games responsive under load. Needs an x86-64-v3 (AVX2) CPU. Deselect it in the installer to use the standard Fedora kernel.</p>
         </div>
 
         <div class="feature-card">
@@ -1067,7 +1096,15 @@
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
           <h3 class="feature-title">Fedora Underneath</h3>
-          <p class="feature-desc">Built on Fedora 44, with Fedora's packages, SELinux and six-month release cycle. A new Ludora follows each Fedora release.</p>
+          <p class="feature-desc">Built on Fedora 45, with Fedora's packages, SELinux and six-month release cycle. A new Ludora follows each Fedora release.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3 class="feature-title">Secure Boot Ready</h3>
+          <p class="feature-desc">Install and use Ludora with Secure Boot on. The Ludora kernel and akmod drivers such as NVIDIA are signed on your machine, and you enroll the key once on first boot.</p>
         </div>
 
         <div class="feature-card">
@@ -1117,7 +1154,7 @@
         <div class="about-cell">
           <div class="about-cell-label">Status</div>
           <p>
-            Ludora 44.3 is the current release. Ludora 45 will follow very soon after Fedora 45 is released.
+            Ludora 45 is the current release, based on Fedora 45.
             Ludora is a personal project that I build in my spare time, not a commercial product.
           </p>
         </div>
@@ -1156,12 +1193,12 @@
 
       <div class="about-grid">
         <div class="about-cell">
-          <h3>When is Ludora 45 coming?</h3>
-          <p>Very soon after Fedora 45 is released. The packages are already being built and tested for Fedora 45.</p>
+          <h3>Does Ludora work with Secure Boot?</h3>
+          <p>Yes. Leave Secure Boot on while installing. If you choose the Ludora kernel, it is signed on your machine, and on first boot you enroll the key once in MokManager with the password <code>ludora</code>.</p>
         </div>
         <div class="about-cell">
           <h3>Can I upgrade from Ludora 44 to 45?</h3>
-          <p>Yes. The Ludora COPR repository builds for both, so the normal Fedora system upgrade works without extra steps.</p>
+          <p>Yes, with the normal Fedora system upgrade. A few preparation steps are needed first, and the <a href="https://github.com/LarsSoeMikkelsen/Ludora/releases/tag/ludora45" target="_blank" rel="noopener">release notes</a> list the exact commands.</p>
           <p>Take a snapshot first with <code>sudo snapper create -d "pre-F45"</code>, so you can go back from the GRUB snapshot menu if needed.</p>
         </div>
         <div class="about-cell">
@@ -1183,8 +1220,8 @@
       <h2 class="heading">Download and install.</h2>
       <p class="subheading">The ISO is hosted on SourceForge. Write it to a USB stick with Fedora Media Writer, Etcher, or Rufus in DD mode, then boot and install.</p>
       <div class="cta-buttons">
-        <a class="btn btn-fill" href="https://sourceforge.net/projects/ludora/files/ludora44/ludora44.3-x86_64.iso/download" target="_blank" rel="noopener">
-          Download Ludora 44.3
+        <a class="btn btn-fill" href="https://sourceforge.net/projects/ludora/files/ludora45/ludora45.0-x86_64.iso/download" target="_blank" rel="noopener">
+          Download Ludora 45
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         </a>
         <a class="btn btn-outline" href="https://github.com/LarsSoeMikkelsen/Ludora/releases" target="_blank" rel="noopener">Release Notes</a>

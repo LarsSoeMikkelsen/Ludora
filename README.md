@@ -2,7 +2,7 @@
 
 **Gaming-ready Fedora with openSUSE-style bootable snapshots**
 
-Ludora (*"Ludo"* - Latin: "I am playing" + *"dora"* from Fedora) is a Fedora-based distribution that automatically sets up bootable Btrfs snapshots during installation. The installer lets you pick exactly what gets installed: go full gaming setup, or strip out all the gaming components for a clean Fedora 44 KDE with automatic snapshots and one-click rollback.
+Ludora (*"Ludo"* - Latin: "I am playing" + *"dora"* from Fedora) is a Fedora-based distribution that automatically sets up bootable Btrfs snapshots during installation. The installer lets you pick exactly what gets installed: go full gaming setup, or strip out all the gaming components for a clean Fedora 45 KDE with automatic snapshots and one-click rollback.
 
 Break your system with a bad update? Just reboot, pick a snapshot from GRUB, and restore with one click.
 
@@ -36,7 +36,7 @@ The installer presents five component groups, all selected by default. Deselect 
 |---|---|---|
 | **Multimedia Codecs** | ffmpeg and GStreamer plugins for video and audio | ✓ On |
 | **Ludora Custom KDE** | Ludora theme, Fastfetch, custom KDE defaults | ✓ On |
-| **Ludora Custom Kernel** | Gaming kernel with BORE scheduler and CachyOS patches | ✓ On |
+| **Ludora Custom Kernel** | kernel.org kernel with the BORE scheduler and POC idle-CPU selector (needs an x86-64-v3 / AVX2 CPU) | ✓ On |
 | **Gaming Stack** | Vulkan drivers, GameMode, Gamescope, VkBasalt | ✓ On |
 | **Gaming Applications** | Steam, Discord, ProtonPlus, LACT, GOverlay | ✓ On |
 
@@ -54,17 +54,22 @@ The installer presents five component groups, all selected by default. Deselect 
 - **Custom Calamares config** - Sets up proper subvolume layout during installation
 
 **Base System:**
-- Built on **Fedora 44** stable release
+- Built on **Fedora 45** stable release
 - **KDE Plasma** desktop environment
 - Access to Fedora's extensive package repositories
 - Regular security updates from upstream
+
+**Secure Boot:**
+- The live ISO boots Fedora's signed kernel, so it works with Secure Boot on
+- If Secure Boot is on during installation, the Ludora kernel is signed on your machine; on first boot you enroll the key once in MokManager (password: `ludora`)
+- `ludora-secureboot` signs every new kernel and akmod driver (such as NVIDIA) automatically, and can set up Secure Boot on an existing install
 
 ---
 
 ## Download & Installation
 
 ### Download ISO
-**[Download Ludora 44.3](https://sourceforge.net/projects/ludora/files/ludora44/ludora44.3-x86_64.iso/download)**
+**[Download Ludora 45.0](https://sourceforge.net/projects/ludora/files/ludora45/ludora45.0-x86_64.iso/download)**
 
 Browse all files on **[SourceForge](https://sourceforge.net/projects/ludora/files/)** or check the [Releases](https://github.com/LarsSoeMikkelsen/Ludora/releases) page.
 
@@ -83,7 +88,7 @@ Browse all files on **[SourceForge](https://sourceforge.net/projects/ludora/file
 Ludora is designed to work out of the box. After installation:
 - Log in to KDE Plasma
 - If you installed the Gaming Applications: launch Steam and start gaming
-- If you skipped the gaming components: enjoy a clean Fedora 44 KDE desktop with automatic snapshots and one-click rollback
+- If you skipped the gaming components: enjoy a clean Fedora 45 KDE desktop with automatic snapshots and one-click rollback
 
 ---
 
@@ -166,5 +171,6 @@ Ludora is an independent derivative distribution based on Fedora. All trademarks
 
 Ludora builds upon the work of many open-source projects:
 - **Fedora Project** - Base distribution
-- **CachyOS** - Kernel patches and optimizations
+- **firelzrd** - BORE scheduler and POC idle-CPU selector
+- **CachyOS** - Kernel tuning defaults
 - **GloriousEggroll** - Proton-GE builds
