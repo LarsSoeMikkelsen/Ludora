@@ -88,4 +88,9 @@ srpm:
 			--define "_srcrpmdir $(outdir)" \
 			--define "_builddir $$_dir" \
 			$(spec); \
+	elif echo "$(spec)" | grep -q "ludora-rpmfusion-compat"; then \
+		rpmbuild -bs \
+			--define "_sourcedir $$(dirname $(spec))" \
+			--define "_srcrpmdir $(outdir)" \
+			$(spec); \
 	fi
