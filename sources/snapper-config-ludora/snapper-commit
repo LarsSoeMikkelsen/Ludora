@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# snapper-commit v7 - Make the currently booted snapshot the new default root
+# snapper-commit v8 - Make the currently booted snapshot the new default root
 #
 # Part of Ludora Linux - https://github.com/LarsSoeMikkelsen/Ludora
 #
@@ -129,8 +129,26 @@ echo ""
 echo "Remounting root filesystem..."
 mount -o remount /
 
+# Only kernels whose modules exist in the committed root are usable.
+# /boot is a separate partition, so it can still hold kernels that were
+# installed after this snapshot was taken (e.g. a newer kernel or a whole
+# release upgrade). Booting one of those finds no modules and ends in
+# emergency mode, so never rebuild an initramfs for them or make them default.
+USABLE_KERNELS=()
+for vmlinuz in /boot/vmlinuz-*; do
+    kver="${vmlinuz#/boot/vmlinuz-}"
+    [[ "$kver" == 0-rescue-* ]] && continue
+    if [[ -f "/usr/lib/modules/$kver/modules.dep" ]]; then
+        USABLE_KERNELS+=("$kver")
+    else
+        echo "      Skipping kernel $kver (no modules in this snapshot)"
+    fi
+done
+
 echo "Regenerating initramfs..."
-dracut --force --regenerate-all
+for kver in "${USABLE_KERNELS[@]}"; do
+    dracut --force --kver "$kver"
+done
 
 echo "Updating GRUB configuration..."
 grub2-mkconfig -o /boot/grub2/grub.cfg
@@ -181,6 +199,27 @@ if [ -d /boot/loader/entries ]; then
     fi
 else
     echo "Note: /boot/loader/entries not found (system may not use BLS)"
+fi
+
+# FIX 3: Default kernel must have modules in the committed root.
+# Prefer the kernel we are running (the user just verified it boots this
+# snapshot); otherwise the newest usable one.
+DEFAULT_KVER=""
+RUNNING_KVER=$(uname -r)
+for kver in "${USABLE_KERNELS[@]}"; do
+    [[ "$kver" == "$RUNNING_KVER" ]] && DEFAULT_KVER="$kver"
+done
+if [[ -z "$DEFAULT_KVER" && ${#USABLE_KERNELS[@]} -gt 0 ]]; then
+    DEFAULT_KVER=$(printf '%s\n' "${USABLE_KERNELS[@]}" | sort -V | tail -1)
+fi
+if [[ -n "$DEFAULT_KVER" ]]; then
+    if grubby --set-default "/boot/vmlinuz-$DEFAULT_KVER" >/dev/null 2>&1; then
+        echo "✓ Default boot kernel set to $DEFAULT_KVER"
+    else
+        echo "WARNING: could not set default kernel to $DEFAULT_KVER"
+    fi
+else
+    echo "WARNING: no kernel in /boot has modules in this snapshot!"
 fi
 
 echo ""
