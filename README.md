@@ -13,7 +13,6 @@ Break your system with a bad update? Just reboot, pick a snapshot from GRUB, and
 ## Why Bootable Snapshots Matter
 
 Setting up openSUSE-style bootable snapshots on Fedora manually is complex:
-- The default Anaconda installer doesn't support the required Btrfs subvolume layout
 - Requires manual configuration of snapper, grub-btrfs, and DNF plugins
 - Easy to misconfigure and end up with non-bootable snapshots
 
