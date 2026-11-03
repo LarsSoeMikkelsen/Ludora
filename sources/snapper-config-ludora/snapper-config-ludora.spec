@@ -1,11 +1,12 @@
 Name:           snapper-config-ludora
 Version:        1.9
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Snapper first-boot setup and rollback wrapper for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
 Source0:        snapper-config-ludora-%{version}.tar.gz
 BuildArch:      noarch
+BuildRequires:  systemd-rpm-macros
 Requires:       snapper
 Requires:       grub-btrfs
 Requires:       btrfs-progs
@@ -78,6 +79,11 @@ systemctl enable ludora-snapper-setup.service &>/dev/null || :
 /usr/share/applications/ludora-snapshot-commit.desktop
 
 %changelog
+* Tue Nov 03 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.9-2
+- Add BuildRequires: systemd-rpm-macros; the %%systemd_* scriptlet macros were
+  never expanded, so %%preun failed on every upgrade/removal and left the old
+  package installed alongside the new one
+
 * Tue Oct 13 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.9-1
 - Fix /.snapshots fstab entry on encrypted installs (reuse root device verbatim
   instead of assuming UUID=); mount only /.snapshots instead of mount -a
