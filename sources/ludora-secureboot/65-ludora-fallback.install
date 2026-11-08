@@ -1,0 +1,32 @@
+#!/usr/bin/bash
+# ludora-secureboot: make Fedora's kernel GRUB's fallback entry.
+#
+# If the default (Ludora) kernel is refused under Secure Boot ("bad shim
+# signature": key not enrolled, signing failed), GRUB boots the entry named
+# in the "fallback" variable instead of stopping at the menu. Fedora's
+# grub.cfg loads grubenv at startup, so the variable is kept there and points
+# at the newest installed Fedora kernel (signed by Fedora, always bootable).
+#
+# Runs on every kernel add and remove (after 20-grub.install has written or
+# deleted the BLS entry), and from %posttrans for existing installs.
+case $1 in add|remove) ;; *) exit 0 ;; esac
+
+entries=/boot/loader/entries
+[[ -d $entries ]] || exit 0
+
+newest=
+for f in "$entries"/*.conf; do
+    [[ -f $f ]] || continue
+    ver=$(sed -n 's/^version[ \t]*//p' "$f")
+    # Fedora's own kernels only: not Ludora, rescue or debug entries
+    case $ver in ''|*ludora*|0-rescue-*|*debug*) continue ;; esac
+    id=$(basename "$f" .conf)
+    newest=$(printf '%s\n%s\n' "$newest" "$ver $id" | sed '/^$/d' | sort -V | tail -1)
+done
+
+if [[ -n $newest ]]; then
+    grub2-editenv - set "fallback=${newest#* }"
+else
+    grub2-editenv - unset fallback
+fi
+exit 0

@@ -1,6 +1,6 @@
 Name:           ludora-secureboot
 Version:        1.0
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Per-machine Secure Boot signing for Ludora kernels
 License:        GPL-3.0-or-later
 URL:            https://github.com/LarsSoeMikkelsen/Ludora
@@ -9,6 +9,7 @@ BuildArch:      noarch
 Source0:        ludora-secureboot
 Source1:        99-ludora-sign.install
 Source2:        60-ludora-title.install
+Source3:        65-ludora-fallback.install
 
 Requires:       sbsigntools
 Requires:       mokutil
@@ -46,12 +47,15 @@ installer does this when Secure Boot is enabled).
 install -Dm0755 %{SOURCE0} %{buildroot}%{_sbindir}/ludora-secureboot
 install -Dm0755 %{SOURCE1} %{buildroot}%{_prefix}/lib/kernel/install.d/99-ludora-sign.install
 install -Dm0755 %{SOURCE2} %{buildroot}%{_prefix}/lib/kernel/install.d/60-ludora-title.install
+install -Dm0755 %{SOURCE3} %{buildroot}%{_prefix}/lib/kernel/install.d/65-ludora-fallback.install
 
 # Retitle entries of kernels installed before this package
 %posttrans
 for d in /lib/modules/*; do
     [ -d "$d" ] && %{_prefix}/lib/kernel/install.d/60-ludora-title.install add "${d##*/}" || :
 done
+# Point GRUB's fallback at Fedora's kernel on existing installs
+%{_prefix}/lib/kernel/install.d/65-ludora-fallback.install add || :
 
 # akmods installed after setup: give it the Ludora key before it generates
 # its own on first use
@@ -83,8 +87,14 @@ fi
 %{_sbindir}/ludora-secureboot
 %{_prefix}/lib/kernel/install.d/99-ludora-sign.install
 %{_prefix}/lib/kernel/install.d/60-ludora-title.install
+%{_prefix}/lib/kernel/install.d/65-ludora-fallback.install
 
 %changelog
+* Sun Nov 08 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-5
+- kernel-install hook 65-ludora-fallback.install: GRUB's fallback entry is
+  the newest Fedora kernel, so a Ludora kernel refused under Secure Boot
+  boots Fedora's kernel instead of stopping at the menu
+
 * Sun Nov 08 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-4
 - Require Fedora's kernel (kernel(x86-64)) as the signed fallback; installs
   from Ludora 45.0 had it removed by the installer
