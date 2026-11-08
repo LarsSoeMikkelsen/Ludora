@@ -1,0 +1,31 @@
+From: Ludora <noreply@ludora>
+Subject: [PATCH] module: also verify signatures against the platform keyring
+
+With INTEGRITY_CA_MACHINE_KEYRING=y (Fedora's config) a MOK that is not a CA
+lands in .platform, not .machine, and mainline only checks module signatures
+against the secondary keyring, so MOK-signed modules (akmods, NVIDIA) are
+rejected under Secure Boot. Fall back to the platform keyring on -ENOKEY, as
+Fedora's kernel does (kernel-ark, kernel/module/signing.c).
+
+---
+--- a/kernel/module/signing.c
++++ b/kernel/module/signing.c
+@@ -61,10 +61,17 @@
+ 	modlen -= sig_len + sizeof(ms);
+ 	info->len = modlen;
+ 
+-	return verify_pkcs7_signature(mod, modlen, mod + modlen, sig_len,
++	ret = verify_pkcs7_signature(mod, modlen, mod + modlen, sig_len,
+ 				      VERIFY_USE_SECONDARY_KEYRING,
+ 				      VERIFYING_MODULE_SIGNATURE,
+ 				      NULL, NULL);
++	if (ret == -ENOKEY && IS_ENABLED(CONFIG_INTEGRITY_PLATFORM_KEYRING)) {
++		ret = verify_pkcs7_signature(mod, modlen, mod + modlen, sig_len,
++				VERIFY_USE_PLATFORM_KEYRING,
++				VERIFYING_MODULE_SIGNATURE,
++				NULL, NULL);
++	}
++	return ret;
+ }
+ 
+ int module_sig_check(struct load_info *info, int flags)

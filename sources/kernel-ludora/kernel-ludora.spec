@@ -11,7 +11,7 @@
 
 # Linux Kernel Versions
 %define _basekver 7.3
-%define _stablekver 1
+%define _stablekver 3
 # 7.3.x already sorts above the last CachyOS-based kernel-ludora
 # (7.2.11-100, sources/kernel), so the release can start at 1
 %define _releasekver 1
@@ -80,6 +80,11 @@ Patch3:         0001-cachyos-default-tunables.patch
 # v2.6.3 is only published for 7.2 but applies to 7.3; the 7.3 patch is
 # v3.0.0, still marked testing upstream (not benchmarked or reviewed)
 Patch4:         0001-7.2-rc1-poc-selector-v2.6.3.patch
+# Fedora's fallback to the platform keyring for module signatures: with
+# INTEGRITY_CA_MACHINE_KEYRING a non-CA MOK (ludora-secureboot's key) lands
+# in .platform, so mainline rejects MOK-signed akmods modules under Secure
+# Boot. Same code as kernel-ark kernel/module/signing.c
+Patch5:         0001-module-verify-signatures-against-platform-keyring.patch
 
 %description
 The meta package for %{name}.
@@ -167,7 +172,8 @@ The meta package for %{name}.
     for opt in SCHED_BORE HZ_1000 PREEMPT DEFAULT_BBR NET_SCH_FQ \
                TRANSPARENT_HUGEPAGE_ALWAYS RCU_BOOST \
                MODULE_SIG_ALL MODULE_COMPRESS_ZSTD MODULE_COMPRESS_ALL \
-               SLAB_MERGE_DEFAULT LIST_HARDENED SCHED_POC_SELECTOR; do
+               SLAB_MERGE_DEFAULT LIST_HARDENED SCHED_POC_SELECTOR \
+               INTEGRITY_PLATFORM_KEYRING; do
         grep -qx "CONFIG_${opt}=y" .config || { echo "CONFIG_${opt} not set"; exit 1; }
     done
     for opt in UBSAN DEBUG_LIST KMALLOC_PARTITION_CACHES; do
@@ -412,7 +418,10 @@ Kernel headers and makefiles sufficient to build modules against %{name}.
 
 %package devel-matched
 Summary:        Meta package to install matching core and devel packages for %{name}
-Provides:       kernel-devel-matched = %{_rpmver}
+# No "Provides: kernel-devel-matched": akmods requires it whenever Fedora's
+# kernel-core is installed (always, it is the signed fallback), and dnf could
+# then pick this package and install this kernel on a system without it.
+# Install it by name (ludora-welcome's NVIDIA tab does).
 Requires:       %{name}-core = %{_rpmver}
 Requires:       %{name}-devel = %{_rpmver}
 
@@ -424,6 +433,15 @@ Installs matching core and devel packages for %{name}.
 %files
 
 %changelog
+* Sun Nov 08 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.3.3-1.ludora
+- Update to kernel 7.3.3; BORE 7.0.0 and POC v2.6.3 unchanged (apply cleanly)
+- Verify module signatures against the platform keyring too, as Fedora's
+  kernel does: MOK-signed akmods modules (NVIDIA) were rejected under
+  Secure Boot ("Key was rejected by service")
+- devel-matched no longer provides kernel-devel-matched, so installing
+  akmods can not pull this kernel in; Fedora's kernel-devel-matched now
+  always satisfies akmods
+
 * Sat Oct 31 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.3.1-1.ludora
 - kernel-ludora is now this kernel (previously kernel-ludora-dev): kernel.org
   source plus BORE and POC from their author, no CachyOS code. Replaces the
