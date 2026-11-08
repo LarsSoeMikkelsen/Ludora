@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        31%{?dist}
+Release:        32%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -44,6 +44,7 @@ install -Dm644 modules/shellprocess.conf    %{buildroot}%{_sysconfdir}/calamares
 install -Dm644 modules/shellprocess_relabel.conf %{buildroot}%{_sysconfdir}/calamares/modules/shellprocess_relabel.conf
 install -Dm644 modules/users.conf          %{buildroot}%{_sysconfdir}/calamares/modules/users.conf
 install -Dm644 modules/notesqml_secureboot.conf %{buildroot}%{_sysconfdir}/calamares/modules/notesqml_secureboot.conf
+install -Dm644 modules/preservefiles.conf   %{buildroot}%{_sysconfdir}/calamares/modules/preservefiles.conf
 install -Dm644 qml/ludora-secureboot.qml    %{buildroot}%{_sysconfdir}/calamares/qml/ludora-secureboot.qml
 
 # ludora_selections Python module (must be in libdir, not sysconfdir — Calamares
@@ -87,6 +88,7 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/modules/shellprocess_relabel.conf
 %{_sysconfdir}/calamares/modules/users.conf
 %{_sysconfdir}/calamares/modules/notesqml_secureboot.conf
+%{_sysconfdir}/calamares/modules/preservefiles.conf
 %{_sysconfdir}/calamares/qml/ludora-secureboot.qml
 %{_libdir}/calamares/modules/ludora_selections/module.desc
 %{_libdir}/calamares/modules/ludora_selections/main.py
@@ -104,6 +106,13 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Sun Nov 08 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-32
+- Secure Boot page: a missed blue screen no longer stops Ludora from
+  starting (it boots Fedora's kernel), so say that and drop the advice to
+  turn Secure Boot off
+- Log the output of 'ludora-secureboot setup' and 'status' in the session
+  log, and keep the log as /var/log/installation.log (preservefiles)
+
 * Sat Nov 07 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-31
 - Keep Fedora's kernel when the Ludora kernel is selected. It is signed by
   Fedora, so it still boots with Secure Boot on when the Ludora kernel is

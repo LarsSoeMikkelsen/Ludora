@@ -81,7 +81,7 @@ Rectangle {
                 "Choose <b>Reboot</b>. Ludora then starts normally, from now on without this screen."
             ],
             keyboard: "<p>The blue screen uses a US keyboard layout. On an AZERTY keyboard (e.g. French), type the last letter of <b>ludora</b> with the <b>Q</b> key.</p>",
-            missed: "<p><b>Missed the blue screen?</b> Ludora will not start while Secure Boot is on. Turn Secure Boot off in your firmware settings, start Ludora, run <tt>sudo ludora-secureboot setup</tt>, restart, complete the blue screen, then turn Secure Boot back on.</p>"
+            missed: "<p><b>Missed the blue screen?</b> Ludora then starts with Fedora's standard kernel instead. To use the Ludora kernel, run <tt>sudo ludora-secureboot setup</tt>, restart and complete the blue screen.</p>"
         },
         "de": {
             offTitle: "Secure Boot",
@@ -98,7 +98,7 @@ Rectangle {
                 "Wählen Sie <b>Reboot</b>. Ludora startet dann normal, ab jetzt ohne diesen Bildschirm."
             ],
             keyboard: "<p>Der blaue Bildschirm verwendet ein US-Tastaturlayout. Auf einer AZERTY-Tastatur (z. B. Französisch) geben Sie den letzten Buchstaben von <b>ludora</b> mit der Taste <b>Q</b> ein.</p>",
-            missed: "<p><b>Blauen Bildschirm verpasst?</b> Ludora startet nicht, solange Secure Boot eingeschaltet ist. Schalten Sie Secure Boot in den Firmware-Einstellungen aus, starten Sie Ludora, führen Sie <tt>sudo ludora-secureboot setup</tt> aus, starten Sie neu, schließen Sie den blauen Bildschirm ab und schalten Sie Secure Boot dann wieder ein.</p>"
+            missed: "<p><b>Blauen Bildschirm verpasst?</b> Ludora startet dann stattdessen mit dem Standard-Kernel von Fedora. Um den Ludora-Kernel zu nutzen, führen Sie <tt>sudo ludora-secureboot setup</tt> aus, starten Sie neu und schließen Sie den blauen Bildschirm ab.</p>"
         },
         "fr": {
             offTitle: "Secure Boot",
@@ -115,7 +115,7 @@ Rectangle {
                 "Choisissez <b>Reboot</b>. Ludora démarre ensuite normalement, désormais sans cet écran."
             ],
             keyboard: "<p>L'écran bleu utilise une disposition de clavier américaine (QWERTY). Sur un clavier AZERTY, tapez la dernière lettre de <b>ludora</b> avec la touche <b>Q</b> : vous tapez donc <b>ludorq</b>.</p>",
-            missed: "<p><b>Vous avez manqué l'écran bleu ?</b> Ludora ne démarre pas tant que Secure Boot est activé. Désactivez Secure Boot dans les paramètres du firmware, démarrez Ludora, lancez <tt>sudo ludora-secureboot setup</tt>, redémarrez, terminez l'écran bleu, puis réactivez Secure Boot.</p>"
+            missed: "<p><b>Vous avez manqué l'écran bleu ?</b> Ludora démarre alors avec le noyau standard de Fedora. Pour utiliser le noyau Ludora, lancez <tt>sudo ludora-secureboot setup</tt>, redémarrez et terminez l'écran bleu.</p>"
         },
         "es": {
             offTitle: "Secure Boot",
@@ -132,7 +132,7 @@ Rectangle {
                 "Elige <b>Reboot</b>. Ludora arrancará con normalidad, a partir de ahora sin esta pantalla."
             ],
             keyboard: "<p>La pantalla azul usa la distribución de teclado de EE. UU. En un teclado AZERTY (p. ej. francés), escribe la última letra de <b>ludora</b> con la tecla <b>Q</b>.</p>",
-            missed: "<p><b>¿Te saltaste la pantalla azul?</b> Ludora no arranca mientras Secure Boot esté activado. Desactiva Secure Boot en la configuración del firmware, arranca Ludora, ejecuta <tt>sudo ludora-secureboot setup</tt>, reinicia, completa la pantalla azul y vuelve a activar Secure Boot.</p>"
+            missed: "<p><b>¿Te saltaste la pantalla azul?</b> Ludora arranca entonces con el kernel estándar de Fedora. Para usar el kernel de Ludora, ejecuta <tt>sudo ludora-secureboot setup</tt>, reinicia y completa la pantalla azul.</p>"
         },
         "it": {
             offTitle: "Secure Boot",
@@ -149,7 +149,7 @@ Rectangle {
                 "Scegli <b>Reboot</b>. Ludora si avvierà normalmente, d'ora in poi senza questa schermata."
             ],
             keyboard: "<p>La schermata blu usa il layout di tastiera statunitense. Su una tastiera AZERTY (ad es. francese), digita l'ultima lettera di <b>ludora</b> con il tasto <b>Q</b>.</p>",
-            missed: "<p><b>Hai perso la schermata blu?</b> Ludora non si avvia finché Secure Boot è attivo. Disattiva Secure Boot nelle impostazioni del firmware, avvia Ludora, esegui <tt>sudo ludora-secureboot setup</tt>, riavvia, completa la schermata blu e poi riattiva Secure Boot.</p>"
+            missed: "<p><b>Hai perso la schermata blu?</b> Ludora si avvia allora con il kernel standard di Fedora. Per usare il kernel Ludora, esegui <tt>sudo ludora-secureboot setup</tt>, riavvia e completa la schermata blu.</p>"
         },
         "pt": {
             offTitle: "Secure Boot",
@@ -166,7 +166,7 @@ Rectangle {
                 "Escolha <b>Reboot</b>. O Ludora passa a arrancar normalmente, a partir de agora sem este ecrã."
             ],
             keyboard: "<p>O ecrã azul usa o esquema de teclado dos EUA. Num teclado AZERTY (por ex. francês), escreva a última letra de <b>ludora</b> com a tecla <b>Q</b>.</p>",
-            missed: "<p><b>Perdeu o ecrã azul?</b> O Ludora não arranca enquanto o Secure Boot estiver ativado. Desative o Secure Boot nas definições do firmware, arranque o Ludora, execute <tt>sudo ludora-secureboot setup</tt>, reinicie, conclua o ecrã azul e volte a ativar o Secure Boot.</p>"
+            missed: "<p><b>Perdeu o ecrã azul?</b> O Ludora arranca então com o kernel padrão do Fedora. Para usar o kernel Ludora, execute <tt>sudo ludora-secureboot setup</tt>, reinicie e conclua o ecrã azul.</p>"
         },
         "zh_CN": {
             offTitle: "安全启动",
@@ -183,7 +183,7 @@ Rectangle {
                 "选择 <b>Reboot</b>。之后 Ludora 将正常启动，不会再出现此界面。"
             ],
             keyboard: "<p>蓝色界面使用美式键盘布局。如果使用 AZERTY 键盘（如法语键盘），请用 <b>Q</b> 键输入 <b>ludora</b> 的最后一个字母。</p>",
-            missed: "<p><b>错过了蓝色界面？</b>安全启动开启时 Ludora 无法启动。请在固件设置中关闭安全启动，启动 Ludora，运行 <tt>sudo ludora-secureboot setup</tt>，重启并完成蓝色界面中的步骤，然后重新开启安全启动。</p>"
+            missed: "<p><b>错过了蓝色界面？</b>Ludora 会改用 Fedora 的标准内核启动。要使用 Ludora 内核，请运行 <tt>sudo ludora-secureboot setup</tt>，重启并完成蓝色界面中的步骤。</p>"
         },
         "ja": {
             offTitle: "セキュアブート",
@@ -200,7 +200,7 @@ Rectangle {
                 "<b>Reboot</b> を選択します。以後、Ludora はこの画面なしで通常どおり起動します。"
             ],
             keyboard: "<p>青い画面では US キーボード配列が使われます。AZERTY キーボード（フランス語など）では、<b>ludora</b> の最後の文字を <b>Q</b> キーで入力してください。</p>",
-            missed: "<p><b>青い画面を見逃した場合：</b>セキュアブートが有効なままでは Ludora は起動しません。ファームウェア設定でセキュアブートを無効にして Ludora を起動し、<tt>sudo ludora-secureboot setup</tt> を実行して再起動し、青い画面の手順を完了してから、セキュアブートを再び有効にしてください。</p>"
+            missed: "<p><b>青い画面を見逃した場合：</b>Ludora は代わりに Fedora の標準カーネルで起動します。Ludora カーネルを使うには、<tt>sudo ludora-secureboot setup</tt> を実行して再起動し、青い画面の手順を完了してください。</p>"
         },
         "ko": {
             offTitle: "보안 부팅",
@@ -217,7 +217,7 @@ Rectangle {
                 "<b>Reboot</b>를 선택하세요. 이후로는 이 화면 없이 Ludora가 정상적으로 시작됩니다."
             ],
             keyboard: "<p>파란 화면은 미국식 키보드 배열을 사용합니다. AZERTY 키보드(예: 프랑스어)에서는 <b>ludora</b>의 마지막 글자를 <b>Q</b> 키로 입력하세요.</p>",
-            missed: "<p><b>파란 화면을 놓쳤나요?</b> 보안 부팅이 켜져 있는 동안에는 Ludora가 시작되지 않습니다. 펌웨어 설정에서 보안 부팅을 끄고 Ludora를 시작한 뒤 <tt>sudo ludora-secureboot setup</tt>을 실행하고, 다시 시작하여 파란 화면의 단계를 마친 다음 보안 부팅을 다시 켜세요.</p>"
+            missed: "<p><b>파란 화면을 놓쳤나요?</b> 그러면 Ludora가 Fedora 표준 커널로 시작됩니다. Ludora 커널을 사용하려면 <tt>sudo ludora-secureboot setup</tt>을 실행하고 다시 시작하여 파란 화면의 단계를 마치세요.</p>"
         },
         "pl": {
             offTitle: "Secure Boot",
@@ -234,7 +234,7 @@ Rectangle {
                 "Wybierz <b>Reboot</b>. Ludora uruchomi się normalnie, od teraz bez tego ekranu."
             ],
             keyboard: "<p>Niebieski ekran używa amerykańskiego układu klawiatury. Na klawiaturze AZERTY (np. francuskiej) wpisz ostatnią literę słowa <b>ludora</b> klawiszem <b>Q</b>.</p>",
-            missed: "<p><b>Niebieski ekran został pominięty?</b> Ludora nie uruchomi się, dopóki Secure Boot jest włączony. Wyłącz Secure Boot w ustawieniach firmware, uruchom Ludorę, wykonaj <tt>sudo ludora-secureboot setup</tt>, uruchom komputer ponownie, przejdź przez niebieski ekran, a potem znów włącz Secure Boot.</p>"
+            missed: "<p><b>Niebieski ekran został pominięty?</b> Ludora uruchomi się wtedy ze standardowym jądrem Fedory. Aby używać jądra Ludora, wykonaj <tt>sudo ludora-secureboot setup</tt>, uruchom komputer ponownie i przejdź przez niebieski ekran.</p>"
         },
         "nl": {
             offTitle: "Secure Boot",
@@ -251,7 +251,7 @@ Rectangle {
                 "Kies <b>Reboot</b>. Ludora start daarna normaal op, voortaan zonder dit scherm."
             ],
             keyboard: "<p>Het blauwe scherm gebruikt een Amerikaanse toetsenbordindeling. Op een AZERTY-toetsenbord (bijv. Belgisch of Frans) typ je de laatste letter van <b>ludora</b> met de toets <b>Q</b>.</p>",
-            missed: "<p><b>Blauw scherm gemist?</b> Ludora start niet zolang Secure Boot aan staat. Zet Secure Boot uit in de firmware-instellingen, start Ludora, voer <tt>sudo ludora-secureboot setup</tt> uit, herstart, doorloop het blauwe scherm en zet Secure Boot daarna weer aan.</p>"
+            missed: "<p><b>Blauw scherm gemist?</b> Ludora start dan met de standaardkernel van Fedora. Om de Ludora-kernel te gebruiken, voer je <tt>sudo ludora-secureboot setup</tt> uit, herstart je en doorloop je het blauwe scherm.</p>"
         },
         "da": {
             offTitle: "Secure Boot",
@@ -268,7 +268,7 @@ Rectangle {
                 "Vælg <b>Reboot</b>. Ludora starter derefter normalt, fremover uden denne skærm."
             ],
             keyboard: "<p>Den blå skærm bruger et amerikansk tastaturlayout. På et AZERTY-tastatur (f.eks. fransk) skriver du det sidste bogstav i <b>ludora</b> med <b>Q</b>-tasten.</p>",
-            missed: "<p><b>Gik du glip af den blå skærm?</b> Ludora starter ikke, så længe Secure Boot er slået til. Slå Secure Boot fra i firmwareindstillingerne, start Ludora, kør <tt>sudo ludora-secureboot setup</tt>, genstart, gennemfør den blå skærm, og slå så Secure Boot til igen.</p>"
+            missed: "<p><b>Gik du glip af den blå skærm?</b> Så starter Ludora i stedet med Fedoras standardkerne. Vil du bruge Ludora-kernen, så kør <tt>sudo ludora-secureboot setup</tt>, genstart og gennemfør den blå skærm.</p>"
         },
         "fi": {
             offTitle: "Secure Boot",
@@ -285,7 +285,7 @@ Rectangle {
                 "Valitse <b>Reboot</b>. Ludora käynnistyy sen jälkeen normaalisti, tästä lähtien ilman tätä näyttöä."
             ],
             keyboard: "<p>Sininen näyttö käyttää yhdysvaltalaista näppäimistöasettelua. AZERTY-näppäimistöllä (esim. ranskalaisella) kirjoita sanan <b>ludora</b> viimeinen kirjain <b>Q</b>-näppäimellä.</p>",
-            missed: "<p><b>Menikö sininen näyttö ohi?</b> Ludora ei käynnisty, kun Secure Boot on käytössä. Poista Secure Boot käytöstä laiteohjelmiston asetuksista, käynnistä Ludora, suorita <tt>sudo ludora-secureboot setup</tt>, käynnistä uudelleen, käy sininen näyttö läpi ja ota Secure Boot sitten taas käyttöön.</p>"
+            missed: "<p><b>Menikö sininen näyttö ohi?</b> Ludora käynnistyy silloin Fedoran vakioytimellä. Jos haluat käyttää Ludora-ydintä, suorita <tt>sudo ludora-secureboot setup</tt>, käynnistä uudelleen ja käy sininen näyttö läpi.</p>"
         },
         "nb": {
             offTitle: "Secure Boot",
@@ -302,7 +302,7 @@ Rectangle {
                 "Velg <b>Reboot</b>. Ludora starter deretter som normalt, heretter uten denne skjermen."
             ],
             keyboard: "<p>Den blå skjermen bruker amerikansk tastaturoppsett. På et AZERTY-tastatur (f.eks. fransk) skriver du den siste bokstaven i <b>ludora</b> med <b>Q</b>-tasten.</p>",
-            missed: "<p><b>Gikk du glipp av den blå skjermen?</b> Ludora starter ikke så lenge Secure Boot er slått på. Slå av Secure Boot i fastvareinnstillingene, start Ludora, kjør <tt>sudo ludora-secureboot setup</tt>, start på nytt, fullfør den blå skjermen og slå deretter Secure Boot på igjen.</p>"
+            missed: "<p><b>Gikk du glipp av den blå skjermen?</b> Da starter Ludora i stedet med Fedoras standardkjerne. For å bruke Ludora-kjernen, kjør <tt>sudo ludora-secureboot setup</tt>, start på nytt og fullfør den blå skjermen.</p>"
         },
         "sv": {
             offTitle: "Secure Boot",
@@ -319,7 +319,7 @@ Rectangle {
                 "Välj <b>Reboot</b>. Ludora startar sedan som vanligt, hädanefter utan den här skärmen."
             ],
             keyboard: "<p>Den blå skärmen använder amerikansk tangentbordslayout. På ett AZERTY-tangentbord (t.ex. franskt) skriver du sista bokstaven i <b>ludora</b> med <b>Q</b>-tangenten.</p>",
-            missed: "<p><b>Missade du den blå skärmen?</b> Ludora startar inte så länge Secure Boot är påslaget. Stäng av Secure Boot i firmwareinställningarna, starta Ludora, kör <tt>sudo ludora-secureboot setup</tt>, starta om, slutför den blå skärmen och slå sedan på Secure Boot igen.</p>"
+            missed: "<p><b>Missade du den blå skärmen?</b> Då startar Ludora i stället med Fedoras standardkärna. För att använda Ludora-kärnan, kör <tt>sudo ludora-secureboot setup</tt>, starta om och slutför den blå skärmen.</p>"
         }
     })
 
