@@ -12,9 +12,9 @@
 # Linux Kernel Versions
 %define _basekver 7.3
 %define _stablekver 3
-# 7.3.x already sorts above the last CachyOS-based kernel-ludora
-# (7.2.11-100, sources/kernel), so the release can start at 1
-%define _releasekver 1
+# Releases start at 100 (like Ludora's mesa), so a release build always
+# sorts above test builds numbered from 1
+%define _releasekver 100
 %define _rpmver %{version}-%{release}
 %define _kver %{_rpmver}.%{_arch}
 
@@ -433,7 +433,7 @@ Installs matching core and devel packages for %{name}.
 %files
 
 %changelog
-* Sun Nov 08 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.3.3-1.ludora
+* Sun Nov 08 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.3.3-100.ludora
 - Update to kernel 7.3.3; BORE 7.0.0 and POC v2.6.3 unchanged (apply cleanly)
 - Verify module signatures against the platform keyring too, as Fedora's
   kernel does: MOK-signed akmods modules (NVIDIA) were rejected under
