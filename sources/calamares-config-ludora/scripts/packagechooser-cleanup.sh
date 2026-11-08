@@ -56,15 +56,22 @@ remove_if_missing \
 
 # Kernel: all-or-nothing — only kernel-ludora is listed in netinstall so the
 # group is toggled as a unit; removing it also removes -core and -modules.
-# protect_running_kernel=false is required in both branches: the live ISO runs
-# kernel-ludora, so DNF inside the chroot may protect either kernel depending
-# on how it resolves uname -r. Using rpm -q to get exact installed NEVRAs
-# avoids dnf5 accidentally matching via Provides: kernel.
+# Fedora's kernel is always kept: it is signed by Fedora, so it is the boot
+# fallback whenever kernel-ludora is refused under Secure Boot (MOK
+# enrollment missed, signing failed).
+# protect_running_kernel=false: the live ISO runs Fedora's kernel, but DNF in
+# the chroot may resolve uname -r to either kernel.
 if selected "kernel-ludora"; then
-    STD_KERNELS=$(rpm -q --queryformat '%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH} ' \
-        kernel kernel-core kernel-modules 2>/dev/null | tr ' ' '\n' | grep -v 'not installed' | tr '\n' ' ')
-    [ -n "$STD_KERNELS" ] && dnf remove -y --noautoremove \
-        --setopt=protect_running_kernel=false $STD_KERNELS || true
+    # Keep kernel-ludora the GRUB default. 20-grub.install takes the default
+    # kernel type from DEFAULTKERNEL via grub2-get-kernel-settings (setting
+    # GRUB_DEFAULT_KERNEL_TYPE in /etc/default/grub does not work: it is
+    # overridden) and then moves saved_entry only to new kernels whose
+    # version contains "ludora", so Fedora kernel updates do not take over
+    # the default. kernel-install add-all (later in shellprocess) sets the
+    # initial default the same way.
+    sed -i 's/^DEFAULTKERNEL=.*/DEFAULTKERNEL=kernel-ludora-core/' /etc/sysconfig/kernel
+    grep -q '^DEFAULTKERNEL=' /etc/sysconfig/kernel \
+        || echo 'DEFAULTKERNEL=kernel-ludora-core' >> /etc/sysconfig/kernel
 else
     dnf remove -y --noautoremove --setopt=protect_running_kernel=false \
         kernel-ludora kernel-ludora-core kernel-ludora-modules || true

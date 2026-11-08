@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        30%{?dist}
+Release:        31%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -104,6 +104,15 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Sat Nov 07 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-31
+- Keep Fedora's kernel when the Ludora kernel is selected. It is signed by
+  Fedora, so it still boots with Secure Boot on when the Ludora kernel is
+  refused (MOK enrollment missed, signing failed). Deselecting the Ludora
+  kernel still removes it
+- With the Ludora kernel kept, set DEFAULTKERNEL=kernel-ludora-core in
+  /etc/sysconfig/kernel so kernel-ludora stays the default boot entry and
+  Fedora kernel updates do not take it over
+
 * Sun Nov 01 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-30
 - shellprocess: stop enabling rpmfusion-nonfree-steam-source (Steam's
   source-package repo; nothing installs from it, it only added a metadata
