@@ -1,6 +1,6 @@
 Name:           ludora-secureboot
 Version:        1.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Per-machine Secure Boot signing for Ludora kernels
 License:        GPL-3.0-or-later
 URL:            https://github.com/LarsSoeMikkelsen/Ludora
@@ -16,6 +16,13 @@ Requires:       openssl
 Requires:       efibootmgr
 Requires:       grub2-tools
 Requires:       util-linux
+Requires:       grubby
+# Fedora's kernel is the signed fallback: it boots with Secure Boot on when a
+# Ludora kernel is refused (key not enrolled, signing failed, key reverted).
+# kernel-ludora-core provides plain "kernel" too, but only Fedora's kernel
+# package provides the arch-tagged kernel(x86-64), so this pulls it in.
+# Installs from Ludora 45.0 had it removed by the installer.
+Requires:       kernel(x86-64)
 
 %description
 Creates a per-machine Machine Owner Key (MOK), enrolls it with shim's
@@ -51,12 +58,44 @@ done
 %triggerin -- akmods
 [ -e /etc/pki/ludora-secureboot/MOK.key ] && %{_sbindir}/ludora-secureboot akmods-key || :
 
+%triggerin -- kernel-ludora-core
+# Keep kernel-ludora the GRUB default while it is installed. 20-grub.install
+# takes the default kernel type from DEFAULTKERNEL, so without this every
+# Fedora kernel update would become the default. Runs before Fedora's kernel
+# runs kernel-install (%%posttrans) when both arrive in one transaction.
+# A DEFAULTKERNEL the user set to anything else is left alone.
+f=/etc/sysconfig/kernel
+if [ ! -f $f ] || ! grep -q '^DEFAULTKERNEL=' $f; then
+    echo 'DEFAULTKERNEL=kernel-ludora-core' >> $f
+elif grep -qx 'DEFAULTKERNEL=kernel-core' $f; then
+    sed -i 's/^DEFAULTKERNEL=kernel-core$/DEFAULTKERNEL=kernel-ludora-core/' $f
+fi
+:
+
+%triggerpostun -- kernel-ludora-core
+# Last Ludora kernel removed: Fedora's kernel is the default again
+if [ "$2" -eq 0 ] && [ -f /etc/sysconfig/kernel ]; then
+    sed -i 's/^DEFAULTKERNEL=kernel-ludora-core$/DEFAULTKERNEL=kernel-core/' /etc/sysconfig/kernel
+fi
+:
+
 %files
 %{_sbindir}/ludora-secureboot
 %{_prefix}/lib/kernel/install.d/99-ludora-sign.install
 %{_prefix}/lib/kernel/install.d/60-ludora-title.install
 
 %changelog
+* Sun Nov 08 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-4
+- Require Fedora's kernel (kernel(x86-64)) as the signed fallback; installs
+  from Ludora 45.0 had it removed by the installer
+- Keep DEFAULTKERNEL=kernel-ludora-core while kernel-ludora is installed,
+  so Fedora kernel updates do not become the GRUB default; back to
+  kernel-core when the last Ludora kernel is removed
+- revert: with Secure Boot on, refuse unless --force (Ludora kernels would
+  be refused at boot); --force makes Fedora's kernel the default first
+- Boot entry repair creates the new entry before deleting the old one
+- status: vendor-signed kernels could be shown as UNSIGNED (pipefail)
+
 * Sat Nov 07 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-3
 - setup: rebuild akmod modules (akmods --rebuild) when the Ludora key
   replaces a key akmods already had; modules signed with the old,

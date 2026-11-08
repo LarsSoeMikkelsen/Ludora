@@ -8,7 +8,7 @@
 # shim. The kernel-install hook (99-ludora-sign.install) then signs every
 # new /boot/vmlinuz-*. Kernel modules are already signed at build time.
 #
-# Usage: ludora-secureboot {setup [--password-stdin]|sign [VERSION]|status|revert}
+# Usage: ludora-secureboot {setup [--password-stdin]|sign [VERSION]|status|revert [--force]}
 
 set -euo pipefail
 
@@ -30,7 +30,11 @@ relabel() { command -v restorecon &>/dev/null && restorecon -R "$@" || true; }
 # 0 = signed with our key, 1 = unsigned, 2 = signed by someone else (vendor)
 sig_state() {
     sbverify --cert "$CERT" "$1" &>/dev/null && return 0
-    sbverify --list "$1" 2>/dev/null | grep -q '^signature' && return 2
+    # capture first: grep -q can SIGPIPE sbverify, which fails the pipeline
+    # under pipefail and would report a vendor-signed kernel as unsigned
+    local sigs
+    sigs=$(sbverify --list "$1" 2>/dev/null || true)
+    grep -q '^signature' <<<"$sigs" && return 2
     return 1
 }
 
@@ -208,12 +212,15 @@ export \$prefix
 configfile \$prefix/grub.cfg
 EOF
 
-    for num in $nums; do
-        efibootmgr -q -b "$num" -B || { warn "could not delete boot entry Boot$num"; return 1; }
-    done
+    # Create the new entry before deleting the old ones, so a failure in
+    # between never leaves the machine without a "Ludora" entry. $nums was
+    # read above, so only the old entries are deleted.
     efibootmgr -q -c -d "$disk" -p "$partnum" -L "$BOOT_LABEL" -l '\EFI\fedora\shimx64.efi' \
-        || { warn "could not create the '$BOOT_LABEL' boot entry"; return 1; }
+        || { warn "could not create the '$BOOT_LABEL' boot entry, old entry left as is"; return 1; }
     [[ $(boot_entry_state) == shim ]] || { warn "boot entry '$BOOT_LABEL' not found after creating it"; return 1; }
+    for num in $nums; do
+        efibootmgr -q -b "$num" -B || warn "could not delete the old boot entry Boot$num; remove it with 'efibootmgr -b $num -B'"
+    done
     echo "Boot entry '$BOOT_LABEL' now boots \\EFI\\fedora\\shimx64.efi (Secure Boot capable)."
 }
 
@@ -304,8 +311,34 @@ cmd_status() {
     done
 }
 
+sb_enabled() { mokutil --sb-state 2>/dev/null | grep -q 'SecureBoot enabled'; }
+
+# Newest installed Fedora kernel (signed by Fedora, boots without our key)
+fedora_kernel() {
+    rpm -q kernel-core --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' 2>/dev/null \
+        | grep -v 'not installed' | sort -V | tail -1
+}
+
 cmd_revert() {
     need_root
+    local force=0
+    [[ ${1:-} == --force ]] && force=1
+    if [[ -r $DER && $(mok_state) == enrolled ]] && sb_enabled; then
+        # Without the key, shim refuses every Ludora kernel. Only Fedora's
+        # kernel still boots, so make it the default first.
+        local fk
+        fk=$(fedora_kernel)
+        if (( ! force )); then
+            echo "Secure Boot is on. After the key is deleted, Ludora kernels will be refused at boot."
+            [[ -n $fk ]] && echo "Fedora's kernel ($fk) will still boot."
+            echo "Turn Secure Boot off in firmware first, or rerun with --force to make"
+            echo "Fedora's kernel the default and delete the key anyway."
+            exit 1
+        fi
+        [[ -n $fk ]] || die "no Fedora kernel installed (sudo dnf install kernel); nothing would boot with Secure Boot on"
+        grubby --set-default "/boot/vmlinuz-$fk" || die "could not make Fedora's kernel ($fk) the default"
+        echo "Default kernel is now Fedora's $fk."
+    fi
     if [[ -r $DER && $(mok_state) == enrolled ]]; then
         echo "Requesting MOK deletion (confirm in MokManager on next boot):"
         mokutil --delete "$DER"
@@ -319,7 +352,7 @@ case ${1:-} in
     setup)      shift; cmd_setup "${1:-}" ;;
     sign)       shift; cmd_sign "${1:-}" ;;
     status)     cmd_status ;;
-    revert)     cmd_revert ;;
+    revert)     shift; cmd_revert "${1:-}" ;;
     akmods-key) cmd_akmods_key ;;
-    *) echo "Usage: $0 {setup [--password-stdin]|sign [VERSION]|status|revert}" >&2; exit 2 ;;
+    *) echo "Usage: $0 {setup [--password-stdin]|sign [VERSION]|status|revert [--force]}" >&2; exit 2 ;;
 esac
