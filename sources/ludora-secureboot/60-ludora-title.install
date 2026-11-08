@@ -1,0 +1,45 @@
+#!/usr/bin/bash
+# ludora-secureboot: name GRUB entries after Ludora. 20-grub.install and
+# 51-dracut-rescue.install title them "$NAME (<version>) $VERSION" from
+# Fedora's os-release ("Fedora Linux (...) 45 (Forty Five)"). Fedora's own
+# kernel stays installed as the signed fallback, so its entry says so:
+#   Ludora 45 (7.3.1-1.ludora.fc45.x86_64)
+#   Ludora 45 with Fedora kernel (7.2.15-300.fc45.x86_64)
+#   Ludora 45 rescue
+# Runs after 51-dracut-rescue.install so a new rescue entry is included.
+# Only titles that still match the os-release default are changed, so
+# renamed entries are left alone and running this twice is harmless.
+[[ $1 == add ]] || exit 0
+kver=$2
+[[ -n $kver ]] || exit 0
+[[ -f /etc/os-release ]] || exit 0
+# shellcheck source=/dev/null
+. /etc/os-release
+[[ -n $NAME && -n $VERSION_ID ]] || exit 0
+
+entries=/boot/loader/entries
+[[ -d $entries ]] || exit 0
+
+for f in "$entries"/*.conf; do
+    [[ -f $f ]] || continue
+    ver=$(sed -n 's/^version[ \t]*//p' "$f")
+    case $ver in
+        "$kver"|"$kver-debug") v=$kver ;;
+        0-rescue-*) v=$ver ;;
+        *) continue ;;
+    esac
+    if [[ $v == 0-rescue-* ]]; then
+        new="Ludora $VERSION_ID rescue"
+    elif [[ $v == *ludora* ]]; then
+        new="Ludora $VERSION_ID ($v)"
+    else
+        new="Ludora $VERSION_ID with Fedora kernel ($v)"
+    fi
+    title=$(sed -n 's/^title[ \t]*//p' "$f")
+    old="$NAME ($v) $VERSION"
+    [[ $title == "$old"* ]] || continue
+    # Keep suffixes such as " with debugging"
+    suffix=${title#"$old"}
+    sed -i "s|^title[ \\t].*|title ${new}${suffix}|" "$f"
+done
+exit 0

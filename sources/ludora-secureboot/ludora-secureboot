@@ -106,11 +106,17 @@ gen_key() {
 # as the unprivileged akmods user, hence a group-readable copy. akmods only
 # generates its own key when these links are missing. Also run from the
 # RPM trigger when akmods is installed after setup.
+AKMODS_KEY_REPLACED=0
 cmd_akmods_key() {
     need_root
     [[ -r $KEY && -r $DER ]] || return 0
     [[ -d $AKMODS_DIR/private && -d $AKMODS_DIR/certs ]] || return 0
     getent group akmods >/dev/null || { warn "akmods group missing, akmods key not set"; return 0; }
+    # akmods already had a key of its own: modules it built are signed with
+    # that one and must be rebuilt (see rebuild_akmods)
+    local old
+    old=$(readlink -f "$AKMODS_DIR/certs/public_key.der" 2>/dev/null || true)
+    [[ -n $old && -e $old && $old != "$AKMODS_DIR/certs/ludora-mok.der" ]] && AKMODS_KEY_REPLACED=1
     install -m 0640 -o root -g akmods "$KEY" "$AKMODS_DIR/private/ludora-mok.priv"
     install -m 0644 -o root -g akmods "$DER" "$AKMODS_DIR/certs/ludora-mok.der"
     ln -nsf "$AKMODS_DIR/private/ludora-mok.priv" "$AKMODS_DIR/private/private_key.priv"
@@ -118,6 +124,34 @@ cmd_akmods_key() {
     chown -h root:akmods "$AKMODS_DIR/private/private_key.priv" "$AKMODS_DIR/certs/public_key.der"
     relabel "$AKMODS_DIR"
     echo "akmods will sign modules with the Ludora key."
+}
+
+# Rebuild akmod modules (NVIDIA etc.) after cmd_akmods_key replaced akmods'
+# own key: the installed ones are signed with the old key, which is not
+# enrolled, so they would not load with Secure Boot on. Only from setup, not
+# from the RPM trigger (akmods would run inside the RPM transaction) and not
+# in the installer chroot (nothing is built there yet; akmods builds on
+# first boot with the new key).
+rebuild_akmods() {
+    (( AKMODS_KEY_REPLACED )) || return 0
+    command -v akmods &>/dev/null || return 0
+    if systemd-detect-virt -q --chroot; then return 0; fi
+    rpm -qa 'akmod-*' | grep -q . || return 0
+    local kdir kver fail=0
+    echo "Rebuilding akmod modules with the Ludora key (this can take a few minutes):"
+    for kdir in /usr/lib/modules/*/; do
+        kver=$(basename "$kdir")
+        # same test akmods uses for "kernel-devel installed"
+        [[ -r $kdir/build/Makefile || -r /usr/src/kernels/$kver/Makefile ]] \
+            || { echo "  skipped  $kver (no kernel-devel)"; continue; }
+        if akmods --rebuild --kernels "$kver" >/dev/null; then
+            echo "  rebuilt  $kver"
+        else
+            echo "  FAILED   $kver"; fail=1
+        fi
+    done
+    (( fail )) && warn "some akmod rebuilds failed; run 'sudo akmods --rebuild' before turning Secure Boot on"
+    return 0
 }
 
 # Prints: shim (entry boots Fedora's signed shim) | unsigned | none
@@ -136,6 +170,11 @@ boot_entry_state() {
 # Installs from before calamares-config-ludora 1.8-22 boot an unsigned GRUB
 # from \EFI\Ludora via grub2-install, bypassing shim. Point the "Ludora"
 # entry at Fedora's signed shim instead (same as Calamares now does).
+#
+# Called as 'fix_boot_entry || warn', where bash ignores set -e inside the
+# function, so every step checks its own result. Nothing is written until
+# all inputs are known: a stub with an empty UUID would leave GRUB unable to
+# find its config.
 fix_boot_entry() {
     [[ $(boot_entry_state) == shim ]] && { echo "Boot entry '$BOOT_LABEL' already uses shim."; return 0; }
     local f
@@ -144,25 +183,37 @@ fix_boot_entry() {
     done
 
     local uuid prefix
-    uuid=$(grub2-probe --target=fs_uuid /boot/grub2)
-    prefix=$(grub2-mkrelpath /boot/grub2)
-    cat > "$SHIM_DIR/grub.cfg" <<EOF
+    uuid=$(grub2-probe --target=fs_uuid /boot/grub2) && [[ -n $uuid ]] \
+        || { warn "grub2-probe found no filesystem UUID for /boot/grub2, boot entry left as is"; return 1; }
+    prefix=$(grub2-mkrelpath /boot/grub2) && [[ -n $prefix ]] \
+        || { warn "grub2-mkrelpath failed for /boot/grub2, boot entry left as is"; return 1; }
+
+    local src part partnum disk num nums
+    src=$(findmnt -no SOURCE "$ESP") && [[ -n $src ]] \
+        || { warn "$ESP is not mounted, boot entry left as is"; return 1; }
+    src=$(readlink -f "$src")
+    part=$(basename "$src")
+    [[ -r /sys/class/block/$part/partition ]] || { warn "$src is not a partition, boot entry left as is"; return 1; }
+    partnum=$(</sys/class/block/$part/partition)
+    disk=/dev/$(basename "$(dirname "$(readlink -f "/sys/class/block/$part")")")
+    [[ -b $disk ]] || { warn "cannot find the disk holding $src, boot entry left as is"; return 1; }
+    nums=$(efibootmgr) || { warn "efibootmgr cannot read boot entries, boot entry left as is"; return 1; }
+    nums=$(sed -nE "s/^Boot([0-9A-Fa-f]{4})\*? ${BOOT_LABEL}([[:space:]]|$).*/\1/p" <<<"$nums")
+
+    cat > "$SHIM_DIR/grub.cfg.new" <<EOF && mv -f "$SHIM_DIR/grub.cfg.new" "$SHIM_DIR/grub.cfg" \
+        || { rm -f "$SHIM_DIR/grub.cfg.new"; warn "cannot write $SHIM_DIR/grub.cfg, boot entry left as is"; return 1; }
 search --no-floppy --fs-uuid --set=dev $uuid
 set prefix=(\$dev)$prefix
 export \$prefix
 configfile \$prefix/grub.cfg
 EOF
 
-    local src part partnum disk num
-    src=$(readlink -f "$(findmnt -no SOURCE "$ESP")")
-    part=$(basename "$src")
-    [[ -r /sys/class/block/$part/partition ]] || { warn "$src is not a partition, boot entry left as is"; return 1; }
-    partnum=$(</sys/class/block/$part/partition)
-    disk=/dev/$(basename "$(dirname "$(readlink -f "/sys/class/block/$part")")")
-
-    efibootmgr | sed -nE "s/^Boot([0-9A-Fa-f]{4})\*? ${BOOT_LABEL}([[:space:]]|$).*/\1/p" |
-    while read -r num; do efibootmgr -q -b "$num" -B; done
-    efibootmgr -q -c -d "$disk" -p "$partnum" -L "$BOOT_LABEL" -l '\EFI\fedora\shimx64.efi'
+    for num in $nums; do
+        efibootmgr -q -b "$num" -B || { warn "could not delete boot entry Boot$num"; return 1; }
+    done
+    efibootmgr -q -c -d "$disk" -p "$partnum" -L "$BOOT_LABEL" -l '\EFI\fedora\shimx64.efi' \
+        || { warn "could not create the '$BOOT_LABEL' boot entry"; return 1; }
+    [[ $(boot_entry_state) == shim ]] || { warn "boot entry '$BOOT_LABEL' not found after creating it"; return 1; }
     echo "Boot entry '$BOOT_LABEL' now boots \\EFI\\fedora\\shimx64.efi (Secure Boot capable)."
 }
 
@@ -211,6 +262,7 @@ cmd_setup() {
 
     gen_key
     cmd_akmods_key
+    rebuild_akmods
     fix_boot_entry || warn "could not update the boot entry"
 
     echo "Signing kernels in /boot:"
