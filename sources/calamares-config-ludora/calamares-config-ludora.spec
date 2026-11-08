@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        32%{?dist}
+Release:        33%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -106,6 +106,11 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Sun Nov 08 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-33
+- Raise the kernel-install and dracut timeouts to 20 minutes: building
+  and signing both kernels took 208 of the 300 s in a 2-vCPU VM, so slow
+  machines could fail the install
+
 * Sun Nov 08 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-32
 - Secure Boot page: a missed blue screen no longer stops Ludora from
   starting (it boots Fedora's kernel), so say that and drop the advice to
