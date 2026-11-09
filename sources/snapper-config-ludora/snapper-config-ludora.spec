@@ -1,6 +1,6 @@
 Name:           snapper-config-ludora
 Version:        1.9
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Snapper first-boot setup and rollback wrapper for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -79,6 +79,11 @@ systemctl enable ludora-snapper-setup.service &>/dev/null || :
 /usr/share/applications/ludora-snapshot-commit.desktop
 
 %changelog
+* Mon Nov 09 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.9-4
+- ludora-snapper-setup: regenerate grub.cfg through grub-btrfs.service
+  instead of a second grub2-mkconfig; both ran at once on first boot and
+  grub-btrfs.service failed, leaving the system degraded
+
 * Tue Nov 03 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.9-3
 - snapper-commit: only rebuild initramfs for kernels whose modules exist in
   the committed root, and set the GRUB default to such a kernel; rolling back

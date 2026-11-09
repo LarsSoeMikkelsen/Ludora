@@ -63,8 +63,13 @@ systemctl enable --now grub-btrfs.path
 # Create initial snapshot so grub-btrfs has something to show immediately
 snapper -c root create --description "Initial Ludora installation"
 
-# Populate grub snapshot submenu
-grub2-mkconfig -o /boot/grub2/grub.cfg
+# Populate grub snapshot submenu. Go through grub-btrfs.service instead of
+# running grub2-mkconfig here: the snapshot above already triggered it via
+# grub-btrfs.path, and two grub2-mkconfig runs at once corrupt each other's
+# output (service failed with "Syntax errors are detected in generated GRUB
+# config file"). The unit is Type=oneshot, so this waits for a running
+# instance instead of starting a second one.
+systemctl start grub-btrfs.service
 
 echo "=== Ludora snapper setup complete: $(date) ==="
 
