@@ -68,7 +68,7 @@ The installer presents five component groups, all selected by default. Deselect 
 ## Download & Installation
 
 ### Download ISO
-**[Download Ludora 45.0](https://sourceforge.net/projects/ludora/files/ludora45/ludora45.0-x86_64.iso/download)**
+**[Download Ludora 45.1](https://sourceforge.net/projects/ludora/files/ludora45/ludora45.1-x86_64.iso/download)**
 
 Browse all files on **[SourceForge](https://sourceforge.net/projects/ludora/files/)** or check the [Releases](https://github.com/LarsSoeMikkelsen/Ludora/releases) page.
 
