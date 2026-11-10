@@ -1,6 +1,6 @@
 Name:           desktop-defaults-ludora
 Version:        1.1
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        KDE desktop defaults and system configuration for Ludora
 License:        GPLv3+
 URL:            https://ludora.org
@@ -9,6 +9,11 @@ BuildArch:      noarch
 Requires:       kde-ludora
 Requires:       fastfetch
 Requires:       polkit
+# Its only file is /etc/xdg/discoverrc (UseOfflineUpdates=true). Discover's
+# offline updates are not snapshotted by libdnf5-plugin-snapper; online
+# PackageKit transactions are. Users can still pick "after restart" in
+# System Settings > Software Update (per-user discoverrc wins).
+Obsoletes:      plasma-discover-offline-updates
 
 %description
 System-wide desktop defaults for Ludora Gaming Edition.
@@ -40,6 +45,12 @@ install -Dm755 apply-ludora-theme-to-users.sh \
 /usr/local/bin/apply-ludora-theme-to-users.sh
 
 %changelog
+* Tue Nov 10 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.1-5
+- Obsolete plasma-discover-offline-updates so Discover installs updates
+  online by default. Offline updates (install on restart) got no snapper
+  snapshot (45.1 VM test: 21 packages incl. kernel, no pre/post pair);
+  online PackageKit transactions get one from libdnf5-plugin-snapper
+
 * Sun Nov 01 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.1-4
 - ludora-apply-theme.sh: broadcast KGlobalSettings notifyChange (palette)
   after applying the theme. When plasmashell had already loaded the light
