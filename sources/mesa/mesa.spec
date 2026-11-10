@@ -74,7 +74,7 @@
 
 Name:           mesa
 Summary:        Mesa graphics libraries
-Version:        26.2.6
+Version:        26.3.0
 Release:        100%{?dist}
 License:        MIT AND BSD-3-Clause AND SGI-B-2.0
 URL:            http://www.mesa3d.org
