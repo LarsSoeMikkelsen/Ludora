@@ -421,7 +421,7 @@ rewrite_wrap_file rustc-hash
   -Dgallium-rusticl=true \
 %endif
   -Dvulkan-drivers=%{?vulkan_drivers} \
-  -Dvulkan-layers=device-select,anti-lag \
+  -Dvulkan-layers=device-select \
   -Dgles1=enabled \
   -Dgles2=enabled \
   -Dopengl=true \
@@ -672,9 +672,7 @@ ln -s libGLX_mesa.so.0 %{buildroot}%{_libdir}/libGLX_system.so.0
 %{_libdir}/libvulkan_lvp.so
 %{_datadir}/drirc.d/00-lavapipe-defaults.conf
 %{_datadir}/vulkan/icd.d/lvp_icd.*.json
-%{_libdir}/libVkLayer_MESA_anti_lag.so
 %{_libdir}/libVkLayer_MESA_device_select.so
-%{_datadir}/vulkan/implicit_layer.d/VkLayer_MESA_anti_lag.json
 %{_datadir}/vulkan/implicit_layer.d/VkLayer_MESA_device_select.json
 %if 0%{?with_virtio}
 %{_libdir}/libvulkan_virtio.so
@@ -684,6 +682,7 @@ ln -s libGLX_mesa.so.0 %{buildroot}%{_libdir}/libGLX_system.so.0
 %if 0%{?with_vulkan_hw}
 %{_libdir}/libvulkan_radeon.so
 %{_datadir}/drirc.d/00-radv-defaults.conf
+%{_datadir}/drirc.d/01-radv-performance.conf
 %{_datadir}/vulkan/icd.d/radeon_icd.*.json
 %if 0%{?with_nvk}
 %{_libdir}/libvulkan_nouveau.so
