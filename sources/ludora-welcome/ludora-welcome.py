@@ -189,6 +189,59 @@ Do <b>not</b> touch the firmware's key management (clear keys, custom keys, setu
 <code>sudo ludora-secureboot status</code>.</p>
 """
 
+LEAVE_HTML = f"""
+<h2>Leaving Ludora</h2>
+
+<p>Ludora is Fedora KDE with extra packages from the Ludora repository on top.
+These steps turn it back into plain Fedora KDE without reinstalling. Your files,
+apps, Steam games, Flatpaks and RPM Fusion stay as they are.</p>
+
+<p><b>Keep this window open</b> (or copy the steps somewhere first):
+Step 2 removes this app.</p>
+
+<h3>Step 1 &mdash; Start Fedora's kernel</h3>
+<pre style="{_CODE}">sudo sed -i 's/^DEFAULTKERNEL=.*/DEFAULTKERNEL=kernel-core/' /etc/sysconfig/kernel
+sudo dnf install kernel
+sudo grubby --set-default "/boot/vmlinuz-$(rpm -q --qf '%{{VERSION}}-%{{RELEASE}}.%{{ARCH}}\\n' kernel-core | sort -V | tail -1)"</pre>
+<p><b>NVIDIA users:</b> also run <code>sudo dnf install kernel-devel-matched</code>, so the
+driver can be built for Fedora's kernel.</p>
+<p>Reboot. Then check that <code>uname -r</code> does <b>not</b> contain <i>ludora</i>.
+The Ludora kernel can only be removed while it is not running.</p>
+
+<h3>Step 2 &mdash; Remove the Ludora repository and packages</h3>
+<pre style="{_CODE}">sudo dnf copr remove predze/ludora
+sudo dnf mark user -y papirus-icon-theme papirus-icon-theme-dark papirus-icon-theme-light
+sudo dnf remove 'kernel-ludora*' ludora-welcome desktop-defaults-ludora kde-ludora ludora-secureboot snapper-config-ludora fastfetch-settings lact protonplus grub-btrfs libdnf5-plugin-snapper</pre>
+<p>The second line keeps the Papirus icons your desktop uses (they come from Fedora).
+Packages you don't have are skipped.</p>
+<p>LACT and ProtonPlus are only in the Ludora repository. If you want them back,
+install them from Flathub in Discover.</p>
+
+<h3>Step 3 &mdash; Switch to Fedora's versions</h3>
+<pre style="{_CODE}">sudo dnf distro-sync --allowerasing</pre>
+<p>This replaces Ludora's builds of Mesa, MangoHud, GOverlay and fastfetch with Fedora's.
+Some of them are a version older for now; that is expected.</p>
+
+<h3>Step 4 &mdash; Remove the Ludora name from the boot menu</h3>
+<pre style="{_CODE}">sudo sh -c '. /etc/os-release; for f in /boot/loader/entries/*.conf; do v=$(sed -n "s/^version *//p" "$f"); sed -i "s/^title .*/title $NAME ($v) $VERSION/" "$f"; done'
+sudo sed -i 's/^GRUB_DISTRIBUTOR=.*/GRUB_DISTRIBUTOR="Fedora Linux"/' /etc/default/grub
+sudo grub2-mkconfig -o /boot/grub2/grub.cfg
+rm -rf ~/.config/autostart/ludora-theme-apply.desktop ~/.config/ludora ~/.ludora-theme-applied ~/.ludora-theme-apply.log</pre>
+<p>Reboot. You are now on Fedora KDE.</p>
+
+<h3>What stays</h3>
+<ul>
+  <li><b>The look.</b> Your desktop keeps its current colours. For Fedora's default look, open
+      <b>System Settings &rarr; Colors &amp; Themes &rarr; Global Theme</b> and choose <b>Breeze</b>.</li>
+  <li><b>Snapshots.</b> Existing snapshots and the hourly snapshots stay. dnf no longer takes
+      a snapshot before each update, and snapshots are no longer listed in the boot menu.</li>
+  <li><b>The Secure Boot key</b>, if you set one up. It is harmless, and NVIDIA users need it:
+      it signs the NVIDIA driver. Without NVIDIA you can delete it with
+      <code>sudo mokutil --delete /etc/pki/ludora-secureboot/MOK.der</code> and confirm on
+      the blue screen at the next boot.</li>
+</ul>
+"""
+
 
 class WelcomeWindow(QMainWindow):
     def __init__(self):
@@ -203,6 +256,7 @@ class WelcomeWindow(QMainWindow):
         tabs.addTab(self._tab(UPGRADE_HTML), "Upgrading")
         tabs.addTab(self._tab(NVIDIA_HTML), "NVIDIA Drivers")
         tabs.addTab(self._tab(SECUREBOOT_HTML), "Secure Boot")
+        tabs.addTab(self._tab(LEAVE_HTML), "Leaving Ludora")
 
         close_btn = QPushButton("Close")
         close_btn.setFixedWidth(100)

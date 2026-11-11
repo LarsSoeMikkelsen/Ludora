@@ -1,6 +1,6 @@
 Name:           ludora-welcome
 Version:        1.8
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        First-boot welcome application for Ludora
 License:        GPLv3+
 URL:            https://ludora.org
@@ -39,6 +39,11 @@ install -Dm644 ludora-welcome-app.desktop \
 %{_datadir}/applications/ludora-welcome.desktop
 
 %changelog
+* Wed Nov 11 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-2
+- Add Leaving Ludora tab: how to turn an install back into plain Fedora KDE
+  (Fedora kernel, remove the COPR and Ludora packages, distro-sync, boot
+  menu titles). Steps tested on a 45.1 VM
+
 * Sat Oct 31 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-1
 - First launch: wait up to 90 s for the Ludora theme to be applied before
   opening, so the window doesn't start with Breeze's grey colours (both
