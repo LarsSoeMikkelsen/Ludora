@@ -2,12 +2,13 @@
 # ludora-secureboot: keep the newest Ludora kernel GRUB's default entry and
 # make Fedora's kernel GRUB's fallback entry.
 #
-# Default: Fedora's 20-grub.install only moves saved_entry when
-# GRUB_UPDATE_DEFAULT_KERNEL=true (unset on Fedora), and it ignores
-# DEFAULTKERNEL. With saved_entry unset, or pointing at a removed kernel,
-# GRUB boots the entry that sorts highest, which is Fedora's kernel whenever
-# both have the same upstream version (7.3.3-300.fc45 > 7.3.3-100.ludora).
-# So saved_entry is set to the newest Ludora kernel here, but only while
+# Default: Fedora's 20-grub.install moves saved_entry only when a kernel is
+# installed, and with DEFAULTKERNEL=kernel-ludora-core only for Ludora
+# kernels (grub2-get-kernel-settings). Nothing repairs a saved_entry that is
+# unset or points at a removed kernel; GRUB then boots the entry that sorts
+# highest, which is Fedora's kernel whenever both have the same upstream
+# version (7.3.3-300.fc45 > 7.3.3-100.ludora). So saved_entry is set to the
+# newest Ludora kernel here on every add and remove, but only while
 # DEFAULTKERNEL=kernel-ludora-core: a user who switched DEFAULTKERNEL (for
 # example to leave Ludora) keeps the default they chose.
 #
