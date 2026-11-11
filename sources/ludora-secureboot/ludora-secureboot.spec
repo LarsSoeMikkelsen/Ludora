@@ -1,6 +1,6 @@
 Name:           ludora-secureboot
 Version:        1.0
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Per-machine Secure Boot signing for Ludora kernels
 License:        GPL-3.0-or-later
 URL:            https://github.com/LarsSoeMikkelsen/Ludora
@@ -54,7 +54,7 @@ install -Dm0755 %{SOURCE3} %{buildroot}%{_prefix}/lib/kernel/install.d/65-ludora
 for d in /lib/modules/*; do
     [ -d "$d" ] && %{_prefix}/lib/kernel/install.d/60-ludora-title.install add "${d##*/}" || :
 done
-# Point GRUB's fallback at Fedora's kernel on existing installs
+# Default = newest Ludora kernel, fallback = Fedora's kernel on existing installs
 %{_prefix}/lib/kernel/install.d/65-ludora-fallback.install add || :
 
 # akmods installed after setup: give it the Ludora key before it generates
@@ -63,9 +63,9 @@ done
 [ -e /etc/pki/ludora-secureboot/MOK.key ] && %{_sbindir}/ludora-secureboot akmods-key || :
 
 %triggerin -- kernel-ludora-core
-# Keep kernel-ludora the GRUB default while it is installed. 20-grub.install
-# takes the default kernel type from DEFAULTKERNEL, so without this every
-# Fedora kernel update would become the default. Runs before Fedora's kernel
+# Keep kernel-ludora the GRUB default while it is installed:
+# 65-ludora-fallback.install sets saved_entry to the newest Ludora kernel
+# only while DEFAULTKERNEL=kernel-ludora-core. Runs before Fedora's kernel
 # runs kernel-install (%%posttrans) when both arrive in one transaction.
 # A DEFAULTKERNEL the user set to anything else is left alone.
 f=/etc/sysconfig/kernel
@@ -90,6 +90,13 @@ fi
 %{_prefix}/lib/kernel/install.d/65-ludora-fallback.install
 
 %changelog
+* Wed Nov 11 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-6
+- 65-ludora-fallback.install also sets GRUB's default (saved_entry) to the
+  newest Ludora kernel on every kernel add/remove, while
+  DEFAULTKERNEL=kernel-ludora-core. Fedora's hooks never moved the default,
+  so GRUB booted the highest-sorting entry: Fedora's kernel when both have
+  the same upstream version (7.3.3-300.fc45 > 7.3.3-100.ludora)
+
 * Sun Nov 08 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-5
 - kernel-install hook 65-ludora-fallback.install: GRUB's fallback entry is
   the newest Fedora kernel, so a Ludora kernel refused under Secure Boot

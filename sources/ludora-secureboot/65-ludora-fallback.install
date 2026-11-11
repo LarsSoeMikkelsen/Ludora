@@ -1,6 +1,17 @@
 #!/usr/bin/bash
-# ludora-secureboot: make Fedora's kernel GRUB's fallback entry.
+# ludora-secureboot: keep the newest Ludora kernel GRUB's default entry and
+# make Fedora's kernel GRUB's fallback entry.
 #
+# Default: Fedora's 20-grub.install only moves saved_entry when
+# GRUB_UPDATE_DEFAULT_KERNEL=true (unset on Fedora), and it ignores
+# DEFAULTKERNEL. With saved_entry unset, or pointing at a removed kernel,
+# GRUB boots the entry that sorts highest, which is Fedora's kernel whenever
+# both have the same upstream version (7.3.3-300.fc45 > 7.3.3-100.ludora).
+# So saved_entry is set to the newest Ludora kernel here, but only while
+# DEFAULTKERNEL=kernel-ludora-core: a user who switched DEFAULTKERNEL (for
+# example to leave Ludora) keeps the default they chose.
+#
+# Fallback:
 # If the default (Ludora) kernel is refused under Secure Boot ("bad shim
 # signature": key not enrolled, signing failed), GRUB boots the entry named
 # in the "fallback" variable instead of stopping at the menu. Fedora's
@@ -15,12 +26,17 @@ entries=/boot/loader/entries
 [[ -d $entries ]] || exit 0
 
 newest=
+newest_ludora=
 for f in "$entries"/*.conf; do
     [[ -f $f ]] || continue
     ver=$(sed -n 's/^version[ \t]*//p' "$f")
-    # Fedora's own kernels only: not Ludora, rescue or debug entries
-    case $ver in ''|*ludora*|0-rescue-*|*debug*) continue ;; esac
+    # Rescue and debug entries are never default or fallback
+    case $ver in ''|0-rescue-*|*debug*) continue ;; esac
     id=$(basename "$f" .conf)
+    if [[ $ver == *ludora* ]]; then
+        newest_ludora=$(printf '%s\n%s\n' "$newest_ludora" "$ver $id" | sed '/^$/d' | sort -V | tail -1)
+        continue
+    fi
     newest=$(printf '%s\n%s\n' "$newest" "$ver $id" | sed '/^$/d' | sort -V | tail -1)
 done
 
@@ -28,5 +44,9 @@ if [[ -n $newest ]]; then
     grub2-editenv - set "fallback=${newest#* }"
 else
     grub2-editenv - unset fallback
+fi
+
+if [[ -n $newest_ludora ]] && grep -qsx 'DEFAULTKERNEL=kernel-ludora-core' /etc/sysconfig/kernel; then
+    grub2-editenv - set "saved_entry=${newest_ludora#* }"
 fi
 exit 0
