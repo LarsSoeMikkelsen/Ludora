@@ -14,7 +14,7 @@
 %define _stablekver 4
 # Releases start at 100 (like Ludora's mesa), so a release build always
 # sorts above test builds numbered from 1
-%define _releasekver 100
+%define _releasekver 99
 %define _rpmver %{version}-%{release}
 %define _kver %{_rpmver}.%{_arch}
 
@@ -76,10 +76,9 @@ Patch0:         0001-linux7.3-rc2-bore-7.0.0.patch
 Patch2:         0001-usb-core-truncate-string-descriptors-at-first-C0-con.patch
 Patch3:         0001-cachyos-default-tunables.patch
 # Piece-Of-Cake idle CPU selector
-# https://github.com/firelzrd/poc-selector 5c5a0c897208 patches/stable/
-# v2.6.3 is only published for 7.2 but applies to 7.3; the 7.3 patch is
-# v3.0.0, still marked testing upstream (not benchmarked or reviewed)
-Patch4:         0001-7.2-rc1-poc-selector-v2.6.3.patch
+# https://github.com/firelzrd/poc-selector af3a117cd122 patches/stable/
+# (v3.0.0, moved from testing to stable 2026-11-01)
+Patch4:         0001-7.3-rc1-poc-selector-v3.0.0.patch
 # Fedora's fallback to the platform keyring for module signatures: with
 # INTEGRITY_CA_MACHINE_KEYRING a non-CA MOK (ludora-secureboot's key) lands
 # in .platform, so mainline rejects MOK-signed akmods modules under Secure
@@ -433,6 +432,10 @@ Installs matching core and devel packages for %{name}.
 %files
 
 %changelog
+* Wed Nov 11 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.3.4-99.ludora
+- ludora-dev test build: POC selector v3.0.0 (stable upstream since
+  2026-11-01) instead of v2.6.3; release 99 sorts below prod 7.3.4-100
+
 * Wed Nov 11 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.3.4-100.ludora
 - Update to kernel 7.3.4; BORE 7.0.0, POC v2.6.3 and our patches unchanged
   (apply cleanly)
