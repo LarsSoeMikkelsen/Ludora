@@ -74,7 +74,7 @@
 
 Name:           mesa
 Summary:        Mesa graphics libraries
-Version:        26.2.6
+Version:        26.3.0
 Release:        100%{?dist}
 License:        MIT AND BSD-3-Clause AND SGI-B-2.0
 URL:            http://www.mesa3d.org
@@ -106,6 +106,14 @@ Source12:       https://raw.githubusercontent.com/LarsSoeMikkelsen/Ludora/main/s
 Source13:       https://raw.githubusercontent.com/LarsSoeMikkelsen/Ludora/main/sources/mesa/syn-%{rust_syn_ver}.tar.gz
 Source14:       https://raw.githubusercontent.com/LarsSoeMikkelsen/Ludora/main/sources/mesa/unicode-ident-%{rust_unicode_ident_ver}.tar.gz
 Source15:       https://raw.githubusercontent.com/LarsSoeMikkelsen/Ludora/main/sources/mesa/rustc-hash-%{rustc_hash_ver}.tar.gz
+
+# Mesa 26.3 requires venus-protocol == 1.1.3 for the Venus (virtio) Vulkan
+# driver. Fedora's venus-protocol-devel 1.1.3 is only in updates-testing for
+# F44/F45, so it is vendored as a meson subproject (same tarball as Fedora's,
+# SHA512 checked). Switch to BuildRequires: venus-protocol-devel once it is
+# in stable updates.
+%global venus_protocol_ver 1.1.3
+Source16:       https://gitlab.freedesktop.org/virgl/venus-protocol/-/archive/v%{venus_protocol_ver}/venus-protocol-v%{venus_protocol_ver}.tar.gz
 
 BuildRequires:  meson >= 1.3.0
 BuildRequires:  gcc
@@ -339,6 +347,12 @@ The drivers with support for the Vulkan API.
 %autosetup -n %{name}-%{ver} -p1
 cp %{SOURCE1} docs/
 
+%if 0%{?with_virtio}
+# meson wrap-mode=nodownload: put venus-protocol where subprojects/venus-protocol.wrap expects it
+tar -xf %{SOURCE16} -C subprojects/
+mv subprojects/venus-protocol-v%{venus_protocol_ver} subprojects/venus-protocol-%{venus_protocol_ver}
+%endif
+
 # Extract Rust crates meson cache directory
 %if 0%{?vendor_nvk_crates}
 mkdir subprojects/packagecache/
@@ -421,7 +435,7 @@ rewrite_wrap_file rustc-hash
   -Dgallium-rusticl=true \
 %endif
   -Dvulkan-drivers=%{?vulkan_drivers} \
-  -Dvulkan-layers=device-select,anti-lag \
+  -Dvulkan-layers=device-select \
   -Dgles1=enabled \
   -Dgles2=enabled \
   -Dopengl=true \
@@ -672,9 +686,7 @@ ln -s libGLX_mesa.so.0 %{buildroot}%{_libdir}/libGLX_system.so.0
 %{_libdir}/libvulkan_lvp.so
 %{_datadir}/drirc.d/00-lavapipe-defaults.conf
 %{_datadir}/vulkan/icd.d/lvp_icd.*.json
-%{_libdir}/libVkLayer_MESA_anti_lag.so
 %{_libdir}/libVkLayer_MESA_device_select.so
-%{_datadir}/vulkan/implicit_layer.d/VkLayer_MESA_anti_lag.json
 %{_datadir}/vulkan/implicit_layer.d/VkLayer_MESA_device_select.json
 %if 0%{?with_virtio}
 %{_libdir}/libvulkan_virtio.so
@@ -684,6 +696,7 @@ ln -s libGLX_mesa.so.0 %{buildroot}%{_libdir}/libGLX_system.so.0
 %if 0%{?with_vulkan_hw}
 %{_libdir}/libvulkan_radeon.so
 %{_datadir}/drirc.d/00-radv-defaults.conf
+%{_datadir}/drirc.d/01-radv-performance.conf
 %{_datadir}/vulkan/icd.d/radeon_icd.*.json
 %if 0%{?with_nvk}
 %{_libdir}/libvulkan_nouveau.so

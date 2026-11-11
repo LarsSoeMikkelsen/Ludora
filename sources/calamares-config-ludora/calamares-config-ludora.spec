@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        33%{?dist}
+Release:        34%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -106,6 +106,15 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Wed Nov 11 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-34
+- Remove the live ISO's passwordless polkit rule for wheel
+  (49-nopasswd-wheel.rules) from the installed system: any program running
+  as the first user could get root through pkexec without a password
+- Remove the other live-only files from the installed system: skel's
+  kscreenlockerrc (screen locking off for new users), the installer
+  launcher (skel autostart + desktop icon, /usr/local/bin/calamares-launcher)
+  and /etc/calamares after the installer is removed
+
 * Sun Nov 08 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-33
 - Raise the kernel-install and dracut timeouts to 20 minutes: building
   and signing both kernels took 208 of the 300 s in a 2-vCPU VM, so slow

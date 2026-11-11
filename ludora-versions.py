@@ -29,7 +29,7 @@ CORE = [
         "copr_name": "mesa",
         "label": "Mesa",
         "url": "https://gitlab.freedesktop.org/mesa/mesa",
-        "upstream": {"type": "arch", "pkgname": "mesa"},
+        "upstream": {"type": "mesa"},
     },
     {
         "copr_name": "libva",
@@ -187,6 +187,25 @@ def fetch_arch(pkgname):
     return pkg.get("pkgver"), parse_iso(pkg.get("last_update"))
 
 
+def fetch_mesa():
+    """Newest final mesa release tag on freedesktop GitLab (Arch lags behind)."""
+    data = fetch_json(
+        "https://gitlab.freedesktop.org/api/v4/projects/176/repository/tags?per_page=50"
+    )
+    best = None
+    for tag in data or []:
+        m = re.fullmatch(r"mesa-(\d+)\.(\d+)\.(\d+)", tag.get("name", ""))
+        if not m:
+            continue
+        key = tuple(int(x) for x in m.groups())
+        if best is None or key > best[0]:
+            best = (key, tag)
+    if not best:
+        return None, None
+    tag = best[1]
+    return tag["name"][len("mesa-"):], parse_iso(tag.get("commit", {}).get("committed_date"))
+
+
 def fetch_kernel(copr_ver):
     """Find the latest stable/longterm release matching the COPR kernel branch."""
     data = fetch_json("https://www.kernel.org/releases.json")
@@ -221,6 +240,8 @@ def get_upstream(spec, copr_ver=None):
         return fetch_arch(spec["pkgname"])
     if t == "kernel":
         return fetch_kernel(copr_ver)
+    if t == "mesa":
+        return fetch_mesa()
     return None, None
 
 
