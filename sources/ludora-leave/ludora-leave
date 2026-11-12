@@ -406,7 +406,7 @@ def main():
     say()
     say("Plan:")
     say("  1. Take a snapshot 'Before leaving Ludora'.")
-    say(f"  2. Remove the Ludora repository ({len(copr)} repo file(s)).")
+    say("  2. Remove the Ludora repository." if copr else "  2. Ludora repository: already removed.")
     say("  3. Install Fedora's kernel and make it the default"
         + (" (with kernel-devel-matched for akmods/NVIDIA)." if akmods else "."))
     say("  4. Remove the Ludora packages:")
