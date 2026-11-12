@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import getpass
+import shutil
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -196,8 +198,15 @@ LEAVE_HTML = f"""
 These steps turn it back into plain Fedora KDE without reinstalling. Your files,
 apps, Steam games, Flatpaks and RPM Fusion stay as they are.</p>
 
-<p><b>Keep this window open</b> (or copy the steps somewhere first):
-Step 2 removes this app.</p>
+<p><b>The easy way:</b> press <b>Leave Ludora&hellip;</b> below (it is also in the
+application menu as <i>Leave Ludora</i>, or run <code>sudo ludora-leave</code>).
+It shows exactly what it will change and asks before doing anything. It takes a
+snapshot first, works without the Ludora repository, and removes itself at the end.
+Then reboot.</p>
+
+<h2>By hand</h2>
+<p>The same steps, if you prefer to run them yourself.
+<b>Keep this window open</b> (or copy the steps somewhere first): Step 2 removes this app.</p>
 
 <h3>Step 1 &mdash; Start Fedora's kernel</h3>
 <pre style="{_CODE}">sudo sed -i 's/^DEFAULTKERNEL=.*/DEFAULTKERNEL=kernel-core/' /etc/sysconfig/kernel
@@ -256,7 +265,9 @@ class WelcomeWindow(QMainWindow):
         tabs.addTab(self._tab(UPGRADE_HTML), "Upgrading")
         tabs.addTab(self._tab(NVIDIA_HTML), "NVIDIA Drivers")
         tabs.addTab(self._tab(SECUREBOOT_HTML), "Secure Boot")
-        tabs.addTab(self._tab(LEAVE_HTML), "Leaving Ludora")
+        leave_btn = QPushButton("Leave Ludora\u2026")
+        leave_btn.clicked.connect(self._leave)
+        tabs.addTab(self._tab(LEAVE_HTML, leave_btn), "Leaving Ludora")
 
         close_btn = QPushButton("Close")
         close_btn.setFixedWidth(100)
@@ -271,7 +282,7 @@ class WelcomeWindow(QMainWindow):
         layout.addLayout(btn_row)
         self.setCentralWidget(central)
 
-    def _tab(self, html):
+    def _tab(self, html, button=None):
         w = QWidget()
         layout = QVBoxLayout(w)
         layout.setContentsMargins(8, 8, 8, 8)
@@ -279,7 +290,22 @@ class WelcomeWindow(QMainWindow):
         browser.setOpenExternalLinks(True)
         browser.setHtml(html)
         layout.addWidget(browser)
+        if button is not None:
+            row = QHBoxLayout()
+            row.addWidget(button)
+            row.addStretch()
+            layout.addLayout(row)
         return w
+
+    def _leave(self):
+        # ludora-leave asks before changing anything; it runs in a terminal
+        # so its questions and dnf's progress are visible
+        if not shutil.which("ludora-leave"):
+            return
+        term = shutil.which("konsole")
+        cmd = [term, "-e", "pkexec", "/usr/bin/ludora-leave"] if term else \
+            ["pkexec", "/usr/bin/ludora-leave"]
+        subprocess.Popen(cmd, start_new_session=True)
 
 
 def main():

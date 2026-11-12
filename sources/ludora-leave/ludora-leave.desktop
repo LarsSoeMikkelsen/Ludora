@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Leave Ludora
+GenericName=Switch back to plain Fedora KDE
+Comment=Remove the Ludora repository and packages and switch to Fedora's kernel and packages
+Exec=pkexec /usr/bin/ludora-leave
+Terminal=true
+Icon=system-switch-user
+Categories=System;
+Keywords=ludora;fedora;uninstall;remove;leave;

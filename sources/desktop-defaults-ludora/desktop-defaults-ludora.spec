@@ -1,6 +1,6 @@
 Name:           desktop-defaults-ludora
 Version:        1.1
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        KDE desktop defaults and system configuration for Ludora
 License:        GPLv3+
 URL:            https://ludora.org
@@ -9,6 +9,8 @@ BuildArch:      noarch
 Requires:       kde-ludora
 Requires:       fastfetch
 Requires:       polkit
+# Every Ludora system gets the way back to plain Fedora KDE
+Requires:       ludora-leave
 Requires(post): coreutils grep
 # Its only file is /etc/xdg/discoverrc (UseOfflineUpdates=true). Discover's
 # offline updates are not snapshotted by libdnf5-plugin-snapper; online
@@ -68,6 +70,10 @@ fi
 /usr/local/bin/apply-ludora-theme-to-users.sh
 
 %changelog
+* Thu Nov 12 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.1-7
+- Require ludora-leave, so every Ludora system has the way back to plain
+  Fedora KDE
+
 * Wed Nov 11 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.1-6
 - Remove live ISO files that the installer left on installed systems
   (fixed for new installs in calamares-config-ludora 1.8-34): the
