@@ -31,7 +31,12 @@ LOG = "/var/log/ludora-leave.log"
 MOK_DER = "/etc/pki/ludora-secureboot/MOK.der"
 MOK_PASSWORD = "ludora"
 AKMODS_CERT = "/etc/pki/akmods/certs/public_key.der"
-DNF_NOCOPR = ["dnf", "-q", f"--disable-repo={COPR_REPOS}"]
+
+
+def dnf_nocopr():
+    """dnf without the Ludora COPR. dnf5 rejects --disable-repo when nothing
+    matches, which is the case once the repo files are gone (a second run)."""
+    return ["dnf", "-q"] + ([f"--disable-repo={COPR_REPOS}"] if glob.glob(COPR_FILES) else [])
 # Files Ludora leaves in home directories (theme autostart, welcome flag)
 HOME_FILES = [
     ".config/autostart/ludora-theme-apply.desktop",
@@ -132,7 +137,7 @@ def in_fedora(names):
     """Names (of `names`) that the non-Ludora repos also offer."""
     if not names:
         return set()
-    o = out(DNF_NOCOPR + ["repoquery", "--available", "--qf", "%{name}\n"] + names)
+    o = out(dnf_nocopr() + ["repoquery", "--available", "--qf", "%{name}\n"] + names)
     return set(o.split()) & set(names)
 
 
@@ -378,7 +383,7 @@ def main():
     say("Your files, apps, Steam games, Flatpaks and RPM Fusion are not touched.")
     say()
     say("Checking Fedora's repositories (the Ludora repository is not used) ...")
-    if run(DNF_NOCOPR + ["makecache"], check=False, quiet=True) != 0:
+    if run(dnf_nocopr() + ["makecache"], check=False, quiet=True) != 0:
         die("Fedora's repositories cannot be reached. Check the network and try again.")
 
     pk = installed()
