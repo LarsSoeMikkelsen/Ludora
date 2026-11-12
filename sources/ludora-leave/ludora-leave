@@ -43,6 +43,7 @@ HOME_FILES = [
 SKEL_FILES = ["/etc/skel/.config/autostart/ludora-live-theme.desktop"]
 
 logf = None
+started = False  # True once the first step has changed something
 
 
 def log(msg):
@@ -77,10 +78,18 @@ def out(cmd):
     return r.stdout if r.returncode == 0 else ""
 
 
+def stopped_msg():
+    if started:
+        say("The steps already done stay done. Run 'sudo ludora-leave' again to")
+        say("finish; it only does what is still left.")
+    else:
+        say("Nothing was changed.")
+
+
 def die(msg):
     say(f"\nERROR: {msg}")
-    say(f"Nothing after this point was changed. Details: {LOG}")
-    say("You can run ludora-leave again after fixing the problem.")
+    stopped_msg()
+    say(f"Details: {LOG}")
     finish(1)
 
 
@@ -346,7 +355,7 @@ def delete_mok():
 # ---- main -------------------------------------------------------------------
 
 def main():
-    global ARGS, logf
+    global ARGS, logf, started
     p = argparse.ArgumentParser(prog=SELF, description="Turn Ludora back into plain Fedora KDE.")
     p.add_argument("--dry-run", action="store_true", help="show what would be done, change nothing")
     p.add_argument("-y", "--yes", action="store_true", help="do not ask (keeps the Secure Boot key)")
@@ -432,6 +441,7 @@ def main():
         delete_key = ask("Delete the Ludora Secure Boot key?", False,
                          ARGS.delete_key if ARGS.yes else None)
 
+    started = True
     step("1/8 Snapshot")
     snapshot()
 
@@ -513,5 +523,6 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        say("\nInterrupted. Run ludora-leave again to finish; every step can be repeated.")
+        say("\nInterrupted.")
+        stopped_msg()
         sys.exit(130)
