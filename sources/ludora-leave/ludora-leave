@@ -357,6 +357,85 @@ def delete_mok():
     return True
 
 
+# ---- reminder when Ludora looks abandoned ------------------------------------
+
+STALE_DAYS = 60       # Fedora's kernel ahead this long -> remind
+REMIND_EVERY = 7      # days between reminders
+REMIND_STATE = os.path.expanduser("~/.local/state/ludora/leave-reminder")
+
+
+def kernel_versions(vendor_is_ludora):
+    """(upstream version, install time) of installed kernel-core-like packages."""
+    o = out(["rpm", "-qa", "--qf", "%{NAME}\t%{VENDOR}\t%{VERSION}\t%{INSTALLTIME}\n",
+             "kernel-core", "kernel-ludora-core"])
+    res = []
+    for line in o.splitlines():
+        name, vendor, ver, t = line.split("\t")
+        if (vendor == VENDOR) == vendor_is_ludora:
+            res.append((ver, int(t)))
+    return res
+
+
+def newer(a, b):
+    """True if upstream version a sorts after b (sort -V)."""
+    if a == b:
+        return False
+    r = subprocess.run(["sort", "-V"], input=f"{a}\n{b}\n", capture_output=True, text=True)
+    return r.stdout.split()[-1] == a
+
+
+def notify_if_stale():
+    """Run at login (autostart): if the Ludora kernel has fallen behind
+    Fedora's for STALE_DAYS, Ludora is probably no longer maintained and the
+    Ludora kernel misses security fixes. Say so, once a week at most."""
+    ludora = kernel_versions(True)
+    if not ludora:
+        return 0  # no Ludora kernel: nothing goes stale
+    newest = ludora[0][0]
+    for v, _ in ludora[1:]:
+        if newer(v, newest):
+            newest = v
+    ahead = [(v, t) for v, t in kernel_versions(False) if newer(v, newest)]
+    if not ahead:
+        return 0
+    days = int((time.time() - min(t for _, t in ahead)) / 86400)
+    if days < int(os.environ.get("LUDORA_STALE_DAYS", STALE_DAYS)):
+        return 0
+    try:
+        last = open(REMIND_STATE).read().strip()
+    except OSError:
+        last = "0"
+    if last == "never":
+        return 0
+    if last.isdigit() and time.time() - int(last) < REMIND_EVERY * 86400:
+        return 0
+    os.makedirs(os.path.dirname(REMIND_STATE), exist_ok=True)
+    with open(REMIND_STATE, "w") as f:
+        f.write(f"{int(time.time())}\n")
+    fedora = ahead[0][0]
+    for v, _ in ahead[1:]:
+        if newer(v, fedora):
+            fedora = v
+    body = (f"The Ludora kernel ({newest}) has been behind Fedora's ({fedora}) for "
+            f"{days} days, so it may be missing security fixes. Leave Ludora "
+            "switches this system back to plain Fedora KDE.")
+    cmd = ["notify-send", "-a", "Ludora", "-i", "dialog-warning", "-u", "critical",
+           "--action=leave=Leave Ludora\u2026", "--action=never=Don't remind me", "-w",
+           "Ludora may no longer be maintained", body]
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode != 0:  # older notify-send without actions
+        subprocess.run(cmd[:7] + cmd[-2:])
+        return 0
+    if r.stdout.strip() == "leave":
+        term = shutil.which("konsole")
+        subprocess.Popen(([term, "-e"] if term else []) + ["pkexec", "/usr/bin/ludora-leave"],
+                         start_new_session=True)
+    elif r.stdout.strip() == "never":
+        with open(REMIND_STATE, "w") as f:
+            f.write("never\n")
+    return 0
+
+
 # ---- main -------------------------------------------------------------------
 
 def main():
@@ -366,7 +445,11 @@ def main():
     p.add_argument("-y", "--yes", action="store_true", help="do not ask (keeps the Secure Boot key)")
     p.add_argument("--delete-key", action="store_true", help="with --yes: also delete the Ludora Secure Boot key")
     p.add_argument("--reboot", action="store_true", help="with --yes: reboot at the end")
+    p.add_argument("--notify-if-stale", action="store_true",
+                   help="(login autostart) remind when the Ludora kernel has fallen far behind Fedora's")
     ARGS = p.parse_args()
+    if ARGS.notify_if_stale:
+        sys.exit(notify_if_stale())
 
     if os.geteuid() != 0 and not ARGS.dry_run:
         print("ludora-leave changes the system and must run as root: sudo ludora-leave")

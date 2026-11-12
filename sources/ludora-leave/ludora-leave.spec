@@ -1,6 +1,6 @@
 Name:           ludora-leave
 Version:        1.0
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Turn a Ludora install back into plain Fedora KDE
 License:        GPL-3.0-or-later
 URL:            https://github.com/LarsSoeMikkelsen/Ludora
@@ -8,6 +8,7 @@ BuildArch:      noarch
 
 Source0:        ludora-leave
 Source1:        ludora-leave.desktop
+Source2:        ludora-leave-reminder.desktop
 
 Requires:       python3
 Requires:       dnf5
@@ -16,6 +17,8 @@ Requires:       grub2-tools
 Requires:       polkit
 Requires:       util-linux
 Requires:       rpm
+# notify-send for the reminder
+Requires:       libnotify
 
 %description
 ludora-leave switches a Ludora system back to plain Fedora KDE without a
@@ -29,6 +32,10 @@ it keeps working if the Ludora repository is gone, and removes itself last.
 Run it from the menu (Leave Ludora), the welcome app, or with
 'sudo ludora-leave'; 'ludora-leave --dry-run' shows the plan.
 
+At login it checks whether the Ludora kernel has been behind Fedora's
+kernel for 60 days (a sign that Ludora is no longer maintained) and then
+shows a reminder with a button to leave, at most once a week.
+
 %prep
 
 %build
@@ -36,12 +43,20 @@ Run it from the menu (Leave Ludora), the welcome app, or with
 %install
 install -Dm0755 %{SOURCE0} %{buildroot}%{_bindir}/ludora-leave
 install -Dm0644 %{SOURCE1} %{buildroot}%{_datadir}/applications/ludora-leave.desktop
+install -Dm0644 %{SOURCE2} %{buildroot}%{_sysconfdir}/xdg/autostart/ludora-leave-reminder.desktop
 
 %files
 %{_bindir}/ludora-leave
 %{_datadir}/applications/ludora-leave.desktop
+%{_sysconfdir}/xdg/autostart/ludora-leave-reminder.desktop
 
 %changelog
+* Thu Nov 12 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-6
+- Login reminder (autostart, --notify-if-stale): when Fedora's kernel has
+  been a newer upstream version than every Ludora kernel for 60 days,
+  notify that Ludora may no longer be maintained, with Leave Ludora and
+  Don't remind me actions; at most once a week
+
 * Thu Nov 12 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-5
 - Plan: say when the Ludora repository is already removed
 

@@ -101,6 +101,22 @@ The repository is automatically enabled on Ludora installations.
 
 ---
 
+## Leaving Ludora
+
+Ludora is a layer on top of Fedora KDE, not a fork, and you can switch back to plain Fedora KDE without reinstalling. Open **Leave Ludora** from the application menu (or run `sudo ludora-leave`; `ludora-leave --dry-run` only shows the plan). It:
+
+- takes a snapshot first and asks before changing anything
+- makes Fedora's kernel the default and removes the Ludora repository and the Ludora-only packages
+- replaces Ludora's builds of Fedora packages (Mesa, MangoHud, ...) with Fedora's
+- restores Fedora's boot menu names and boot splash, and can remove the Ludora Secure Boot key
+- removes itself at the end
+
+Your files, apps, Steam games, Flatpaks and RPM Fusion are not touched. It needs only Fedora's repositories, so it keeps working if the Ludora repository is gone.
+
+**If Ludora stops:** your system is Fedora underneath and keeps getting Fedora's updates, and Fedora's signed kernel is always installed as a fallback. Ludora's own packages, most importantly the kernel, would stop getting updates, so switch back with Leave Ludora. If the Ludora kernel falls far behind Fedora's, the desktop shows a reminder.
+
+---
+
 ## Snapshot Management
 
 ### Automatic Snapshots
