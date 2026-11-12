@@ -1,6 +1,6 @@
 Name:           ludora-leave
 Version:        1.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Turn a Ludora install back into plain Fedora KDE
 License:        GPL-3.0-or-later
 URL:            https://github.com/LarsSoeMikkelsen/Ludora
@@ -42,5 +42,9 @@ install -Dm0644 %{SOURCE1} %{buildroot}%{_datadir}/applications/ludora-leave.des
 %{_datadir}/applications/ludora-leave.desktop
 
 %changelog
+* Thu Nov 12 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-2
+- Boot splash: the spinner watermark belongs to fedora-logos; reinstall
+  the file's owner instead of plymouth-theme-spinner
+
 * Thu Nov 12 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-1
 - Initial package

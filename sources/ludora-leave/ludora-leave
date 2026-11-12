@@ -308,13 +308,20 @@ def clean_homes():
 
 
 def plymouth():
-    """The Ludora ISO put its watermark into Fedora's spinner theme."""
-    o = subprocess.run(["rpm", "-V", "plymouth-theme-spinner"],
-                       capture_output=True, text=True).stdout
-    if "watermark.png" not in o:
+    """The Ludora ISO put its watermark into Fedora's spinner theme.
+
+    The file belongs to fedora-logos (not plymouth-theme-spinner);
+    reinstalling its owner restores Fedora's image.
+    """
+    f = "/usr/share/plymouth/themes/spinner/watermark.png"
+    owner = out(["rpm", "-qf", "--qf", "%{NAME}\n", f]).strip()
+    if not owner or " " in owner:
         return False
-    run(["dnf", "-y", "reinstall", "plymouth-theme-spinner"])
-    say("Fedora's boot splash restored.")
+    o = subprocess.run(["rpm", "-V", owner], capture_output=True, text=True).stdout
+    if f not in o:
+        return False
+    run(["dnf", "-y", "reinstall", owner])
+    say(f"Fedora's boot splash restored ({owner}).")
     return True
 
 
