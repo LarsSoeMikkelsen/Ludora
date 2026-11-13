@@ -98,7 +98,9 @@ class Window(QWidget):
         self.keybox = QCheckBox(
             "Also delete the Ludora Secure Boot key (Fedora's kernel does not need "
             "it). At the next boot a blue screen asks you to confirm, with the "
-            f"password '{mok_password}'. Keeping it is harmless.")
+            f"password '{mok_password}'. Harmless today, but Easy Anti-Cheat's upcoming "
+            "Secure Boot check is set to refuse to run while this key is enrolled. "
+            "Delete it if you play such games.")
         self.keybox.setVisible(False)
         v.addWidget(self.keybox)
         row = QHBoxLayout()

@@ -581,7 +581,9 @@ def main():
         say("Secure Boot key: Ludora enrolled its own key to sign the Ludora kernel.")
         say("Fedora's kernel does not need it. Deleting it needs one confirmation on a")
         say(f"blue MokManager screen at the next boot, with the password '{MOK_PASSWORD}'.")
-        say("Keeping it is harmless.")
+        say("Keeping it does no harm today. But Easy Anti-Cheat's upcoming Secure Boot")
+        say("check (EAC v2) is set to refuse to run while any key not on Epic's")
+        say("approved list is enrolled. If you plan to play such games, delete it.")
         delete_key = ask("Delete the Ludora Secure Boot key?", False,
                          ARGS.delete_key if ARGS.yes else None)
 
