@@ -30,6 +30,7 @@ SELF = "ludora-leave"
 LOG = "/var/log/ludora-leave.log"
 MOK_DER = "/etc/pki/ludora-secureboot/MOK.der"
 MOK_PASSWORD = "ludora"
+MOK_SUBJECT = "CN=Ludora Secure Boot MOK"  # ludora-secureboot's -subj
 AKMODS_CERT = "/etc/pki/akmods/certs/public_key.der"
 
 
@@ -185,11 +186,17 @@ def removal_set(pk, ludora, swap):
 
 def mok_state():
     """'enrolled', 'none' or 'nosb' (no Secure Boot / no Ludora key)."""
-    if not os.path.exists(MOK_DER) or not shutil.which("mokutil"):
+    root = os.geteuid() == 0
+    # MOK.der sits in a root-only directory; the plan for the window runs as
+    # the user, who can still read the list of enrolled keys
+    have = os.path.exists(MOK_DER) if root else os.path.isdir(os.path.dirname(MOK_DER))
+    if not have or not shutil.which("mokutil"):
         return "nosb"
     r = subprocess.run(["mokutil", "--sb-state"], capture_output=True, text=True)
     if "SecureBoot" not in r.stdout + r.stderr:
         return "nosb"
+    if not root:
+        return "enrolled" if MOK_SUBJECT in out(["mokutil", "--list-enrolled"]) else "none"
     r = subprocess.run(["mokutil", "--test-key", MOK_DER], capture_output=True, text=True)
     return "enrolled" if "already enrolled" in (r.stdout + r.stderr) else "none"
 

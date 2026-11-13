@@ -64,6 +64,8 @@ install -Dm0644 %{SOURCE4} %{buildroot}%{_datadir}/polkit-1/actions/org.ludora.l
 * Fri Nov 13 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-8
 - Window: say "Checking Fedora's repositories" once the password is
   accepted, instead of still "Waiting for your password"
+- Window: offer deleting the Secure Boot key (the plan runs as the user,
+  who cannot read MOK.der; use the enrolled-key list instead)
 
 * Fri Nov 13 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-7
 - A window (as the user) explains what will happen and shows the plan
