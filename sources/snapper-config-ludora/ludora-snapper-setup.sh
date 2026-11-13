@@ -1,12 +1,36 @@
 #!/bin/bash
+# Ludora first-boot snapper + grub-btrfs setup.
+# Every step checks whether it is already done, and the completion marker is
+# written only at the very end, so a run that fails part-way is simply
+# retried on the next boot (the unit is conditioned on the marker).
 set -e
 exec >> /var/log/ludora-snapper-setup.log 2>&1
 echo "=== Ludora snapper setup: $(date) ==="
 
+DONE=/var/lib/ludora/snapper-setup.done
+finish() {
+    mkdir -p "${DONE%/*}"
+    touch "$DONE"
+    systemctl disable ludora-snapper-setup.service || true
+}
+
+# Snapper and grub-btrfs need a Btrfs root. Manual partitioning allows ext4,
+# xfs etc.: nothing to set up then, and no point retrying on every boot.
+ROOT_FS=$(findmnt -no FSTYPE /)
+if [ "$ROOT_FS" != btrfs ]; then
+    echo "Root filesystem is ${ROOT_FS:-unknown}, not btrfs: no snapshots, nothing to do."
+    finish
+    exit 0
+fi
+
 # Create snapper root config.
 # This also creates the /.snapshots btrfs subvolume (snapper requires this —
 # it will fail if .snapshots already exists, so we must NOT pre-create it).
-snapper -c root create-config /
+if [ -e /etc/snapper/configs/root ]; then
+    echo "snapper root config exists"
+else
+    snapper -c root create-config /
+fi
 
 # Set /@ as the default Btrfs subvolume so snapper rollback can detect it.
 # Without this, snapper rollback fails with "cannot detect ambit since default subvolume is unknown".
@@ -19,7 +43,7 @@ if [ -z "${ROOT_SUBVOL_ID}" ]; then
     btrfs subvolume list /
     echo "Skipping set-default — snapper rollback may not work."
 else
-    btrfs subvolume set-default ${ROOT_SUBVOL_ID} /
+    btrfs subvolume set-default "${ROOT_SUBVOL_ID}" /
 fi
 
 # Tune retention limits (space-conscious for a gaming desktop)
@@ -40,20 +64,24 @@ snapper -c root set-config \
 # which grub-btrfs.path BindsTo= and requires to start.
 # Reuse the device field of the existing / entry verbatim: Calamares writes
 # UUID=... for plain installs but /dev/mapper/luks-... for encrypted ones.
-ROOT_DEV=$(awk '$2=="/" && $3=="btrfs" {print $1}' /etc/fstab)
-if [ -z "${ROOT_DEV}" ]; then
-    echo "ERROR: No btrfs / entry found in /etc/fstab — not adding /.snapshots"
-    exit 1
+if awk '$1 !~ /^#/ && $2=="/.snapshots" {f=1} END {exit !f}' /etc/fstab; then
+    echo "/.snapshots already in fstab"
+else
+    ROOT_DEV=$(awk '$1 !~ /^#/ && $2=="/" && $3=="btrfs" {print $1}' /etc/fstab)
+    if [ -z "${ROOT_DEV}" ]; then
+        echo "ERROR: No btrfs / entry found in /etc/fstab — not adding /.snapshots"
+        exit 1
+    fi
+    BTRFS_OPTS=$(awk '$1 !~ /^#/ && $2=="/" && $3=="btrfs" {print $4}' /etc/fstab | sed 's/subvol=[^,]*,\?//')
+    echo "${ROOT_DEV}  /.snapshots  btrfs  subvol=/@/.snapshots,${BTRFS_OPTS}  0 0" >> /etc/fstab
 fi
-BTRFS_OPTS=$(awk '$2=="/" && $3=="btrfs" {print $4}' /etc/fstab | sed 's/subvol=[^,]*,\?//')
-echo "${ROOT_DEV}  /.snapshots  btrfs  subvol=/@/.snapshots,${BTRFS_OPTS}  0 0" >> /etc/fstab
-
-# Mount /.snapshots now so grub-btrfs.path can start without a reboot
-mkdir -p /.snapshots
-mount /.snapshots
 
 # Reload systemd so it picks up the new .snapshots.mount unit from fstab
 systemctl daemon-reload
+
+# Mount /.snapshots now so grub-btrfs.path can start without a reboot
+mkdir -p /.snapshots
+mountpoint -q /.snapshots || mount /.snapshots
 
 # Enable snapper timers and grub-btrfs snapshot watcher
 systemctl enable --now snapper-timeline.timer
@@ -61,7 +89,12 @@ systemctl enable --now snapper-cleanup.timer
 systemctl enable --now grub-btrfs.path
 
 # Create initial snapshot so grub-btrfs has something to show immediately
-snapper -c root create --description "Initial Ludora installation"
+# (once: a retried run must not add a second one)
+if snapper -c root list --columns description | grep -qF "Initial Ludora installation"; then
+    echo "initial snapshot exists"
+else
+    snapper -c root create --description "Initial Ludora installation"
+fi
 
 # Populate grub snapshot submenu. Go through grub-btrfs.service instead of
 # running grub2-mkconfig here: the snapshot above already triggered it via
@@ -71,9 +104,5 @@ snapper -c root create --description "Initial Ludora installation"
 # instance instead of starting a second one.
 systemctl start grub-btrfs.service
 
+finish
 echo "=== Ludora snapper setup complete: $(date) ==="
-
-# Self-destruct: disable and remove this service
-systemctl disable ludora-snapper-setup.service
-rm -f /etc/systemd/system/ludora-snapper-setup.service
-rm -f /usr/local/bin/ludora-snapper-setup.sh

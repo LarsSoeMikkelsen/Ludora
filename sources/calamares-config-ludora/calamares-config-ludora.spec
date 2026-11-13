@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        34%{?dist}
+Release:        35%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -106,6 +106,14 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Fri Nov 13 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-35
+- users: the password may be short but no longer empty (nonempty: true)
+- packagechooser-cleanup: "dnf mark user" instead of dnf4's "mark install",
+  which dnf5 rejects, so the protected packages were never marked
+- netinstall: hidden, always-selected marker group; without it in the
+  selection (Components page failed to load) the cleanup keeps everything
+  instead of removing every optional group
+
 * Wed Nov 11 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-34
 - Remove the live ISO's passwordless polkit rule for wheel
   (49-nopasswd-wheel.rules) from the installed system: any program running

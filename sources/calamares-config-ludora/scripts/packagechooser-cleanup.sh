@@ -11,7 +11,8 @@
 # plasma-login-manager: the login manager since F44 (sddm is no longer installed).
 # vulkan-tools: kinfocenter hard-depends on it; removing it forces kinfocenter out.
 # Mark these before any removal so they are treated as user-installed.
-dnf mark install gstreamer1-plugins-base plasma-login-manager plasma-workspace vulkan-tools || true
+# (dnf5: "mark user"; dnf4's "mark install" does not exist in dnf5.)
+dnf mark user gstreamer1-plugins-base plasma-login-manager plasma-workspace vulkan-tools || true
 
 # If the file doesn't exist the module never ran — keep everything as-is
 if [ ! -f /tmp/ludora-selections ]; then
@@ -22,6 +23,15 @@ SELECTED=$(cat /tmp/ludora-selections)
 
 # Guard against unexpected null output from the Python module
 if [ "$SELECTED" = "null" ]; then
+    exit 0
+fi
+
+# The hidden, always-selected netinstall group "ludora-components-page"
+# proves the Components page delivered its selection. Without it (page
+# failed to load, globalstorage key changed) an empty list would remove every
+# optional group, so keep everything instead.
+if ! echo "$SELECTED" | grep -qxF "ludora-components-page"; then
+    echo "packagechooser-cleanup: no Components page marker, keeping all packages"
     exit 0
 fi
 
@@ -99,7 +109,7 @@ remove_if_missing \
 # Mark plasma-login-manager and plasma-workspace as explicitly installed first
 # so they are never removed as orphaned dependencies of kde-ludora.
 if ! selected "kde-ludora"; then
-    dnf mark install plasma-login-manager plasma-workspace || true
+    dnf mark user plasma-login-manager plasma-workspace || true
     dnf remove -y --noautoremove \
         fastfetch fastfetch-settings kde-ludora desktop-defaults-ludora || true
 fi

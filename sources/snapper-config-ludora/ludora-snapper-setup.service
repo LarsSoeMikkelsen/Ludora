@@ -1,7 +1,9 @@
 [Unit]
 Description=Ludora first-boot snapper and grub-btrfs setup
 After=local-fs.target
-ConditionPathExists=!/etc/snapper/configs/root
+# Written only when the whole setup succeeded; a failed run is retried on the
+# next boot.
+ConditionPathExists=!/var/lib/ludora/snapper-setup.done
 
 [Service]
 Type=oneshot

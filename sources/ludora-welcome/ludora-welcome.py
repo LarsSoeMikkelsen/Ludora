@@ -88,6 +88,24 @@ in a broken state or failing without clear output. dnf gives you full control
 and readable feedback.</p>
 """
 
+# Kernel headers for akmods: the Ludora kernel's when it is installed, else
+# Fedora's (the Ludora kernel may have been deselected in the installer;
+# kernel-ludora-devel-matched would pull it back in and make it the default).
+def _ludora_kernel_installed():
+    import subprocess
+    try:
+        return subprocess.run(["rpm", "-q", "--quiet", "kernel-ludora-core"]).returncode == 0
+    except OSError:
+        return True
+
+
+if _ludora_kernel_installed():
+    _HDR = "kernel-ludora-devel-matched"
+    _HDR_FOR = "the Ludora kernel"
+else:
+    _HDR = "kernel-devel-matched"
+    _HDR_FOR = "Fedora's kernel"
+
 NVIDIA_HTML = f"""
 <h2>Installing NVIDIA Drivers</h2>
 
@@ -123,15 +141,15 @@ Follow these steps to install the right driver for your GPU.</p>
 </table>
 
 <h3>Step 3 &mdash; Install</h3>
-<p>The commands below include <code>kernel-ludora-devel-matched</code>, which installs the
-kernel headers matching the Ludora kernel. Without it the NVIDIA module cannot be
+<p>The commands below include <code>{_HDR}</code>, which installs the
+kernel headers matching {_HDR_FOR}. Without it the NVIDIA module cannot be
 built and you will boot to a black screen.</p>
 <p><b>RTX 20xx and newer:</b></p>
-<pre style="{_CODE}">sudo dnf install kernel-ludora-devel-matched akmod-nvidia xorg-x11-drv-nvidia-cuda</pre>
+<pre style="{_CODE}">sudo dnf install {_HDR} akmod-nvidia xorg-x11-drv-nvidia-cuda</pre>
 <p><b>GTX 750 Ti &mdash; GTX 16xx (Maxwell &amp; Pascal):</b></p>
-<pre style="{_CODE}">sudo dnf install kernel-ludora-devel-matched akmod-nvidia-580xx xorg-x11-drv-nvidia-580xx-cuda</pre>
+<pre style="{_CODE}">sudo dnf install {_HDR} akmod-nvidia-580xx xorg-x11-drv-nvidia-580xx-cuda</pre>
 <p><b>GTX 600 / 700 series (Kepler):</b></p>
-<pre style="{_CODE}">sudo dnf install kernel-ludora-devel-matched akmod-nvidia-470xx</pre>
+<pre style="{_CODE}">sudo dnf install {_HDR} akmod-nvidia-470xx</pre>
 
 <h3>Step 4 &mdash; Reboot and wait</h3>
 <p>After rebooting, the kernel module builds in the background.
@@ -140,7 +158,7 @@ Once built, NVIDIA acceleration is active and survives future kernel updates aut
 
 <p><b>Black screen after installing?</b> If you installed the driver without the kernel headers,
 switch to a text console (<b>Ctrl+Alt+F3</b>), log in and run:</p>
-<pre style="{_CODE}">sudo dnf install kernel-ludora-devel-matched
+<pre style="{_CODE}">sudo dnf install {_HDR}
 sudo akmods --force
 sudo reboot</pre>
 
@@ -257,7 +275,7 @@ class WelcomeWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Welcome to Ludora")
-        self.setWindowIcon(QIcon.fromTheme("ludora-start-here"))
+        self.setWindowIcon(QIcon.fromTheme("ludora-start-here", QIcon.fromTheme("start-here")))
         self.setMinimumSize(800, 680)
         self.resize(820, 720)
 
