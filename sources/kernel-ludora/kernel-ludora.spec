@@ -11,7 +11,7 @@
 
 # Linux Kernel Versions
 %define _basekver 7.3
-%define _stablekver 3
+%define _stablekver 4
 # Releases start at 100 (like Ludora's mesa), so a release build always
 # sorts above test builds numbered from 1
 %define _releasekver 100
@@ -71,7 +71,7 @@ Source1:        config
 # https://github.com/firelzrd/bore-scheduler 1e2f57ad74e8 patches/stable/
 Patch0:         0001-linux7.3-rc2-bore-7.0.0.patch
 # USB serials with control characters (ASUS ROG Azoth 0b05:1a85) break
-# systemd/Wayland input; not fixed upstream as of 7.3.1. Supersedes our
+# systemd/Wayland input; not fixed upstream as of 7.3.4. Supersedes our
 # older usbhid-only patch (dropped)
 Patch2:         0001-usb-core-truncate-string-descriptors-at-first-C0-con.patch
 Patch3:         0001-cachyos-default-tunables.patch
@@ -433,6 +433,10 @@ Installs matching core and devel packages for %{name}.
 %files
 
 %changelog
+* Wed Nov 11 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.3.4-100.ludora
+- Update to kernel 7.3.4; BORE 7.0.0, POC v2.6.3 and our patches unchanged
+  (apply cleanly)
+
 * Sun Nov 08 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 7.3.3-100.ludora
 - Update to kernel 7.3.3; BORE 7.0.0 and POC v2.6.3 unchanged (apply cleanly)
 - Verify module signatures against the platform keyring too, as Fedora's

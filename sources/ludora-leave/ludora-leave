@@ -1,0 +1,674 @@
+#!/usr/bin/python3
+"""ludora-leave: turn a Ludora install back into plain Fedora KDE.
+
+Ludora is Fedora KDE plus packages from the predze/ludora COPR. This undoes
+that without a reinstall: Fedora's kernel becomes the default, the COPR and
+the Ludora-only packages are removed, Ludora builds of Fedora packages (Mesa,
+MangoHud, ...) are swapped for Fedora's, and the Ludora name leaves the boot
+menu. User files, apps, Flatpaks and RPM Fusion are not touched.
+
+It needs only Fedora's repositories, so it keeps working if the Ludora COPR
+is gone. Ludora packages are found by their COPR vendor tag, not a fixed
+list. The whole program is loaded at start, so it can remove its own package
+as the last step.
+"""
+import argparse
+import glob
+import os
+import pwd
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+
+VENDOR = "Fedora Copr - user predze"
+COPR_REPOS = "copr:copr.fedorainfracloud.org:predze:*"
+COPR_FILES = "/etc/yum.repos.d/_copr:copr.fedorainfracloud.org:predze:*.repo"
+SELF = "ludora-leave"
+LOG = "/var/log/ludora-leave.log"
+MOK_DER = "/etc/pki/ludora-secureboot/MOK.der"
+MOK_PASSWORD = "ludora"
+MOK_SUBJECT = "CN=Ludora Secure Boot MOK"  # ludora-secureboot's -subj
+AKMODS_CERT = "/etc/pki/akmods/certs/public_key.der"
+
+
+def dnf_nocopr():
+    """dnf without the Ludora COPR. dnf5 rejects --disable-repo when nothing
+    matches, which is the case once the repo files are gone (a second run)."""
+    return ["dnf", "-q"] + ([f"--disable-repo={COPR_REPOS}"] if glob.glob(COPR_FILES) else [])
+# Files Ludora leaves in home directories (theme autostart, welcome flag)
+HOME_FILES = [
+    ".config/autostart/ludora-theme-apply.desktop",
+    ".config/autostart/ludora-live-theme.desktop",
+    ".config/ludora",
+    ".ludora-theme-applied",
+    ".ludora-theme-apply.log",
+]
+SKEL_FILES = ["/etc/skel/.config/autostart/ludora-live-theme.desktop"]
+
+logf = None
+started = False  # True once the first step has changed something
+
+
+def log(msg):
+    if logf:
+        logf.write(time.strftime("%F %T ") + msg + "\n")
+        logf.flush()
+
+
+def say(msg=""):
+    print(msg, flush=True)
+    log(msg)
+
+
+def step(msg):
+    say()
+    say(f"==> {msg}")
+
+
+def run(cmd, check=True, quiet=False):
+    """Run a command with its output on the terminal; return its exit code."""
+    log("$ " + " ".join(cmd))
+    r = subprocess.run(cmd, stdout=subprocess.DEVNULL if quiet else None)
+    log(f"  exit {r.returncode}")
+    if check and r.returncode != 0:
+        die(f"command failed ({r.returncode}): {' '.join(cmd)}")
+    return r.returncode
+
+
+def out(cmd):
+    """Run a command and return its stdout ('' on failure)."""
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    return r.stdout if r.returncode == 0 else ""
+
+
+def stopped_msg():
+    if started:
+        say("The steps already done stay done. Run 'sudo ludora-leave' again to")
+        say("finish; it only does what is still left.")
+    else:
+        say("Nothing was changed.")
+
+
+def die(msg):
+    say(f"\nERROR: {msg}")
+    stopped_msg()
+    say(f"Details: {LOG}")
+    finish(1)
+
+
+def ask(question, default, assume):
+    if assume is not None:
+        return assume
+    hint = "[Y/n]" if default else "[y/N]"
+    try:
+        a = input(f"{question} {hint} ").strip().lower()
+    except EOFError:
+        return default
+    return default if not a else a in ("y", "yes")
+
+
+def finish(code):
+    if sys.stdin.isatty() and not ARGS.yes:
+        try:
+            input("\nPress Enter to close.")
+        except EOFError:
+            pass
+    sys.exit(code)
+
+
+# ---- what is installed ------------------------------------------------------
+
+def installed():
+    """name -> vendor of every installed package."""
+    pk = {}
+    for line in out(["rpm", "-qa", "--qf", "%{NAME}\t%{VENDOR}\n"]).splitlines():
+        name, _, vendor = line.partition("\t")
+        pk[name] = vendor
+    return pk
+
+
+def ludora_packages(pk):
+    return sorted(n for n, v in pk.items() if v == VENDOR)
+
+
+def in_fedora(names):
+    """Names (of `names`) that the non-Ludora repos also offer."""
+    if not names:
+        return set()
+    o = out(dnf_nocopr() + ["repoquery", "--available", "--qf", "%{name}\n"] + names)
+    return set(o.split()) & set(names)
+
+
+def running_kernel():
+    return os.uname().release
+
+
+def fedora_kernels():
+    """Installed Fedora kernel versions, newest last."""
+    o = out(["rpm", "-q", "--qf", "%{VENDOR}\t%{VERSION}-%{RELEASE}.%{ARCH}\n", "kernel-core"])
+    vers = [v for line in o.splitlines()
+            for vend, _, v in [line.partition("\t")] if vend != VENDOR and v]
+    if not vers:
+        return []
+    r = subprocess.run(["sort", "-V"], input="\n".join(vers) + "\n",
+                       capture_output=True, text=True)
+    return r.stdout.split()
+
+
+def removal_set(pk, ludora, swap):
+    """Ludora-only packages to remove, plus kmods built for Ludora kernels.
+
+    A Ludora package that a non-Ludora package still needs is kept (for
+    example ludora-rpmfusion-compat while RPM Fusion's release packages need
+    the path it provides); removing it would take that package with it.
+    """
+    remove = set(n for n in ludora if n not in swap and n != SELF)
+    remove |= set(n for n in pk if n.startswith("kernel-ludora"))
+    # kmod-nvidia-7.3.3-100.ludora... etc. are built for a Ludora kernel
+    remove |= set(n for n in pk if n.startswith("kmod-") and ".ludora" in n)
+    kept = {}
+    while True:
+        changed = False
+        for n in sorted(remove):
+            needers = set(out(["dnf", "-q", "repoquery", "--installed",
+                               "--whatrequires", n, "--qf", "%{name}\n"]).split())
+            outside = needers - remove - {n, SELF}
+            if outside:
+                remove.discard(n)
+                kept[n] = sorted(outside)
+                changed = True
+        if not changed:
+            return sorted(remove), kept
+
+
+def mok_state():
+    """'enrolled', 'none' or 'nosb' (no Secure Boot / no Ludora key)."""
+    root = os.geteuid() == 0
+    # MOK.der sits in a root-only directory; the plan for the window runs as
+    # the user, who can still read the list of enrolled keys
+    have = os.path.exists(MOK_DER) if root else os.path.isdir(os.path.dirname(MOK_DER))
+    if not have or not shutil.which("mokutil"):
+        return "nosb"
+    r = subprocess.run(["mokutil", "--sb-state"], capture_output=True, text=True)
+    if "SecureBoot" not in r.stdout + r.stderr:
+        return "nosb"
+    if not root:
+        return "enrolled" if MOK_SUBJECT in out(["mokutil", "--list-enrolled"]) else "none"
+    r = subprocess.run(["mokutil", "--test-key", MOK_DER], capture_output=True, text=True)
+    return "enrolled" if "already enrolled" in (r.stdout + r.stderr) else "none"
+
+
+def akmods_uses_mok():
+    try:
+        return os.path.realpath(AKMODS_CERT).startswith("/etc/pki/akmods/certs/ludora")
+    except OSError:
+        return False
+
+
+# ---- steps ------------------------------------------------------------------
+
+def snapshot():
+    if not shutil.which("snapper") or not os.path.exists("/etc/snapper/configs/root"):
+        say("No snapper root config, skipping the snapshot.")
+        return
+    run(["snapper", "-c", "root", "create", "-d", "Before leaving Ludora",
+         "-u", "important=yes"])
+    say("Snapshot 'Before leaving Ludora' created (marked important).")
+
+
+def remove_copr():
+    files = glob.glob(COPR_FILES)
+    for f in files:
+        os.remove(f)
+        say(f"removed {f}")
+    if not files:
+        say("No Ludora COPR repository configured.")
+
+
+def set_defaultkernel():
+    f = "/etc/sysconfig/kernel"
+    try:
+        text = open(f).read()
+    except FileNotFoundError:
+        text = ""
+    if re.search(r"^DEFAULTKERNEL=", text, re.M):
+        text = re.sub(r"^DEFAULTKERNEL=.*$", "DEFAULTKERNEL=kernel-core", text, flags=re.M)
+    else:
+        text += "DEFAULTKERNEL=kernel-core\n"
+    open(f, "w").write(text)
+    say("DEFAULTKERNEL=kernel-core")
+
+
+def fedora_titles():
+    """Retitle BLS entries the way Fedora's kernel-install writes them."""
+    osr = {}
+    for line in open("/etc/os-release"):
+        k, _, v = line.strip().partition("=")
+        osr[k] = v.strip('"')
+    for f in glob.glob("/boot/loader/entries/*.conf"):
+        lines = open(f).read().splitlines()
+        ver = next((l.split(None, 1)[1] for l in lines
+                    if l.startswith("version ") and len(l.split(None, 1)) > 1), None)
+        if not ver:
+            continue
+        title = f"title {osr.get('NAME', 'Fedora Linux')} ({ver}) {osr.get('VERSION', '')}".rstrip()
+        new = [title if l.startswith("title ") else l for l in lines]
+        if new != lines:
+            open(f, "w").write("\n".join(new) + "\n")
+    say("Boot entries titled 'Fedora Linux (...)'.")
+
+
+def grub_distributor():
+    f = "/etc/default/grub"
+    if not os.path.exists(f):
+        return
+    text = open(f).read()
+    # Fedora's own line (what Anaconda writes)
+    fedora = """GRUB_DISTRIBUTOR="$(sed 's, release .*$,,g' /etc/system-release)\""""
+    if re.search(r"^GRUB_DISTRIBUTOR=", text, re.M):
+        text = re.sub(r"^GRUB_DISTRIBUTOR=.*$", lambda m: fedora, text, flags=re.M)
+    else:
+        text += fedora + "\n"
+    open(f, "w").write(text)
+    say("GRUB_DISTRIBUTOR set to Fedora's default.")
+
+
+def efi_entry():
+    """Replace the firmware boot entry named 'Ludora' by one named 'Fedora'."""
+    if not os.path.isdir("/sys/firmware/efi") or not shutil.which("efibootmgr"):
+        return
+    entries = re.findall(r"^Boot([0-9A-F]{4})\*? (.*?)\t(.*)$",
+                         out(["efibootmgr", "-v"]), re.M)
+    ludora = [(n, path) for n, label, path in entries if label.strip() == "Ludora"]
+    if not ludora:
+        say("No firmware boot entry named Ludora.")
+        return
+    loader = "\\EFI\\fedora\\shimx64.efi"
+    if not os.path.exists("/boot/efi/EFI/fedora/shimx64.efi"):
+        say("Fedora's shim is missing from the EFI partition; keeping the Ludora entry.")
+        return
+    have_fedora = any(label.strip() == "Fedora" and loader.lower() in path.lower()
+                      for n, label, path in entries)
+    if not have_fedora:
+        src = out(["findmnt", "-no", "SOURCE", "/boot/efi"]).strip()
+        disk = out(["lsblk", "-no", "PKNAME", src]).strip()
+        part = out(["lsblk", "-no", "PARTN", src]).strip()
+        if not (src and disk and part):
+            say("Could not find the EFI partition; keeping the Ludora entry.")
+            return
+        if run(["efibootmgr", "-q", "-c", "-d", f"/dev/{disk}", "-p", part,
+                "-L", "Fedora", "-l", loader], check=False) != 0:
+            say("Could not create a Fedora boot entry; keeping the Ludora entry.")
+            return
+        say("Firmware boot entry 'Fedora' created (first in boot order).")
+    for n, path in ludora:
+        run(["efibootmgr", "-q", "-b", n, "-B"], check=False)
+        say(f"Firmware boot entry Boot{n} 'Ludora' removed.")
+
+
+def clean_homes():
+    for f in SKEL_FILES:
+        if os.path.exists(f):
+            os.remove(f)
+            say(f"removed {f}")
+    for u in pwd.getpwall():
+        if u.pw_uid < 1000 or u.pw_uid >= 60000 or not os.path.isdir(u.pw_dir):
+            continue
+        for rel in HOME_FILES:
+            p = os.path.join(u.pw_dir, rel)
+            if os.path.islink(p) or os.path.isfile(p):
+                os.remove(p)
+            elif os.path.isdir(p):
+                shutil.rmtree(p)
+            else:
+                continue
+            say(f"removed {p}")
+
+
+def plymouth():
+    """The Ludora ISO put its watermark into Fedora's spinner theme.
+
+    The file belongs to fedora-logos (not plymouth-theme-spinner);
+    reinstalling its owner restores Fedora's image.
+    """
+    f = "/usr/share/plymouth/themes/spinner/watermark.png"
+    owner = out(["rpm", "-qf", "--qf", "%{NAME}\n", f]).strip()
+    if not owner or " " in owner:
+        return False
+    o = subprocess.run(["rpm", "-V", owner], capture_output=True, text=True).stdout
+    if f not in o:
+        return False
+    run(["dnf", "-y", "reinstall", owner])
+    say(f"Fedora's boot splash restored ({owner}).")
+    return True
+
+
+def delete_mok():
+    h = tempfile.NamedTemporaryFile(delete=False)
+    h.close()
+    try:
+        with open(h.name, "w") as fh:
+            ok = subprocess.run(["mokutil", f"--generate-hash={MOK_PASSWORD}"],
+                                stdout=fh).returncode == 0
+        if not ok:
+            say("mokutil cannot hash the password; the key is kept.")
+            return False
+        if run(["mokutil", "--delete", MOK_DER, "--hash-file", h.name], check=False) != 0:
+            say("mokutil could not request the deletion; the key is kept.")
+            return False
+    finally:
+        os.unlink(h.name)
+    return True
+
+
+# ---- reminder when Ludora looks abandoned ------------------------------------
+
+STALE_DAYS = 60       # Fedora's kernel ahead this long -> remind
+REMIND_EVERY = 7      # days between reminders
+REMIND_STATE = os.path.expanduser("~/.local/state/ludora/leave-reminder")
+
+
+def kernel_versions(vendor_is_ludora):
+    """(upstream version, install time) of installed kernel-core-like packages."""
+    o = out(["rpm", "-qa", "--qf", "%{NAME}\t%{VENDOR}\t%{VERSION}\t%{INSTALLTIME}\n",
+             "kernel-core", "kernel-ludora-core"])
+    res = []
+    for line in o.splitlines():
+        name, vendor, ver, t = line.split("\t")
+        if (vendor == VENDOR) == vendor_is_ludora:
+            res.append((ver, int(t)))
+    return res
+
+
+def newer(a, b):
+    """True if upstream version a sorts after b (sort -V)."""
+    if a == b:
+        return False
+    r = subprocess.run(["sort", "-V"], input=f"{a}\n{b}\n", capture_output=True, text=True)
+    return r.stdout.split()[-1] == a
+
+
+def notify_if_stale():
+    """Run at login (autostart): if the Ludora kernel has fallen behind
+    Fedora's for STALE_DAYS, Ludora is probably no longer maintained and the
+    Ludora kernel misses security fixes. Say so, once a week at most."""
+    ludora = kernel_versions(True)
+    if not ludora:
+        return 0  # no Ludora kernel: nothing goes stale
+    newest = ludora[0][0]
+    for v, _ in ludora[1:]:
+        if newer(v, newest):
+            newest = v
+    ahead = [(v, t) for v, t in kernel_versions(False) if newer(v, newest)]
+    if not ahead:
+        return 0
+    days = int((time.time() - min(t for _, t in ahead)) / 86400)
+    if days < int(os.environ.get("LUDORA_STALE_DAYS", STALE_DAYS)):
+        return 0
+    try:
+        last = open(REMIND_STATE).read().strip()
+    except OSError:
+        last = "0"
+    if last == "never":
+        return 0
+    if last.isdigit() and time.time() - int(last) < REMIND_EVERY * 86400:
+        return 0
+    os.makedirs(os.path.dirname(REMIND_STATE), exist_ok=True)
+    with open(REMIND_STATE, "w") as f:
+        f.write(f"{int(time.time())}\n")
+    fedora = ahead[0][0]
+    for v, _ in ahead[1:]:
+        if newer(v, fedora):
+            fedora = v
+    body = (f"The Ludora kernel ({newest}) has been behind Fedora's ({fedora}) for "
+            f"{days} days, so it may be missing security fixes. Leave Ludora "
+            "switches this system back to plain Fedora KDE.")
+    cmd = ["notify-send", "-a", "Ludora", "-i", "dialog-warning", "-u", "critical",
+           "--action=leave=Leave Ludora\u2026", "--action=never=Don't remind me", "-w",
+           "Ludora may no longer be maintained", body]
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode != 0:  # older notify-send without actions
+        subprocess.run(cmd[:7] + cmd[-2:])
+        return 0
+    if r.stdout.strip() == "leave":
+        subprocess.Popen(["/usr/bin/ludora-leave"], start_new_session=True)
+    elif r.stdout.strip() == "never":
+        with open(REMIND_STATE, "w") as f:
+            f.write("never\n")
+    return 0
+
+
+# ---- the plan ---------------------------------------------------------------
+
+class PlanError(Exception):
+    pass
+
+
+def is_live():
+    return "rd.live.image" in open("/proc/cmdline").read()
+
+
+def make_plan():
+    """What leaving would do. Needs no root: the GUI shows it before anything
+    asks for a password."""
+    if run(dnf_nocopr() + ["makecache"], check=False, quiet=True) != 0:
+        raise PlanError("Fedora's repositories cannot be reached. "
+                        "Check the network and try again.")
+    pk = installed()
+    ludora = ludora_packages(pk)
+    swap = in_fedora(ludora)
+    swap.discard(SELF)
+    remove, kept = removal_set(pk, ludora, swap)
+    copr = glob.glob(COPR_FILES)
+    mok = mok_state()
+    P = dict(pk=pk, ludora=ludora, swap=sorted(swap), remove=remove, kept=kept,
+             akmods="akmods" in pk, mok=mok, copr=bool(copr),
+             may_delete_key=mok == "enrolled" and not akmods_uses_mok(),
+             nothing=not ludora and not copr)
+    if not P["nothing"] and not in_fedora(["kernel-core"]) and not fedora_kernels():
+        raise PlanError("Fedora's kernel is neither installed nor available.")
+    return P
+
+
+def plan_json():
+    """--plan-json: the plan for the GUI, on stdout."""
+    import json
+    if is_live():
+        res = {"error": "This is the live system; there is nothing to leave."}
+    else:
+        try:
+            P = make_plan()
+            P.pop("pk")
+            res = P
+        except PlanError as e:
+            res = {"error": str(e)}
+    print(json.dumps(res))
+    return 0
+
+
+def gui():
+    """Window that explains the plan; root is asked for only on Leave."""
+    sys.path.insert(0, "/usr/share/ludora-leave")
+    import ludora_leave_gui
+    return ludora_leave_gui.main(MOK_PASSWORD)
+
+
+# ---- main -------------------------------------------------------------------
+
+def main():
+    global ARGS, logf, started
+    p = argparse.ArgumentParser(prog=SELF, description="Turn Ludora back into plain Fedora KDE.")
+    p.add_argument("--dry-run", action="store_true", help="show what would be done, change nothing")
+    p.add_argument("-y", "--yes", action="store_true", help="do not ask (keeps the Secure Boot key)")
+    p.add_argument("--delete-key", action="store_true", help="with --yes: also delete the Ludora Secure Boot key")
+    p.add_argument("--reboot", action="store_true", help="with --yes: reboot at the end")
+    p.add_argument("--plan-json", action="store_true", help=argparse.SUPPRESS)
+    p.add_argument("--notify-if-stale", action="store_true",
+                   help="(login autostart) remind when the Ludora kernel has fallen far behind Fedora's")
+    ARGS = p.parse_args()
+    if ARGS.notify_if_stale:
+        sys.exit(notify_if_stale())
+
+    if ARGS.plan_json:
+        sys.exit(plan_json())
+    if os.geteuid() != 0 and not ARGS.dry_run:
+        if not ARGS.yes and (os.environ.get("WAYLAND_DISPLAY") or os.environ.get("DISPLAY")):
+            sys.exit(gui())
+        print("ludora-leave changes the system and must run as root: sudo ludora-leave")
+        print("(ludora-leave --dry-run only shows the plan)")
+        sys.exit(1)
+    if is_live():
+        print("This is the live system; there is nothing to leave.")
+        sys.exit(1)
+    if not ARGS.dry_run:
+        logf = open(LOG, "a")
+        log(f"---- ludora-leave started, kernel {running_kernel()}")
+
+    say("Leave Ludora: turn this system back into plain Fedora KDE.")
+    say("Your files, apps, Steam games, Flatpaks and RPM Fusion are not touched.")
+    say()
+    say("Checking Fedora's repositories (the Ludora repository is not used) ...")
+    try:
+        P = make_plan()
+    except PlanError as e:
+        die(str(e))
+    pk, ludora, swap, remove, kept = P["pk"], P["ludora"], P["swap"], P["remove"], P["kept"]
+    akmods, mok, may_delete_key, copr = P["akmods"], P["mok"], P["may_delete_key"], P["copr"]
+
+    if P["nothing"]:
+        say("Nothing from Ludora is installed or configured here.")
+        finish(0)
+
+    say()
+    say("Plan:")
+    say("  1. Take a snapshot 'Before leaving Ludora'.")
+    say("  2. Remove the Ludora repository." if copr else "  2. Ludora repository: already removed.")
+    say("  3. Install Fedora's kernel and make it the default"
+        + (" (with kernel-devel-matched for akmods/NVIDIA)." if akmods else "."))
+    say("  4. Remove the Ludora packages:")
+    for n in remove:
+        say(f"       {n}")
+    if not remove:
+        say("       (none left)")
+    for n, by in kept.items():
+        say(f"     kept: {n} (needed by {', '.join(by)})")
+    say("  5. Replace Ludora builds with Fedora's (dnf distro-sync):")
+    say("       " + (", ".join(sorted(swap)) if swap else "(none left)"))
+    say("     and bring back Discover's offline updates (Fedora's default).")
+    say("  6. Fedora's boot splash, boot menu names and firmware boot entry;")
+    say("     remove Ludora's leftover files in home folders.")
+    if mok == "enrolled":
+        if may_delete_key:
+            say("  7. Optionally delete the Ludora Secure Boot key (you will be asked).")
+        else:
+            say("  7. The Ludora Secure Boot key stays: akmods (e.g. NVIDIA) signs with it.")
+    say(f"  {8 if mok == 'enrolled' else 7}. Remove this tool, then reboot.")
+    say()
+    if ARGS.dry_run:
+        say("Dry run: nothing was changed.")
+        sys.exit(0)
+
+    if not ask("Leave Ludora now?", False, True if ARGS.yes else None):
+        say("Nothing was changed.")
+        finish(0)
+
+    delete_key = False
+    if may_delete_key:
+        say()
+        say("Secure Boot key: Ludora enrolled its own key to sign the Ludora kernel.")
+        say("Fedora's kernel does not need it. Deleting it needs one confirmation on a")
+        say(f"blue MokManager screen at the next boot, with the password '{MOK_PASSWORD}'.")
+        say("Keeping it does no harm today. But Easy Anti-Cheat's upcoming Secure Boot")
+        say("check (EAC v2) is set to refuse to run while any key not on Epic's")
+        say("approved list is enrolled. If you plan to play such games, delete it.")
+        delete_key = ask("Delete the Ludora Secure Boot key?", False,
+                         ARGS.delete_key if ARGS.yes else None)
+
+    started = True
+    step("1/8 Snapshot")
+    snapshot()
+
+    step("2/8 Remove the Ludora repository")
+    remove_copr()
+
+    step("3/8 Fedora's kernel")
+    set_defaultkernel()
+    run(["dnf", "-y", "install", "kernel"] + (["kernel-devel-matched"] if akmods else []))
+
+    step("4/8 Remove the Ludora packages")
+    if remove:
+        # The Ludora kernel is usually the running one: dnf refuses to remove
+        # it by default. Nothing loads modules from it until the reboot.
+        # clean_requirements_on_remove=False: nothing besides these packages
+        # (e.g. the Papirus icons the desktop uses) is removed with them.
+        run(["dnf", "-y", "remove", "--setopt=protect_running_kernel=False",
+             "--setopt=clean_requirements_on_remove=False"] + remove)
+    else:
+        say("Nothing to remove.")
+
+    step("5/8 Switch to Fedora's versions")
+    run(["dnf", "-y", "distro-sync", "--allowerasing"])
+    # Fedora KDE ships Discover's offline updates; Ludora's desktop-defaults
+    # obsoleted them (they got no snapshot)
+    now = installed()
+    if "plasma-discover" in now and "plasma-discover-offline-updates" not in now:
+        run(["dnf", "-y", "install", "plasma-discover-offline-updates"], check=False)
+    left = [n for n in ludora_packages(installed()) if n not in (SELF, *kept)]
+    if left:
+        say("Still installed from Ludora (no Fedora version found): " + ", ".join(left))
+
+    step("6/8 Boot menu, boot splash, home folders")
+    fks = fedora_kernels()
+    if not fks:
+        die("no Fedora kernel is installed after the update")
+    if plymouth():
+        run(["dracut", "-f", "--regenerate-all"])
+    fedora_titles()
+    run(["grubby", f"--set-default=/boot/vmlinuz-{fks[-1]}"])
+    say(f"Default kernel: {fks[-1]}")
+    run(["grub2-editenv", "-", "unset", "fallback"], check=False)
+    grub_distributor()
+    run(["grub2-mkconfig", "-o", "/boot/grub2/grub.cfg"])
+    efi_entry()
+    clean_homes()
+
+    step("7/8 Secure Boot key")
+    key_pending = False
+    if delete_key:
+        key_pending = delete_mok()
+        if key_pending:
+            say("Deletion requested. At the next boot a blue MokManager screen appears:")
+            say(f"choose 'Delete MOK', confirm, enter the password '{MOK_PASSWORD}', then reboot.")
+    elif mok == "enrolled":
+        say("Kept.")
+    else:
+        say("No Ludora key enrolled.")
+
+    step("8/8 Remove ludora-leave")
+    run(["dnf", "-y", "remove", "--setopt=clean_requirements_on_remove=False", SELF],
+        check=False)
+
+    say()
+    say("Done. This is now Fedora KDE; Fedora's kernel starts after the reboot.")
+    say("The Ludora desktop look stays until you pick another one in")
+    say("System Settings > Colors & Themes > Global Theme (Fedora's default: Breeze).")
+    say("Snapshots taken so far stay; snapshots are no longer listed in the boot menu.")
+    if kept:
+        say("Kept because other packages need them: " + ", ".join(kept))
+    log("---- finished")
+    if ask("Reboot now?", True, ARGS.reboot if ARGS.yes else None):
+        run(["systemctl", "reboot"], check=False)
+    finish(0)
+
+
+ARGS = None
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        say("\nInterrupted.")
+        stopped_msg()
+        sys.exit(130)

@@ -1155,6 +1155,7 @@
           <p>
             Ludora 45.1 is the current release, based on Fedora 45.
             Ludora is a personal project that I build in my spare time, not a commercial product.
+            It is a layer on top of Fedora, not a fork: you can switch back to plain Fedora KDE at any time, without reinstalling.
           </p>
         </div>
         <div class="about-cell">
@@ -1202,7 +1203,15 @@
         </div>
         <div class="about-cell">
           <h3>Should I update with Discover or dnf?</h3>
-          <p>Use <code>sudo dnf upgrade</code> in a terminal for system updates. Snapshots are created around dnf operations, and Discover doesn't trigger them.</p>
+          <p>Either. Updates from dnf and from Discover both get a snapshot before and after. <code>sudo dnf upgrade</code> in a terminal shows more detail if something goes wrong.</p>
+        </div>
+        <div class="about-cell">
+          <h3>Can I go back to plain Fedora?</h3>
+          <p>Yes, without reinstalling. Open <strong>Leave Ludora</strong> from the application menu, or the Leaving Ludora tab in the welcome app. It shows what it will change, takes a snapshot first and asks before doing anything. Your files, apps, Steam games, Flatpaks and RPM Fusion stay.</p>
+        </div>
+        <div class="about-cell">
+          <h3>What happens if Ludora stops?</h3>
+          <p>Your system is Fedora underneath, so Fedora keeps updating it, and Fedora's own signed kernel is always installed next to the Ludora kernel. What stops is Ludora's own packages, most importantly the kernel, which would no longer get security fixes. If the Ludora kernel falls far behind Fedora's, your desktop tells you, and Leave Ludora switches you back in one step. It needs only Fedora's repositories, so it keeps working when Ludora is gone.</p>
         </div>
         <div class="about-cell">
           <h3>Found a bug or have a question?</h3>

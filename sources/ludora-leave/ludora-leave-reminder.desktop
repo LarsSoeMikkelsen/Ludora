@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Ludora maintenance reminder
+Comment=Reminds you when the Ludora kernel has fallen far behind Fedora's
+Exec=sh -c "sleep 90; exec /usr/bin/ludora-leave --notify-if-stale"
+NoDisplay=true
+X-KDE-autostart-phase=2
