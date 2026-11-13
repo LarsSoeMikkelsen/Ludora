@@ -4,13 +4,14 @@
 
 Name:           gamescope-session-plus
 Version:        0^%{commitdate}git%{shortcommit}
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Generic gamescope session runner (Steam Big Picture style sessions)
 License:        MIT
 URL:            https://github.com/ChimeraOS/gamescope-session
 # Upstream has no releases; pinned commit
 Source0:        %{url}/archive/%{commit}/gamescope-session-%{shortcommit}.tar.gz
 BuildArch:      noarch
+BuildRequires:  systemd-rpm-macros
 
 Requires:       gamescope
 Requires:       bash
@@ -47,5 +48,8 @@ cp -a usr %{buildroot}/
 %{_datadir}/gamescope/scripts/50-custom/50-disable-explicit-sync.lua
 
 %changelog
+* Fri Nov 13 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 0^20260106git73d2da8-2
+- BuildRequires systemd-rpm-macros (%%{_userunitdir})
+
 * Fri Nov 13 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 0^20260106git73d2da8-1
 - Initial package for Ludora Game Mode (ludora-dev prototype)
