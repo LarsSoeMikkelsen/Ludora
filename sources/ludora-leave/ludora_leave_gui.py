@@ -96,13 +96,19 @@ class Window(QWidget):
         self.text.setOpenExternalLinks(True)
         v.addWidget(self.text)
         self.keybox = QCheckBox(
-            "Also delete the Ludora Secure Boot key (Fedora's kernel does not need "
-            "it). At the next boot a blue screen asks you to confirm, with the "
-            f"password '{mok_password}'. Harmless today, but Easy Anti-Cheat's upcoming "
-            "Secure Boot check is set to refuse to run while this key is enrolled. "
-            "Delete it if you play such games.")
+            "Also delete the Ludora Secure Boot key (Fedora's kernel does not need it)")
         self.keybox.setVisible(False)
         v.addWidget(self.keybox)
+        # QCheckBox text never wraps; the details go in a wrapping label below
+        self.keynote = QLabel(
+            "At the next boot a blue screen asks you to confirm, with the password "
+            f"'{mok_password}'. Harmless today, but Easy Anti-Cheat's upcoming Secure "
+            "Boot check is set to refuse to run while this key is enrolled. Delete it "
+            "if you play such games.")
+        self.keynote.setWordWrap(True)
+        self.keynote.setContentsMargins(24, 0, 0, 0)
+        self.keynote.setVisible(False)
+        v.addWidget(self.keynote)
         row = QHBoxLayout()
         row.addStretch()
         self.cancel = QPushButton("Close")
@@ -173,6 +179,7 @@ class Window(QWidget):
         self.plan = P
         self.text.setHtml(INTRO + plan_html(P, self.mok_password))
         self.keybox.setVisible(P["may_delete_key"])
+        self.keynote.setVisible(P["may_delete_key"])
         self.go.setEnabled(True)
 
     # -- leave (as root, via pkexec) --

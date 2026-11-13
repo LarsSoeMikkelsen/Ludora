@@ -1,6 +1,6 @@
 Name:           ludora-leave
 Version:        1.0
-Release:        9%{?dist}
+Release:        10%{?dist}
 Summary:        Turn a Ludora install back into plain Fedora KDE
 License:        GPL-3.0-or-later
 URL:            https://github.com/LarsSoeMikkelsen/Ludora
@@ -61,6 +61,11 @@ install -Dm0644 %{SOURCE4} %{buildroot}%{_datadir}/polkit-1/actions/org.ludora.l
 %{_datadir}/polkit-1/actions/org.ludora.leave.policy
 
 %changelog
+* Fri Nov 13 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-10
+- Window: short Secure Boot key checkbox with the details in a wrapping
+  label below (a QCheckBox never wraps, so the long text made the window
+  very wide)
+
 * Fri Nov 13 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-9
 - Secure Boot key: no longer called harmless to keep; Easy Anti-Cheat's
   upcoming Secure Boot check (EAC v2) is set to refuse any enrolled key not
