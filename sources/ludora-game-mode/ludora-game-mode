@@ -1,0 +1,77 @@
+#!/bin/bash
+# ludora-game-mode: switch between the Plasma desktop and Game Mode (Steam
+# Big Picture in gamescope).
+#
+#   ludora-game-mode            from Plasma: ask, then log out into Game Mode
+#   ludora-game-mode --session-start
+#                               Plasma autostart: drop a pending "relogin into
+#                               the desktop" (we are there now) and put the
+#                               Game Mode icon on the desktop once
+#
+# The switch uses Plasma Login Manager's autologin with Relogin=true, written
+# to /run by a small root helper, so it never survives a reboot.
+set -u
+HELPER=/usr/libexec/ludora-game-mode/set-session
+STATE=/run/ludora/game-mode.conf
+APP=/usr/share/applications/ludora-game-mode.desktop
+ICON_FLAG="${XDG_CONFIG_HOME:-$HOME/.config}/ludora/game-mode-icon-placed"
+
+msg() {
+    if command -v kdialog >/dev/null && [ -n "${WAYLAND_DISPLAY:-}${DISPLAY:-}" ]; then
+        kdialog --title "Game Mode" "--$1" "$2"
+    else
+        echo "$2" >&2
+    fi
+}
+
+snapshot_boot() {
+    # grub-btrfs snapshot entries boot rootflags=subvol=@/.snapshots/N/snapshot
+    grep -q '@/\.snapshots/' /proc/cmdline 2>/dev/null && return 0
+    findmnt -no OPTIONS / 2>/dev/null | grep -q 'subvol=/@/\.snapshots/'
+}
+
+session_start() {
+    if [ -e "$STATE" ]; then
+        pkexec "$HELPER" clear >/dev/null 2>&1 || true
+    fi
+    # Desktop icon, once per user (deleting it is respected)
+    if [ ! -e "$ICON_FLAG" ]; then
+        desk=$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Desktop")
+        [ -n "$desk" ] && [ "$desk" != "$HOME" ] || desk="$HOME/Desktop"
+        mkdir -p "$desk" "${ICON_FLAG%/*}"
+        if [ ! -e "$desk/ludora-game-mode.desktop" ]; then
+            install -m 0755 "$APP" "$desk/ludora-game-mode.desktop"
+        fi
+        touch "$ICON_FLAG"
+    fi
+}
+
+enter() {
+    if snapshot_boot; then
+        msg error "This computer is running from a snapshot. Game Mode is not available until the snapshot is made permanent or you boot normally."
+        exit 1
+    fi
+    if ! command -v steam >/dev/null; then
+        msg error "Steam is not installed. Install it first:  sudo dnf install steam"
+        exit 1
+    fi
+    msg yesno "Switch to Game Mode?
+
+Steam starts full screen in Big Picture mode. Open apps are closed, so save your work first.
+
+To come back: Steam menu → Power → Switch to Desktop." || exit 0
+    if ! pkexec "$HELPER" gamemode; then
+        msg error "Could not switch to Game Mode."
+        exit 1
+    fi
+    # Log out of Plasma without the confirmation screen; the login manager
+    # then logs straight back in, into Game Mode.
+    dbus-send --session --type=method_call --dest=org.kde.Shutdown \
+        /Shutdown org.kde.Shutdown.logout
+}
+
+case "${1:-}" in
+    --session-start) session_start ;;
+    ""|--enter) enter ;;
+    *) echo "usage: ludora-game-mode [--enter|--session-start]" >&2; exit 2 ;;
+esac

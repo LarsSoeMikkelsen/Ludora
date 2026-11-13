@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Game Mode
+Name[de]=Spielmodus
+Name[da]=Spiltilstand
+Name[fr]=Mode jeu
+Name[es]=Modo juego
+Comment=Switch to Steam Big Picture full screen (back with Steam → Power → Switch to Desktop)
+Exec=ludora-game-mode
+Icon=input-gaming
+Categories=Game;
+Keywords=steam;big picture;gamescope;couch;tv;

@@ -1,0 +1,13 @@
+#!/bin/bash
+# Called by steamos-session-select (Steam: Power -> Switch to Desktop, or
+# gamescope-session-plus after repeated crashes). Next login is the Plasma
+# desktop; then Steam shuts down, the Game Mode session ends and the login
+# manager logs straight into Plasma.
+case "${1:-desktop}" in
+    plasma*|desktop) target=desktop ;;
+    gamescope) target=gamemode ;;
+    *) echo "os-session-select: unknown session '$1'" >&2; exit 1 ;;
+esac
+pkexec /usr/libexec/ludora-game-mode/set-session "$target" || exit 1
+[ "$target" = desktop ] && steam -shutdown
+exit 0

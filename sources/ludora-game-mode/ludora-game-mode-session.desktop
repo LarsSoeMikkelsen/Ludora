@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Ludora Game Mode session start
+Exec=ludora-game-mode --session-start
+OnlyShowIn=KDE;
+NoDisplay=true
+X-KDE-autostart-phase=2

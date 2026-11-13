@@ -1,0 +1,30 @@
+#!/bin/bash
+# Root helper (via pkexec, polkit action org.ludora.game-mode.set-session):
+# set or clear the next autologin of the CALLING user.
+#   gamemode  -> next login is Game Mode (Steam Big Picture in gamescope)
+#   desktop   -> next login is the Plasma desktop
+#   clear     -> no Game Mode autologin (normal login screen / autologin)
+# Only writes /run/ludora/game-mode.conf (gone after a reboot), which
+# /etc/plasmalogin.conf.d/60-ludora-game-mode.conf points to.
+set -eu
+umask 022
+STATE=/run/ludora/game-mode.conf
+
+[ "$(id -u)" -eq 0 ] || { echo "run via pkexec" >&2; exit 1; }
+uid=${PKEXEC_UID:-}
+[[ $uid =~ ^[0-9]+$ ]] && [ "$uid" -ge 1000 ] || { echo "no calling user" >&2; exit 1; }
+user=$(getent passwd "$uid" | cut -d: -f1)
+[[ $user =~ ^[a-z_][a-z0-9_.-]*\$?$ ]] || { echo "bad user" >&2; exit 1; }
+
+case "${1:-}" in
+    gamemode) session=gamescope-session-steam.desktop ;;
+    desktop)  session=plasma.desktop ;;
+    clear)    rm -f "$STATE"; exit 0 ;;
+    *) echo "usage: set-session gamemode|desktop|clear" >&2; exit 2 ;;
+esac
+
+mkdir -p "${STATE%/*}"
+tmp=$(mktemp "${STATE%/*}/.game-mode.XXXXXX")
+printf '[Autologin]\nUser=%s\nSession=%s\nRelogin=true\n' "$user" "$session" > "$tmp"
+chmod 0644 "$tmp"
+mv -f "$tmp" "$STATE"

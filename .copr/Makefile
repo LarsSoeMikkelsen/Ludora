@@ -93,4 +93,13 @@ srpm:
 			--define "_sourcedir $$(dirname $(spec))" \
 			--define "_srcrpmdir $(outdir)" \
 			$(spec); \
+	elif echo "$(spec)" | grep -q "gamescope-session-"; then \
+		_u=$$(rpmspec -P $(spec) | awk '/^Source0:/{print $$2}') && \
+		curl -fsSL -o /tmp/$$(basename $$_u) "$$_u" && \
+		rpmbuild -bs \
+			--define "_sourcedir /tmp" \
+			--define "_srcrpmdir $(outdir)" \
+			$(spec); \
+	else \
+		echo "No SRPM rule for $(spec) in .copr/Makefile" >&2; exit 1; \
 	fi
