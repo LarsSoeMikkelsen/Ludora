@@ -209,6 +209,8 @@ class Window(QWidget):
 
     def output(self):
         data = bytes(self.proc.readAllStandardOutput()).decode(errors="replace")
+        if data and self.bar.value() == 0 and not self.status.text().startswith("Step"):
+            self.status.setText("Checking Fedora's repositories \u2026")
         for line in data.splitlines():
             self.details.appendPlainText(line)
             m = STEP_RE.match(line.strip())

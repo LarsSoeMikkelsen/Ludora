@@ -1,6 +1,6 @@
 Name:           ludora-leave
 Version:        1.0
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Turn a Ludora install back into plain Fedora KDE
 License:        GPL-3.0-or-later
 URL:            https://github.com/LarsSoeMikkelsen/Ludora
@@ -61,6 +61,10 @@ install -Dm0644 %{SOURCE4} %{buildroot}%{_datadir}/polkit-1/actions/org.ludora.l
 %{_datadir}/polkit-1/actions/org.ludora.leave.policy
 
 %changelog
+* Fri Nov 13 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-8
+- Window: say "Checking Fedora's repositories" once the password is
+  accepted, instead of still "Waiting for your password"
+
 * Fri Nov 13 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.0-7
 - A window (as the user) explains what will happen and shows the plan
   before anything asks for a password; the password is asked only when
