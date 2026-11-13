@@ -1,6 +1,6 @@
 Name:           calamares-config-ludora
 Version:        1.8
-Release:        35%{?dist}
+Release:        36%{?dist}
 Summary:        Calamares installer configuration for Ludora Gaming Edition
 License:        GPLv3+
 URL:            https://ludora.org
@@ -106,6 +106,11 @@ install -Dm644 branding/welcome.png      %{buildroot}%{_sysconfdir}/calamares/br
 %{_sysconfdir}/calamares/branding/ludora/welcome.png
 
 %changelog
+* Fri Nov 13 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-36
+- Ludora kernel is not installed on CPUs without x86-64-v3 (AVX2): it cannot
+  boot there, and the Fedora kernel stays the default. The Components page
+  says so in all 15 languages.
+
 * Fri Nov 13 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-35
 - users: the password may be short but no longer empty (nonempty: true)
 - packagechooser-cleanup: "dnf mark user" instead of dnf4's "mark install",

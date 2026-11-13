@@ -71,6 +71,17 @@ remove_if_missing \
 # enrollment missed, signing failed).
 # protect_running_kernel=false: the live ISO runs Fedora's kernel, but DNF in
 # the chroot may resolve uname -r to either kernel.
+# The Ludora kernel is built for x86-64-v3 (AVX2, BMI2, FMA, ...): on an
+# older CPU it cannot boot, so it is removed even when selected. glibc's
+# dynamic loader reports which x86-64 levels this CPU supports.
+cpu_x86_64_v3() {
+    /usr/lib64/ld-linux-x86-64.so.2 --help 2>/dev/null | grep -q 'x86-64-v3 (supported'
+}
+if selected "kernel-ludora" && ! cpu_x86_64_v3; then
+    echo "packagechooser-cleanup: CPU lacks x86-64-v3 (AVX2), not installing the Ludora kernel"
+    SELECTED=$(echo "$SELECTED" | grep -vxF "kernel-ludora")
+fi
+
 if selected "kernel-ludora"; then
     # Keep kernel-ludora the GRUB default. 20-grub.install takes the default
     # kernel type from DEFAULTKERNEL via grub2-get-kernel-settings (setting
