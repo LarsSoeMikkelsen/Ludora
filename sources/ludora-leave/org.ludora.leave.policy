@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<policyconfig>
+  <vendor>Ludora</vendor>
+  <vendor_url>https://github.com/LarsSoeMikkelsen/Ludora</vendor_url>
+  <action id="org.ludora.leave">
+    <description>Leave Ludora</description>
+    <message>Leave Ludora: switch this computer back to plain Fedora KDE. This changes system packages and the boot menu.</message>
+    <icon_name>system-switch-user</icon_name>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/ludora-leave</annotate>
+  </action>
+</policyconfig>

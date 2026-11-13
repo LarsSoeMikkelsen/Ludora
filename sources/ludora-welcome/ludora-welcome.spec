@@ -1,6 +1,6 @@
 Name:           ludora-welcome
 Version:        1.8
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        First-boot welcome application for Ludora
 License:        GPLv3+
 URL:            https://ludora.org
@@ -8,7 +8,7 @@ Source0:        ludora-welcome-%{version}.tar.gz
 BuildArch:      noarch
 Requires:       python3-pyqt6
 Requires:       kde-ludora
-Requires:       ludora-leave
+Requires:       ludora-leave >= 1.0-7
 
 %description
 A simple welcome application that runs on first boot, introducing the user
@@ -40,6 +40,10 @@ install -Dm644 ludora-welcome-app.desktop \
 %{_datadir}/applications/ludora-welcome.desktop
 
 %changelog
+* Fri Nov 13 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-4
+- "Leave Ludora..." opens ludora-leave's window (plan first, password only
+  when you press Leave Ludora) instead of pkexec in a terminal
+
 * Thu Nov 12 2026 Lars Soe Mikkelsen <larssoemikkelsen@gmail.com> - 1.8-3
 - Leaving Ludora tab: "Leave Ludora..." button runs ludora-leave in a
   terminal; the manual steps stay below as "By hand"

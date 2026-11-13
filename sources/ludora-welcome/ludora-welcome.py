@@ -200,7 +200,8 @@ apps, Steam games, Flatpaks and RPM Fusion stay as they are.</p>
 
 <p><b>The easy way:</b> press <b>Leave Ludora&hellip;</b> below (it is also in the
 application menu as <i>Leave Ludora</i>, or run <code>sudo ludora-leave</code>).
-It shows exactly what it will change and asks before doing anything. It takes a
+It shows exactly what it will change first, and asks for your password only when
+you press <i>Leave Ludora</i> in its window. It takes a
 snapshot first, works without the Ludora repository, and removes itself at the end.
 Then reboot.</p>
 
@@ -298,14 +299,11 @@ class WelcomeWindow(QMainWindow):
         return w
 
     def _leave(self):
-        # ludora-leave asks before changing anything; it runs in a terminal
-        # so its questions and dnf's progress are visible
+        # ludora-leave opens its own window: it shows the plan first and asks
+        # for the password only when the user presses Leave Ludora
         if not shutil.which("ludora-leave"):
             return
-        term = shutil.which("konsole")
-        cmd = [term, "-e", "pkexec", "/usr/bin/ludora-leave"] if term else \
-            ["pkexec", "/usr/bin/ludora-leave"]
-        subprocess.Popen(cmd, start_new_session=True)
+        subprocess.Popen(["/usr/bin/ludora-leave"], start_new_session=True)
 
 
 def main():

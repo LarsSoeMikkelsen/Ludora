@@ -427,13 +427,66 @@ def notify_if_stale():
         subprocess.run(cmd[:7] + cmd[-2:])
         return 0
     if r.stdout.strip() == "leave":
-        term = shutil.which("konsole")
-        subprocess.Popen(([term, "-e"] if term else []) + ["pkexec", "/usr/bin/ludora-leave"],
-                         start_new_session=True)
+        subprocess.Popen(["/usr/bin/ludora-leave"], start_new_session=True)
     elif r.stdout.strip() == "never":
         with open(REMIND_STATE, "w") as f:
             f.write("never\n")
     return 0
+
+
+# ---- the plan ---------------------------------------------------------------
+
+class PlanError(Exception):
+    pass
+
+
+def is_live():
+    return "rd.live.image" in open("/proc/cmdline").read()
+
+
+def make_plan():
+    """What leaving would do. Needs no root: the GUI shows it before anything
+    asks for a password."""
+    if run(dnf_nocopr() + ["makecache"], check=False, quiet=True) != 0:
+        raise PlanError("Fedora's repositories cannot be reached. "
+                        "Check the network and try again.")
+    pk = installed()
+    ludora = ludora_packages(pk)
+    swap = in_fedora(ludora)
+    swap.discard(SELF)
+    remove, kept = removal_set(pk, ludora, swap)
+    copr = glob.glob(COPR_FILES)
+    mok = mok_state()
+    P = dict(pk=pk, ludora=ludora, swap=sorted(swap), remove=remove, kept=kept,
+             akmods="akmods" in pk, mok=mok, copr=bool(copr),
+             may_delete_key=mok == "enrolled" and not akmods_uses_mok(),
+             nothing=not ludora and not copr)
+    if not P["nothing"] and not in_fedora(["kernel-core"]) and not fedora_kernels():
+        raise PlanError("Fedora's kernel is neither installed nor available.")
+    return P
+
+
+def plan_json():
+    """--plan-json: the plan for the GUI, on stdout."""
+    import json
+    if is_live():
+        res = {"error": "This is the live system; there is nothing to leave."}
+    else:
+        try:
+            P = make_plan()
+            P.pop("pk")
+            res = P
+        except PlanError as e:
+            res = {"error": str(e)}
+    print(json.dumps(res))
+    return 0
+
+
+def gui():
+    """Window that explains the plan; root is asked for only on Leave."""
+    sys.path.insert(0, "/usr/share/ludora-leave")
+    import ludora_leave_gui
+    return ludora_leave_gui.main(MOK_PASSWORD)
 
 
 # ---- main -------------------------------------------------------------------
@@ -445,17 +498,22 @@ def main():
     p.add_argument("-y", "--yes", action="store_true", help="do not ask (keeps the Secure Boot key)")
     p.add_argument("--delete-key", action="store_true", help="with --yes: also delete the Ludora Secure Boot key")
     p.add_argument("--reboot", action="store_true", help="with --yes: reboot at the end")
+    p.add_argument("--plan-json", action="store_true", help=argparse.SUPPRESS)
     p.add_argument("--notify-if-stale", action="store_true",
                    help="(login autostart) remind when the Ludora kernel has fallen far behind Fedora's")
     ARGS = p.parse_args()
     if ARGS.notify_if_stale:
         sys.exit(notify_if_stale())
 
+    if ARGS.plan_json:
+        sys.exit(plan_json())
     if os.geteuid() != 0 and not ARGS.dry_run:
+        if not ARGS.yes and (os.environ.get("WAYLAND_DISPLAY") or os.environ.get("DISPLAY")):
+            sys.exit(gui())
         print("ludora-leave changes the system and must run as root: sudo ludora-leave")
-        print("(sudo ludora-leave --dry-run only shows the plan)")
+        print("(ludora-leave --dry-run only shows the plan)")
         sys.exit(1)
-    if "rd.live.image" in open("/proc/cmdline").read():
+    if is_live():
         print("This is the live system; there is nothing to leave.")
         sys.exit(1)
     if not ARGS.dry_run:
@@ -466,25 +524,16 @@ def main():
     say("Your files, apps, Steam games, Flatpaks and RPM Fusion are not touched.")
     say()
     say("Checking Fedora's repositories (the Ludora repository is not used) ...")
-    if run(dnf_nocopr() + ["makecache"], check=False, quiet=True) != 0:
-        die("Fedora's repositories cannot be reached. Check the network and try again.")
+    try:
+        P = make_plan()
+    except PlanError as e:
+        die(str(e))
+    pk, ludora, swap, remove, kept = P["pk"], P["ludora"], P["swap"], P["remove"], P["kept"]
+    akmods, mok, may_delete_key, copr = P["akmods"], P["mok"], P["may_delete_key"], P["copr"]
 
-    pk = installed()
-    ludora = ludora_packages(pk)
-    swap = in_fedora(ludora)
-    swap.discard(SELF)
-    remove, kept = removal_set(pk, ludora, swap)
-    fk_avail = bool(in_fedora(["kernel-core"]))
-    akmods = "akmods" in pk
-    mok = mok_state()
-    may_delete_key = mok == "enrolled" and not akmods_uses_mok()
-    copr = glob.glob(COPR_FILES)
-
-    if not ludora and not copr:
+    if P["nothing"]:
         say("Nothing from Ludora is installed or configured here.")
         finish(0)
-    if not fk_avail and not fedora_kernels():
-        die("Fedora's kernel is neither installed nor available.")
 
     say()
     say("Plan:")
