@@ -1,6 +1,6 @@
 Name:           ludora-game-mode
 Version:        0.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Switch between the Plasma desktop and Steam Big Picture (Game Mode)
 License:        GPL-3.0-or-later
 URL:            https://github.com/LarsSoeMikkelsen/Ludora
@@ -53,6 +53,10 @@ ln -s /run/ludora/game-mode.conf %{buildroot}%{_sysconfdir}/plasmalogin.conf.d/6
 %{_sysconfdir}/plasmalogin.conf.d/60-ludora-game-mode.conf
 
 %changelog
+* Sat Nov 14 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 0.1-2
+- Label /run/ludora/game-mode.conf xdm_var_run_t: SELinux kept Plasma Login
+  Manager from reading it, so the Game Mode autologin was ignored (VM test)
+
 * Fri Nov 13 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 0.1-1
 - Prototype (ludora-dev): Game Mode desktop icon and menu entry, Steam
   "Switch to Desktop" hook, root helper limited to the caller's autologin

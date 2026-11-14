@@ -27,4 +27,9 @@ mkdir -p "${STATE%/*}"
 tmp=$(mktemp "${STATE%/*}/.game-mode.XXXXXX")
 printf '[Autologin]\nUser=%s\nSession=%s\nRelogin=true\n' "$user" "$session" > "$tmp"
 chmod 0644 "$tmp"
+# plasmalogin runs as xdm_t, which may not read plain var_run_t files: without
+# this label the autologin drop-in is silently ignored (AVC denied).
+if command -v selinuxenabled >/dev/null 2>&1 && selinuxenabled; then
+    chcon -t xdm_var_run_t "$tmp"
+fi
 mv -f "$tmp" "$STATE"
