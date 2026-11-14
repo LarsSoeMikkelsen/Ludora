@@ -1,0 +1,48 @@
+#!/bin/bash
+# Started by set-session (as a transient systemd unit, root) after it wrote
+# the next autologin. Plasma Login Manager only autologins (or relogins) with
+# the [Autologin] it loaded when it started, so a changed autologin needs a
+# restart. Wait until the user's session on seat0 has ended and the login
+# screen is up, then restart plasmalogin. Never restarts it while a user
+# session is active on seat0.
+set -u
+uid=${1:?uid}
+STATE=/run/ludora/game-mode.conf
+seat_sessions() {
+    for s in $(loginctl list-sessions --no-legend 2>/dev/null | awk -v u="$uid" '$2==u {print $1}'); do
+        [ "$(loginctl show-session "$s" -p Seat --value 2>/dev/null)" = seat0 ] && echo "$s"
+    done
+}
+before=" $(seat_sessions | tr '\n' ' ') "
+for _ in $(seq 1 240); do
+    # Switch cleared, or the login manager already logged the user in again
+    # (it does when it was started with an autologin): nothing left to do.
+    [ -e "$STATE" ] || exit 0
+    for s in $(seat_sessions); do
+        case "$before" in *" $s "*) ;; *) exit 0 ;; esac
+    done
+    active=$(loginctl show-seat seat0 -p ActiveSession --value 2>/dev/null)
+    if [ -n "$active" ] &&
+       [ "$(loginctl show-session "$active" -p Class --value 2>/dev/null)" = greeter ]; then
+        busy=no
+        for s in $(loginctl list-sessions --no-legend 2>/dev/null | awk -v u="$uid" '$2==u {print $1}'); do
+            seat=$(loginctl show-session "$s" -p Seat --value 2>/dev/null)
+            state=$(loginctl show-session "$s" -p State --value 2>/dev/null)
+            [ "$seat" = seat0 ] && [ "$state" != closing ] && busy=yes
+        done
+        if [ "$busy" = no ]; then
+            systemctl restart plasmalogin.service
+            sleep 5
+            if ! systemctl is-active --quiet plasmalogin.service; then
+                # never leave the machine without a login screen
+                echo "ludora-game-mode: plasmalogin failed after restart; starting it again" >&2
+                systemctl reset-failed plasmalogin.service
+                systemctl start plasmalogin.service
+            fi
+            exit 0
+        fi
+    fi
+    sleep 0.5
+done
+echo "ludora-game-mode: login screen not reached within 2 minutes; not restarting" >&2
+exit 0

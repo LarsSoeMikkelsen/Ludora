@@ -5,7 +5,8 @@
 #   desktop   -> next login is the Plasma desktop
 #   clear     -> no Game Mode autologin (normal login screen / autologin)
 # Only writes /run/ludora/game-mode.conf (gone after a reboot), which
-# /etc/plasmalogin.conf.d/60-ludora-game-mode.conf points to.
+# /etc/plasmalogin.conf.d/60-ludora-game-mode.conf points to, and starts
+# relogin, which restarts the login manager once the session has ended.
 set -eu
 umask 022
 STATE=/run/ludora/game-mode.conf
@@ -33,3 +34,8 @@ if command -v selinuxenabled >/dev/null 2>&1 && selinuxenabled; then
     chcon -t xdm_var_run_t "$tmp"
 fi
 mv -f "$tmp" "$STATE"
+
+# Apply it once the caller's session has ended (see relogin).
+systemctl stop ludora-game-mode-relogin.service >/dev/null 2>&1 || true
+systemd-run --quiet --no-block --collect --unit=ludora-game-mode-relogin \
+    /usr/libexec/ludora-game-mode/relogin "$uid"
