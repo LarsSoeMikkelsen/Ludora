@@ -12,7 +12,7 @@
 %undefine __brp_mangle_shebangs
 
 Name:           %{project}d
-Version:        5.1.1
+Version:        5.1.2
 Release:        %{?autorelease}%{!?autorelease:0%{?dist}}
 Summary:        Powerful cooling control and monitoring
 Obsoletes:      coolercontrol-liqctld <= 2.2.2
@@ -83,6 +83,9 @@ install -Dpm 755 target/rpm/%{name} -t %{buildroot}%{_bindir}
 %systemd_postun_with_restart %{name}.service
 
 %changelog
+* Sun Nov 15 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 5.1.2-1
+- 5.1.2 Release
+
 * Tue Oct 20 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 5.1.1-1
 - 5.1.1 Release
 

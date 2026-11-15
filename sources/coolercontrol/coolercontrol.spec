@@ -3,7 +3,7 @@
 %{!?_metainfodir: %define _metainfodir %{_datadir}/metainfo}
 
 Name:           coolercontrol
-Version:        5.1.1
+Version:        5.1.2
 Release:        %{?autorelease}%{!?autorelease:0%{?dist}}
 Summary:        Powerful cooling control and monitoring
 ExclusiveArch:  x86_64 aarch64
@@ -68,6 +68,9 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/*.metainfo.xml
 %doc CHANGELOG.md
 
 %changelog
+* Sun Nov 15 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 5.1.2-1
+- 5.1.2 Release
+
 * Tue Oct 20 2026 Lars Søe Mikkelsen <larssoemikkelsen@gmail.com> - 5.1.1-1
 - 5.1.1 Release
 
