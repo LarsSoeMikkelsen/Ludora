@@ -2,7 +2,7 @@
 
 Name:		libva
 Version:	2.24.1
-Release:	%autorelease
+Release:	100%{?dist}
 Summary:	Video Acceleration (VA) API for Linux
 # va/wayland/wayland-drm.xml is HPND-sell-variant
 # va/x11/va_dri* are ICU
